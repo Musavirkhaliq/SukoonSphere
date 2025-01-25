@@ -20,6 +20,7 @@ const SignIn = () => {
     const data = Object.fromEntries(formData);
     try {
       const result = await login(data);
+      console.log(result);
       if (result.success) {
         toast.success("Login successful");
         navigate("/posts");

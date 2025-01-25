@@ -157,7 +157,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
 
         {/* Stats Row */}
         <div className="flex justify-center space-x-8 mt-4 border-y border-gray-100 py-3">
-          <div className="text-center group ">
+          <div className="text-center group cursor-pointer">
             <div className="font-bold text-gray-800 group-hover:text-[var(--ternery)] transition-colors duration-300">
               {user?.posts?.length || 0}
             </div>
@@ -165,7 +165,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
               Posts
             </div>
           </div>
-          <div className="text-center group ">
+          <div className="text-center group cursor-pointer">
             <div className="font-bold text-gray-800 group-hover:text-[var(--ternery)] transition-colors duration-300">
               {user?.followers?.length || 0}
             </div>
@@ -173,7 +173,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
               Followers
             </div>
           </div>
-          <div className="text-center group ">
+          <div className="text-center group cursor-pointer">
             <div className="font-bold text-gray-800 group-hover:text-[var(--ternery)] transition-colors duration-300">
               {user?.following?.length || 0}
             </div>
@@ -185,7 +185,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
 
         {/* Engagement Stats */}
         <div className="mt-4 flex justify-center items-center gap-6">
-          <div className="flex flex-col items-center justify-center text-center group  transform hover:scale-105 transition-all duration-300">
+          <div className="flex flex-col items-center justify-center text-center group cursor-pointer transform hover:scale-105 transition-all duration-300">
             <FaQuestion className="text-pink-500 text-xl mb-1 group-hover:text-pink-600" />
             <div className="text-sm font-semibold group-hover:text-[var(--ternery)]">
               {user?.questions?.length || 0}
@@ -194,7 +194,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
               Questions Asked
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center text-center group  transform hover:scale-105 transition-all duration-300">
+          <div className="flex flex-col items-center justify-center text-center group cursor-pointer transform hover:scale-105 transition-all duration-300">
             <FcAnswers className="text-blue-500 text-xl mb-1 group-hover:text-blue-600" />
             <div className="text-sm font-semibold group-hover:text-[var(--ternery)]">
               {user?.answers?.length || 0}
@@ -204,7 +204,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
             </div>
           </div>
           {user?.role === "contributor" && (
-            <div className="flex flex-col items-center justify-center text-center group  transform hover:scale-105 transition-all duration-300">
+            <div className="flex flex-col items-center justify-center text-center group cursor-pointer transform hover:scale-105 transition-all duration-300">
               <FaBookmark className="text-purple-500 text-xl mb-1 group-hover:text-purple-600" />
               <div className="text-sm font-semibold group-hover:text-[var(--ternery)]">
                 {user?.articles?.length || 0}

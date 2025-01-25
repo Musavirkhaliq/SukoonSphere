@@ -1,4 +1,3 @@
-import { useUser } from "@/context/UserContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -15,21 +14,17 @@ const customFetch = axios.create({
  * to reset the app state.
  * Note that this interceptor catches all 400 errors from the server, not just authentication
  * errors. So, it's not the most robust solution, but it should cover most cases.
-*/
-// const { login, isLoading } = useUser();
+ */
 customFetch.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 ) {
+    if (error.response?.status === 401) {
       // Clear user data from localStorage on authentication error
-
       localStorage.removeItem('user');
       localStorage.removeItem('isAuthenticated');
       toast.error('Session expired. Please sign in again.');
       // Force reload the page to reset app state
-      setTimeout(() => {
-        window.location.href = '/auth/sign-in';
-      }, 1000);
+      // window.location.href = '/auth/sign-in';
     }
     return Promise.reject(error);
   }

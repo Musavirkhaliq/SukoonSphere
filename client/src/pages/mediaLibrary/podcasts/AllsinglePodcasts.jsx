@@ -11,6 +11,7 @@ const AllsinglePodcasts = () => {
     const fetchPodcasts = async () => {
       try {
         const response = await customFetch.get("/podcasts/singles");
+        console.log({ response });
         setPodcasts(response.data.podcasts || []);
         setLoading(false);
       } catch (err) {

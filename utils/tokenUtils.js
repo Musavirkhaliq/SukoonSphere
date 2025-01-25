@@ -17,7 +17,7 @@ export const attachCookiesToResponse = ({ res, user, refreshToken }) => {
   const Threehours = 1000 * 60 * 60 * 3;
   const fortyfiveDays = 1000 * 60 * 60 * 24 * 45;
 
-  res.cookie("accessToken", accessTokenJWT, { 
+  res.cookie("accessToken", accessTokenJWT, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     signed: true,

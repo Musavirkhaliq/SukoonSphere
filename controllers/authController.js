@@ -55,10 +55,10 @@ export const login = async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
   const isValidUser =
     user && (await comparePassword(req.body.password, user.password));
-  if (!isValidUser) throw new UnauthenticatedError("Invalid Credentials");
+  if (!isValidUser) throw new UnauthenticatedError("invalid Credentials");
   if (!user.isVerified)
     throw new UnauthenticatedError(
-      "Please verify your email, you have already recieved verification link, check your mail"
+      "please verify your email, you have already recieved verification link, check your mail"
     );
 
   let refreshToken = "";

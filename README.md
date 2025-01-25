@@ -42,3 +42,66 @@ Key Features:
 •	A secure, private journal feature where users can track their thoughts, moods, and progress over time, encouraging self-reflection and mental health monitoring.
 
 
+
+
+
+        
+
+
+/*/*/*/*/*/**/*/*/*/*/*  Website Deployment Process  /*/*/*/*/*/**/*/*/*/*/*
+
+/*/*/*/*/**/*/*/*/* Prerequistes /*/*/*/*/*/**/*/
+Step 1- Copy github repository(if not copied yet).
+        command: git clone github_repo_url
+
+Step 2- Navigate to repository.
+        command: code folder_name
+
+Step 3- Setup node modules.
+        command: npm i (both in client and BE)
+
+Step 4- Create build version of client.
+        command: npm run build
+
+/*/*/*/*/**/*/*/*/* VPS commands- Deploy website /*/*/*/*/*/**/*/
+
+
+Step 1- Check Running Processes:
+        command: ps aux | grep node
+
+Step 2- Identify running Node.js processes.
+
+Step 3- Terminate process if any:
+        command: sudo kill processId-PID(eg. 182928)
+
+Step 4- Clear Log File:
+        command rm nohup.out
+
+Step 5- Remove the nohup.out log file to start fresh.
+        Optional- Restart Server:
+        reboot
+
+Step 6-  Launch the Node.js server application in the background.
+        command: nohup node server.js & (run command in BE)
+
+Step 7- Start a preview server for the application on the host machine.
+        command: nohup pnpm preview --host &
+
+Step 8- Exit terminals.
+        command: exit
+
+/*/*/*/*/**/*/*/*/* Database commands-  /*/*/*/*/**/*/
+Check mongoDb.
+        command: mongosh
+Show database.
+        command: show dbs
+Use database or clustures.
+        command: use --clusture or db name
+
+/*/*/*/*/**/*/*/*/* Clone and backup local Database /*/*/*/*/*/**/*/
+Clone database.
+        command: mongodump --out "." --host loacalhost --port27017
+Copy to folder.
+        command: chmod +x backup.sh
+
+

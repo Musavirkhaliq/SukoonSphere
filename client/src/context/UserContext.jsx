@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 
 import customFetch from "@/utils/customFetch";
-import axios from "axios";
 
 const UserContext = createContext();
 
@@ -63,7 +62,7 @@ export const UserProvider = ({ children }) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
 
-      const { data } = await axios.post("/api/v1/auth/login", userData);
+      const { data } = await customFetch.post("/auth/login", userData);
 
       // Store user data in localStorage
 

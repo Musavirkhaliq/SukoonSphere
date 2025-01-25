@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"cdc95d84d8ff46d0b8a0e43f3350fbb2","collectionName":"podcastplaylists","type":"collection"}

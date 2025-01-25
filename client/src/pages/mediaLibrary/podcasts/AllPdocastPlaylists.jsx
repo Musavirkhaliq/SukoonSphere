@@ -20,6 +20,7 @@ const AllPodcastPlaylists = () => {
     const fetchPlaylists = async () => {
       try {
         const response = await customFetch.get("/podcasts/playlists");
+        console.log({ response });
         setPlaylists(response.data.playlists || []);
         setLoading(false);
       } catch (err) {

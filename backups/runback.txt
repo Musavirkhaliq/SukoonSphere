@@ -1,0 +1,51 @@
+in backups folder run bash backup.sh
+
+
+
+restore backup
+
+1. Restore from a mongodump Backup
+mongodump to create the backup restore.
+
+Steps:
+Locate the Backup Files: Ensure to have access to the directory containing the backup (e.g., /path/to/backup).
+
+Restore the Data: Use the mongorestore command:
+
+ 
+mongorestore --dir /path/to/backup --host localhost --port 27017
+
+________________________________________________
+If you backed up specific databases, you can restore only those:
+ 
+mongorestore --db database_name /path/to/backup/database_name
+______________________________________________
+
+For authentication:
+ 
+mongorestore --username your_user --password your_password --authenticationDatabase admin --db database_name /path/to/backup/database_name
+____________________________________________
+
+Restart the Database (if needed): If the database was stopped before restoring:
+
+ 
+sudo systemctl start mongod
+
+
+
+
+
+after restoring
+
+
+show dbs;
+use database_name;
+show collections;
+db.collection_name.findOne();
+
+
+
+
+
+
+db.users.find({});
