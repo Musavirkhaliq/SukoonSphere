@@ -32,7 +32,7 @@ const TopIntro = () => {
 
           {/* Main Heading */}
           <h2 className="text-[2rem] md:text-[2.5rem] lg:text-[3.5rem] sm:leading-[4rem] mb-4 font-extrabold text-[var(--grey--900)] ">
-            Empowering you to Heal, Grow, and Thrive
+            Empowering you to Heal, Grow, and Thrive and test text
           </h2>
 
           {/* Subtext */}
