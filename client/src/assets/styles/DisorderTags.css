@@ -1,0 +1,53 @@
+.carousel-wrapper {
+    overflow: hidden;
+    width: 100%;
+}
+
+.content-right-left {
+    display: flex;
+    animation: scroll-left 60s linear infinite;
+}
+
+.content-left-right {
+    display: flex;
+    animation: scroll-right 50s linear infinite;
+}
+
+.content-right-left:hover {
+    animation-play-state: paused;
+}
+
+.content-left-right:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scroll-left {
+    0% {
+        transform: translateX(10%);
+
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes scroll-right {
+    0% {
+        transform: translateX(-50%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    z-index: 100;
+    white-space: nowrap;
+}

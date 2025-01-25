@@ -1,0 +1,104 @@
+/* Glossy effect for the titles */
+.glossy-effect-bar {
+    position: relative;
+    overflow: hidden;
+    /* Hide overflow for the glossy effect */
+}
+
+.glossy-effect-bar::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 200%;
+    /* Make sure it's larger than the parent */
+    height: 200%;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    animation: glossy-animation 2s infinite;
+    /* Adjust duration for speed */
+    transform: rotate(45deg);
+}
+
+@keyframes glossy-animation {
+    0% {
+        top: -100%;
+        left: -100%;
+    }
+
+    100% {
+        top: 100%;
+        left: 100%;
+    }
+
+    /* 
+    100% {
+        top: -100%;
+        left: -100%;
+    } */
+}
+
+
+@keyframes scrollUp {
+    0% {
+        transform: translateY(100%);
+        /* Start from below */
+        opacity: 0;
+        /* Initially hidden */
+    }
+
+    50% {
+        opacity: 1;
+        /* Fade in as it scrolls up */
+    }
+
+    100% {
+        transform: translateY(0);
+        /* End at original position */
+        opacity: 1;
+        /* Fully visible */
+    }
+}
+
+.stats-card {
+    animation: scrollUp 5s ease-in-out infinite;
+    /* Adjust timing as necessary */
+}
+
+
+@keyframes like-loader {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.like-loader {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ff4b4b;
+    border-radius: 50%;
+    animation: like-loader 0.8s ease-in-out infinite;
+}
+
+.like-loader::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: #ff4b4b;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}

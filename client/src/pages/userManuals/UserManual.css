@@ -1,0 +1,33 @@
+.user-manual {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.user-manual h1 {
+    color: #333;
+    font-size: 2em;
+}
+
+.user-manual h2 {
+    color: #555;
+    font-size: 1.5em;
+    margin-top: 20px;
+}
+
+.user-manual p {
+    color: #666;
+    line-height: 1.6;
+}
+
+.user-manual ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.user-manual li {
+    margin: 10px 0;
+}

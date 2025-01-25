@@ -1,0 +1,29 @@
+.carousel-wrapper {
+    overflow: hidden;
+    width: 100%;
+}
+
+.carousel-content {
+    display: flex;
+    width: calc(200px * 16);
+    animation: scroll-left 30s linear infinite;
+}
+
+@keyframes scroll-left {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.carousel-content:hover {
+    animation-play-state: paused;
+}
+
+.logo {
+    width: 200px;
+    padding: 0px 30px;
+}
