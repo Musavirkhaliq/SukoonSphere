@@ -22,6 +22,8 @@ import NotificationModel from "@/components/notifications/NotificationModel";
 function NavMenu() {
   const [activeSublink, setActiveSublink] = useState(null);
   const [miniMenu, setMiniMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
   const navigate = useNavigate();
   const { user, logout } = useUser();
   const toggleMiniMenu = () => setMiniMenu(!miniMenu);
@@ -106,14 +108,26 @@ function NavMenu() {
               alt="Logo Loading..."
             />
           </Link>
+          
           <DesktopNav links={links} />
           {user ? (
-            <UserSection
+          <div className="flex items-center justify-center gap-2">
+           <div className="relative">
+            <button onClick={handleNotificationClick} className="text-2xl text-gray-800">
+              <MdOutlineNotificationsActive />
+            </button>
+            {showNotifications && (
+              <NotificationDropdown user={loggedInUser}  onClose={closeDropdown} />
+            )}
+          </div>
+          <UserSection
               user={user}
               miniMenu={miniMenu}
               toggleMiniMenu={toggleMiniMenu}
               handleLogout={handleLogout}
             />
+
+            </div>
           ) : (
             <AuthButtons />
           )}
@@ -138,6 +152,7 @@ function NavMenu() {
               </Link>
             )}
             {user ? (
+              <>
               <Link to={`/about/user/${user._id}`}>
                 <img
                   src={
@@ -148,6 +163,16 @@ function NavMenu() {
                   className="w-8 h-8 rounded-full object-cover"
                 />
               </Link>
+              
+              <div className="relative">
+            <button onClick={handleNotificationClick} className="text-2xl text-gray-800">
+              <MdOutlineNotificationsActive />
+            </button>
+            {showNotifications && (
+              <NotificationDropdown user={loggedInUser}  onClose={closeDropdown} />
+            )}
+          </div>
+              </>
             ) : (
               <Link to="/auth/sign-in">
                 <button className="bg-[var(--secondary)] px-2 py-1 text-sm rounded-[6px] hover:scale-105 transition-all duration-300 hover:bg-[var(--secondary-hover)] flex items-center">
