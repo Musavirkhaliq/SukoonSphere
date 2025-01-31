@@ -18,10 +18,12 @@ import { BiMessageSquareAdd } from "react-icons/bi";
 import { CiMedal } from "react-icons/ci";
 import { BiUser } from "react-icons/bi";
 import { IoNotifications } from "react-icons/io5";
-import NotificationModel from "@/components/notifications/NotificationModel";
+import NotificationDropdown from "../NotificationDropdown";
 function NavMenu() {
   const [activeSublink, setActiveSublink] = useState(null);
   const [miniMenu, setMiniMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
   const navigate = useNavigate();
   const { user, logout } = useUser();
   const toggleMiniMenu = () => setMiniMenu(!miniMenu);
@@ -50,49 +52,57 @@ function NavMenu() {
       console.error("Logout failed:", error);
     }
   };
-  const settingsLinks = user
-    ? [
-        ...(loggedInUser?.role !== "contributor"
-          ? [
-              ...(loggedInUser?.role === "admin"
-                ? [
-                    {
-                      name: "Notifications",
-                      address: "/admin",
-                      icon: <MdOutlineNotificationsActive />,
-                    },
-                  ]
-                : []),
-              {
-                name: "Become a contributor",
-                address: "/user/request-contributor",
-                icon: <CiMedal />,
-              },
-            ]
-          : []),
-        {
-          name: "Change Password",
-          address: "/user/change-password",
-          icon: <MdOutlinePassword />,
-        },
-        {
-          name: "Logout",
-          icon: <RxCross2 />,
-          onClick: handleLogout,
-        },
-      ]
-    : [
-        {
-          name: "Sign Up",
-          address: "/auth/sign-up",
-          icon: <FiUserPlus />,
-        },
-        {
-          name: "Login",
-          address: "/auth/sign-in",
-          icon: <BiLogIn />,
-        },
-      ];
+  const settingsLinks = user 
+  ? [
+      ...(loggedInUser?.role !== "contributor" 
+        ? [
+            ...(loggedInUser?.role === "admin" 
+              ? [
+                  {
+                    name: "Notifications",
+                    address: "/admin",
+                    icon: <MdOutlineNotificationsActive />,
+                  },
+                ]
+              : []),
+            {
+              name: "Become a contributor",
+              address: "/user/request-contributor",
+              icon: <CiMedal />,
+            },
+          ] 
+        : []),
+      {
+        name: "Change Password",
+        address: "/user/change-password",
+        icon: <MdOutlinePassword />,
+      },
+      {
+        name: "Logout",
+        icon: <RxCross2 />,
+        onClick: handleLogout,
+      },
+    ] 
+  : [
+      {
+        name: "Sign Up",
+        address: "/auth/sign-up",
+        icon: <FiUserPlus />,
+      },
+      {
+        name: "Login",
+        address: "/auth/sign-in",
+        icon: <BiLogIn />,
+      },
+    ];
+    const handleNotificationClick = () => {
+      setShowNotifications(!showNotifications);
+    };
+    
+  const closeDropdown = () => {
+    setShowNotifications(false);
+  };
+  
 
   return (
     <>
@@ -106,14 +116,26 @@ function NavMenu() {
               alt="Logo Loading..."
             />
           </Link>
+          
           <DesktopNav links={links} />
           {user ? (
-            <UserSection
+          <div className="flex items-center justify-center gap-2">
+           <div className="relative">
+            <button onClick={handleNotificationClick} className="text-2xl text-gray-800">
+              <MdOutlineNotificationsActive />
+            </button>
+            {showNotifications && (
+              <NotificationDropdown user={loggedInUser}  onClose={closeDropdown} />
+            )}
+          </div>
+          <UserSection
               user={user}
               miniMenu={miniMenu}
               toggleMiniMenu={toggleMiniMenu}
               handleLogout={handleLogout}
             />
+
+            </div>
           ) : (
             <AuthButtons />
           )}
@@ -138,6 +160,7 @@ function NavMenu() {
               </Link>
             )}
             {user ? (
+              <>
               <Link to={`/about/user/${user._id}`}>
                 <img
                   src={
@@ -148,6 +171,16 @@ function NavMenu() {
                   className="w-8 h-8 rounded-full object-cover"
                 />
               </Link>
+              
+              <div className="relative">
+            <button onClick={handleNotificationClick} className="text-2xl text-gray-800">
+              <MdOutlineNotificationsActive />
+            </button>
+            {showNotifications && (
+              <NotificationDropdown user={loggedInUser}  onClose={closeDropdown} />
+            )}
+          </div>
+              </>
             ) : (
               <Link to="/auth/sign-in">
                 <button className="bg-[var(--secondary)] px-2 py-1 text-sm rounded-[6px] hover:scale-105 transition-all duration-300 hover:bg-[var(--secondary-hover)] flex items-center">
@@ -297,8 +330,7 @@ const UserSection = ({ user, miniMenu, toggleMiniMenu, handleLogout }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [miniMenu, toggleMiniMenu]);
-  const [showNotificationModel, setShowNotificationModel] = useState(false);
-
+ 
   return (
     <div ref={menuRef} className="relative">
       <div className="hidden lg:flex items-center justify-center gap-2">
@@ -317,20 +349,7 @@ const UserSection = ({ user, miniMenu, toggleMiniMenu, handleLogout }) => {
             </div>
           </div>
         </Link>
-        <div
-          className="group relative cursor-pointer"
-          onClick={() => {
-            setShowNotificationModel(true);
-          }}
-        >
-          <div className="absolute top-0 right-0 text-[10px] font-bold text-[var(--white-color)] bg-[var(--secondary)] rounded-full px-1.5 ">
-            3
-          </div>
-          <IoNotifications size={30} />
-          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-[var(--grey--900)] text-[var(--white-color)] px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            View Notifications
-          </div>
-        </div>
+     
         {miniMenu ? (
           <RxCross2
             className="block cursor-pointer size-8 hover:text-[var(--ternery)] hover:bg-[var(--grey--200)] rounded-full p-1 transition-transform duration-300"
@@ -344,9 +363,7 @@ const UserSection = ({ user, miniMenu, toggleMiniMenu, handleLogout }) => {
         )}
       </div>
       <UserMenu user={user} miniMenu={miniMenu} handleLogout={handleLogout} />
-      {showNotificationModel && (
-        <NotificationModel onclose={() => setShowNotificationModel(false)} />
-      )}
+    
     </div>
   );
 };
