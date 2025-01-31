@@ -1,24 +1,35 @@
-import React, { lazy, Suspense } from 'react';
+
+import React, { lazy, Suspense, useEffect } from 'react';
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { routes } from './routes';
 import { UserProvider } from './context/UserContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import socket from './utils/socket/socket';
 const App = () => {
-  // Create router once outside of render to avoid recreation
   const router = React.useMemo(() => createBrowserRouter(routes), []);
-
-  // Create a client
   const queryClient = React.useMemo(() => new QueryClient({
     defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        cacheTime: 1000 * 60 * 30, // 30 minutes
+      queries: {  
+        staleTime: 1000 * 60 * 5,
+        cacheTime: 1000 * 60 * 30,
         refetchOnWindowFocus: false,
         retry: 1,
       },
     },
   }), []);
+
+  useEffect(() => {
+    // Listen for notifications
+    socket.on('notification', (notification) => {
+      console.log(notification.message); // Display the notification message
+      // You can also update the UI here, e.g., show a toast notification
+    });
+
+    // Clean up the listener on component unmount
+    return () => {
+      socket.off('notification');
+    };
+  }, []);
 
   return (
     <React.StrictMode>

@@ -44,6 +44,7 @@
     "nodemon": "^3.0.3",
     "pdfjs-dist": "^4.9.155",
     "react-intersection-observer": "^9.13.1",
-    "react-quill": "^2.0.0"
+    "react-quill": "^2.0.0",
+    "socket.io": "^4.8.1"
   }
 }

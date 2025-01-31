@@ -3,9 +3,11 @@ import Post from "../models/postModel.js";
 import { BadRequestError, UnauthorizedError } from "../errors/customErors.js";
 import PostComments from "../models/postCommentsModel.js";
 import PostReplies from "../models/postReplyModel.js";
+import Notification from "../models/notifications/postNotificationModel.js";
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import { deleteFile } from '../utils/fileUtils.js';
+import { io } from "../server.js";
 
 export const createPost = async (req, res) => {
   const newPost = {
@@ -217,72 +219,125 @@ export const getPostById = async (req, res) => {
   res.status(StatusCodes.OK).json({ post: post[0] });
 };
 
+
 export const likePosts = async (req, res) => {
-  const userId = req.user.userId;
-  const postId = req.params.id;
+  const { id: postId } = req.params;
+  const userId = req.user.userId; // Get the user ID from the authenticated user
 
-  const post = await Post.findById(postId);
-  if (!post) {
-    throw new BadRequestError("Post not found");
-  }
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      throw new BadRequestError("Post not found");
+    }
 
-  if (post?.likes?.includes(userId)) {
-    post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
+    // Toggle like
+    const alreadyLiked = post.likes.includes(userId);
+    if (alreadyLiked) {
+      // User is unliking the post
+      post.likes = post.likes.filter((user) => user.toString() !== userId);
+      await post.save();
+      return res.status(StatusCodes.OK).json({ msg: "Post unliked successfully", likes: post.likes });
+    } else {
+      // User is liking the post
+      post.likes.push(userId);
+      
+      // Create a notification only if the user is not liking their own post and notification doesn't already exist
+      if (post.createdBy.toString() !== userId) {
+        const notificationAlreadyExists = await Notification.findOne({ userId: post.createdBy, postId: postId, type: 'like' });
+        if (!notificationAlreadyExists) {
+          const notification = new Notification({
+            userId: post.createdBy, // The user who created the post
+            postId: postId,
+            type: 'like',
+            message: `${req.user.username} liked your post`, // Assuming you have the username available
+          });
+          await notification.save();
+
+          // Retrieve the populated notification
+          const populatedNotification = await Notification.findById(notification._id)
+            .populate("postId", "_id imageUrl")
+            .populate("userId", "name avatar");
+
+          io.to(post.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+        }
+      }
+    }
+
     await post.save();
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Post unliked successfully", post });
-  } else {
-    post.likes.push(userId);
-    await post.save();
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Post liked successfully", post });
+    res.status(StatusCodes.OK).json({ msg: "Post liked successfully", likes: post.likes });
+  } catch (error) {
+    console.error('Error in likePosts:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ msg: 'Failed to like the post' });
   }
 };
-
 export const createPostComment = async (req, res) => {
   const { content } = req.body;
   const { id: postId } = req.params;
-  const comment = await PostComments.create({
-    postId,
-    createdBy: req.user.userId,  // Only store user ID
-    content,
-  });
-  const post = await Post.findById(postId);
-  post.comments.push(comment._id);
-  await post.save();
 
-  // Fetch comment with current user details for response
-  const commentWithUser = await PostComments.aggregate([
-    {
-      $match: { _id: comment._id }
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "createdBy",
-        foreignField: "_id",
-        as: "userDetails"
+  try {
+    const comment = await PostComments.create({
+      postId,
+      createdBy: req.user.userId,  // Only store user ID
+      content,
+    });
+
+    const post = await Post.findById(postId);
+    post.comments.push(comment._id);
+    await post.save();
+
+    // Fetch comment with current user details for response
+    const commentWithUser = await PostComments.aggregate([
+      {
+        $match: { _id: comment._id }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "userDetails"
+        }
+      },
+      {
+        $addFields: {
+          username: { $arrayElemAt: ["$userDetails.username", 0] },
+          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
+        }
+      },
+      {
+        $project: {
+          userDetails: 0
+        }
       }
-    },
-    {
-      $addFields: {
-        username: { $arrayElemAt: ["$userDetails.username", 0] },
-        userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
-      }
-    },
-    {
-      $project: {
-        userDetails: 0
-      }
+    ]);
+
+    // Create a notification only if the user is not commenting on their own post
+    if (post.createdBy.toString() !== req.user.userId) {
+      const notification = new Notification({
+        userId: post.createdBy, // The user who created the post
+        postId: postId,
+        type: 'comment',
+        message: `${req.user.username} commented on your post`, // Assuming you have the username available
+      });
+
+      await notification.save();
+
+      // Retrieve the populated notification
+      const populatedNotification = await Notification.findById(notification._id)
+        .populate("postId", "_id imageUrl")
+        .populate("userId", "name avatar");
+
+      io.to(post.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
     }
-  ]);
 
-  res.status(StatusCodes.CREATED).json({
-    message: "Comment created successfully",
-    comment: commentWithUser[0],
-  });
+    res.status(StatusCodes.CREATED).json({
+      message: "Comment created successfully",
+      comment: commentWithUser[0],
+    });
+  } catch (error) {
+    console.error('Error creating comment:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Failed to create comment' });
+  }
 };
 
 export const getAllCommentsByPostId = async (req, res) => {
@@ -325,75 +380,99 @@ export const createReply = async (req, res) => {
   const { content } = req.body;
   const { id: parentId } = req.params;
 
-  const comment = await PostComments.findById(parentId);
-  const parentReply = await PostReplies.findById(parentId);
+  try {
+    const comment = await PostComments.findById(parentId);
+    const parentReply = await PostReplies.findById(parentId);
 
-  if (!comment && !parentReply) {
-    throw new BadRequestError("Comment or reply not found");
-  }
-
-  const reply = await PostReplies.create({
-    content,
-    createdBy: req.user.userId,
-    parentId,
-    commentId: comment ? comment._id : parentReply.commentId,
-    replyTo: comment ? comment.createdBy : parentReply.createdBy
-  });
-
-  if (comment) {
-    comment.replies.push(reply._id);
-    await comment.save();
-  } else if (parentReply) {
-    parentReply.replies.push(reply._id);
-    await parentReply.save();
-  }
-
-  // Fetch reply with current user details for response
-  const replyWithUser = await PostReplies.aggregate([
-    {
-      $match: { _id: reply._id }
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "createdBy",
-        foreignField: "_id",
-        as: "authorDetails"
-      }
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "replyTo",
-        foreignField: "_id",
-        as: "replyToDetails"
-      }
-    },
-    {
-      $addFields: {
-        username: { $arrayElemAt: ["$authorDetails.name", 0] },
-        userAvatar: { $arrayElemAt: ["$authorDetails.avatar", 0] },
-        commentUsername: { $arrayElemAt: ["$replyToDetails.name", 0] },
-        commentUserAvatar: { $arrayElemAt: ["$replyToDetails.avatar", 0] },
-        commentUserId: "$replyTo",
-        totalReplies: { $size: { $ifNull: ["$replies", []] } },
-        totalLikes: { $size: { $ifNull: ["$likes", []] } }
-      }
-    },
-    {
-      $project: {
-        authorDetails: 0,
-        replyToDetails: 0
-      }
+    if (!comment && !parentReply) {
+      throw new BadRequestError("Comment or reply not found");
     }
-  ]);
 
-  res.status(StatusCodes.CREATED).json({
-    message: "Reply created successfully",
-    reply: replyWithUser[0],
-  });
+    const reply = await PostReplies.create({
+      content,
+      createdBy: req.user.userId,
+      parentId,
+      commentId: comment ? comment._id : (parentReply ? parentReply.commentId : null), // Ensure commentId is set correctly
+      replyTo: comment ? comment.createdBy : (parentReply ? parentReply.createdBy : null)
+    });
+
+    if (comment) {
+      comment.replies.push(reply._id);
+      await comment.save();
+    } else if (parentReply) {
+      parentReply.replies.push(reply._id);
+      await parentReply.save();
+    }
+
+    // Fetch reply with current user details for response
+    const replyWithUser = await PostReplies.aggregate([
+      {
+        $match: { _id: reply._id }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "authorDetails"
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "replyTo",
+          foreignField: "_id",
+          as: "replyToDetails"
+        }
+      },
+      {
+        $addFields: {
+          username: { $arrayElemAt: ["$authorDetails.name", 0] },
+          userAvatar: { $arrayElemAt: ["$authorDetails.avatar", 0] },
+          commentUsername: { $arrayElemAt: ["$replyToDetails.name", 0] },
+          commentUserAvatar: { $arrayElemAt: ["$replyToDetails.avatar", 0] },
+          commentUserId: "$replyTo",
+          totalReplies: { $size: { $ifNull: ["$replies", []] } },
+          totalLikes: { $size: { $ifNull: ["$likes", []] } }
+        }
+      },
+      {
+        $project: {
+          authorDetails: 0,
+          replyToDetails: 0
+        }
+      }
+    ]);
+
+    // Send notification to the user who was replied to
+    if (reply.replyTo && reply.replyTo.toString() !== req.user.userId) {
+      const notification = new Notification({
+        userId: reply.replyTo.toString(), // The user who was replied to
+        postId: comment ? comment.postId : parentReply.postId,
+        commentId: comment ? comment._id : (parentReply ? parentReply.commentId : null),
+        type: 'reply',
+        message: `${req.user.username} replied to your comment`, // Assuming you have the username available
+      });
+
+      await notification.save();
+
+      // Retrieve the populated notification
+      const populatedNotification = await Notification.findById(notification._id)
+        .populate("postId", "_id imageUrl")
+        .populate("userId", "name avatar");
+
+      io.to(reply.replyTo.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+    }
+
+    res.status(StatusCodes.CREATED).json({
+      message: "Reply created successfully",
+      reply: replyWithUser[0],
+    });
+  } catch (error) {
+    console.error('Error creating reply:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Failed to create reply' });
+  }
 };
-
 export const getAllRepliesByCommentId = async (req, res) => {
   const { id: commentId } = req.params;
   
