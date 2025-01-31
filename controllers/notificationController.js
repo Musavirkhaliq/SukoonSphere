@@ -25,6 +25,7 @@ export const getNotifications = async (req, res) => {
     })
       .populate("postId", "_id  imageUrl")
       .populate("userId", "name avatar")
+      .populate("createdBy", "_id name avatar")
       .sort({ createdAt: -1 });
     res.status(200).json(notifications);
   } catch (error) {
