@@ -15,6 +15,10 @@ const postNotificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Comment',
     },
+    postReplyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Reply',
+    },
     type: {
       type: String,
       enum: ['like', 'comment', 'reply', 'commentLiked', 'replyLiked'],
@@ -22,6 +26,11 @@ const postNotificationSchema = new mongoose.Schema(
     },
     message: {
       type: String,
+      required: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
   },

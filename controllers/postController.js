@@ -247,6 +247,7 @@ export const likePosts = async (req, res) => {
         if (!notificationAlreadyExists) {
           const notification = new Notification({
             userId: post.createdBy, // The user who created the post
+            createdBy: userId,
             postId: postId,
             type: 'like',
             message: `${req.user.username} liked your post`, // Assuming you have the username available
@@ -256,7 +257,8 @@ export const likePosts = async (req, res) => {
           // Retrieve the populated notification
           const populatedNotification = await Notification.findById(notification._id)
             .populate("postId", "_id imageUrl")
-            .populate("userId", "name avatar");
+            .populate("userId", "name avatar")
+            .populate("createdBy", "_id name avatar")
 
           io.to(post.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
         }
@@ -315,6 +317,7 @@ export const createPostComment = async (req, res) => {
     if (post.createdBy.toString() !== req.user.userId) {
       const notification = new Notification({
         userId: post.createdBy, // The user who created the post
+        createdBy: req.user.userId,
         postId: postId,
         type: 'comment',
         message: `${req.user.username} commented on your post`, // Assuming you have the username available
@@ -325,7 +328,8 @@ export const createPostComment = async (req, res) => {
       // Retrieve the populated notification
       const populatedNotification = await Notification.findById(notification._id)
         .populate("postId", "_id imageUrl")
-        .populate("userId", "name avatar");
+        .populate("userId", "name avatar")
+        .populate("createdBy", "_id name avatar");
 
       io.to(post.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
     }
@@ -389,6 +393,7 @@ export const createReply = async (req, res) => {
     }
 
     const reply = await PostReplies.create({
+      
       content,
       createdBy: req.user.userId,
       parentId,
@@ -448,6 +453,7 @@ export const createReply = async (req, res) => {
     if (reply.replyTo && reply.replyTo.toString() !== req.user.userId) {
       const notification = new Notification({
         userId: reply.replyTo.toString(), // The user who was replied to
+        createdBy: req.user.userId,
         postId: comment ? comment.postId : parentReply.postId,
         commentId: comment ? comment._id : (parentReply ? parentReply.commentId : null),
         type: 'reply',
@@ -459,7 +465,8 @@ export const createReply = async (req, res) => {
       // Retrieve the populated notification
       const populatedNotification = await Notification.findById(notification._id)
         .populate("postId", "_id imageUrl")
-        .populate("userId", "name avatar");
+        .populate("userId", "name avatar")
+        .populate("createdBy", "_id name avatar");
 
       io.to(reply.replyTo.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
     }
@@ -658,6 +665,27 @@ export const likePostComment = async (req, res) => {
   const update = isLiked
     ? { $pull: { likes: userId } }
     : { $push: { likes: userId } };
+    if(!isLiked && comment.createdBy.toString() !== userId) {
+      const notificationAlreadyExists = await Notification.findOne({ userId: comment.createdBy, postId: comment.postId,createdBy: userId, postCommentId: commentId, type: 'commentLiked' });
+      if (!notificationAlreadyExists) {
+        const notification = new Notification({
+          userId: comment.createdBy, // The user who created the post
+          createdBy: userId,
+          postId: comment.postId,
+          postCommentId: commentId,
+          message: `${req.user.username} liked your comment`,
+          type: 'commentLiked',
+        });
+        await notification.save();
+
+        const populatedNotification = await Notification.findById(notification._id)
+          .populate("postId", "_id imageUrl")
+          .populate("userId", "name avatar")
+          .populate("createdBy", "_id name avatar");
+
+        io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
+      }
+    }
 
   const updatedComment = await PostComments.findByIdAndUpdate(
     commentId,
@@ -686,6 +714,27 @@ export const likePostCommentReply = async (req, res) => {
   const update = isLiked
     ? { $pull: { likes: userId } }
     : { $push: { likes: userId } };
+    if(!isLiked && reply.createdBy.toString() !== userId) {
+      const notificationAlreadyExists = await Notification.findOne({ userId: reply.createdBy, postId:reply.postId,createdBy: userId, postReplyId: reply._id, type: 'replyLiked' });
+      if (!notificationAlreadyExists) {
+        const notification = new Notification({
+          userId: reply.createdBy, // The user who created the post
+          createdBy: userId,
+          postId: reply.postId,
+          postReplyId: replyId,
+          message: `${req.user.username} liked your reply`,
+          type: 'replyLiked',
+        });
+        await notification.save();
+
+        const populatedNotification = await Notification.findById(notification._id)
+          .populate("postId", "_id imageUrl")
+          .populate("userId", "name avatar")
+          .populate("createdBy", "_id name avatar");
+
+        io.to(reply.createdBy.toString()).emit('notification', populatedNotification);
+      }
+    }
 
   const updatedReply = await PostReplies.findByIdAndUpdate(replyId, update, {
     new: true,
