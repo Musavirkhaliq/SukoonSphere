@@ -11,6 +11,22 @@ const postNotificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Post',
     },
+    questionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Question',
+    },
+    answerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Answer',
+    },
+    answerCommentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AnswerComment',
+    },
+    answerReplyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AnswerReply',
+    },
     postCommentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Comment',
@@ -21,7 +37,8 @@ const postNotificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['like', 'comment', 'reply', 'commentLiked', 'replyLiked'],
+      enum: ['like', 'comment', 'reply', 'commentLiked', 'replyLiked',
+       "answered", "answerLiked","answerCommentLiked","answerCommentReplyLiked","answerComment" ,"answerReply",],
       required: true,
     },
     message: {

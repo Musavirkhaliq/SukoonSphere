@@ -2,10 +2,13 @@ import Question from "../models/qaSection/questionModel.js"; // Adjust the impor
 import Answer from "../models/qaSection/answerModel.js";
 import Comment from "../models/qaSection/answerCommentModel.js";
 import Replies from "../models/qaSection/answerReplyModel.js";
+import Notification from "../models/notifications/postNotificationModel.js";
 import { StatusCodes } from "http-status-codes";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErors.js";
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
+import { io } from "../server.js";
+
 // question controllers
 export const addQuestion = async (req, res) => {
   const { questionText, context, tags } = req.body;
@@ -502,7 +505,21 @@ export const createAnswer = async (req, res) => {
         }
       }
     ]);
+    // Send notification to user who asked the question
+     if (question.createdBy.toString() !== req.user.userId) {
+    const notification = await Notification.create({
+      userId: question.createdBy,
+      createdBy: userId,
+      type: "answered",
+      message: `${req.user.username} Answered your question`,
+      answerId: newAnswer[0]._id,
+      questionId: question._id,
+    });
+ const populatedNotification = await Notification.findById(notification._id).populate("createdBy", "_id name avatar");
+    // Emit to socket
+    io.to(question.createdBy.toString()).emit('notification', populatedNotification);
 
+     }
     await session.commitTransaction();
     session.endSession();
 
@@ -516,6 +533,7 @@ export const createAnswer = async (req, res) => {
     throw error;
   }
 };
+    
 export const getAnswerById = async (req, res) => {
   const { id: answerId } = req.params;
 
@@ -861,7 +879,22 @@ export const createAnswerComment = async (req, res) => {
       }
     }
   ]);
+ if (answer.createdBy.toString() !== req.user.userId) {
+          const notification = new Notification({
+            userId: commentWithUser[0].createdBy, // The user who created the post
+            createdBy: req.user.userId,
+            answerId: answerId,
+            type: 'answerComment',
+            message: `${req.user.username} commented on your answer`, // Assuming you have the username available
+          });
+          await notification.save();
 
+          // Retrieve the populated notification
+          const populatedNotification = await Notification.findById(notification._id)
+            .populate("createdBy", "_id name avatar")
+
+          io.to(answer.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+        }
   res.status(StatusCodes.CREATED).json({
     message: "Comment created successfully",
     comment: commentWithUser[0]
@@ -1506,6 +1539,22 @@ export const likeAnswer = async (req, res) => {
     { new: true }
   );
 
+if(updatedAnswer.createdBy.toString() !== userId){
+  const notificationAlreadyExists = await Notification.findOne({ userId: updatedAnswer.createdBy, answerId: answerId,createdBy: userId, type: 'answerLiked' });
+  if (!notificationAlreadyExists) {
+    const notification = new Notification({
+      userId: updatedAnswer.createdBy, // The user who created the post
+      createdBy: userId,
+      answerId: updatedAnswer._id,
+      type: 'answerLiked',
+      message: `${req.user.username} liked your answer`, // Assuming you have the username available
+    });
+    await notification.save();
+    const populatedNotification = await Notification.findById(notification._id)
+      .populate("createdBy", "_id name avatar")
+    io.to(updatedAnswer.createdBy.toString()).emit('notification', populatedNotification);
+}
+}
   // Update total likes count
   updatedAnswer.totalLikes = updatedAnswer.likes.length;
   await updatedAnswer.save();
@@ -1515,4 +1564,4 @@ export const likeAnswer = async (req, res) => {
     likes: updatedAnswer.likes,
     totalLikes: updatedAnswer.totalLikes,
   });
-};
+}
