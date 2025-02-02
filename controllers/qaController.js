@@ -1012,6 +1012,21 @@ export const createAnswerReply = async (req, res) => {
       }
     }
   ]);
+  if(req.user.userId !== comment.createdBy.toString() ) {
+    console.log("notified")
+    const notification = new Notification({
+      userId: comment.createdBy, // The user who created the post
+      createdBy: req.user.userId,
+      answerReplyId: reply._id,
+      answerId: comment.answerId,
+      type: 'answerReply',
+      message: `${req.user.username} replied to your comment`, // Assuming you have the username available
+    });
+    await notification.save();
+     const populatedNotification = await notification.populate('createdBy', '_id name avatar');
+     io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
+
+  }
 
   res.status(StatusCodes.CREATED).json({
     message: "Reply created successfully",
@@ -1127,7 +1142,30 @@ export const likeAnswerReply = async (req, res) => {
       }
     }
   ]);
+  const comment = await Comment.findById(reply.commentId);
+  if(req.user.userId !== reply.createdBy.toString() && !isLiked ) {
+   const notificationAlreadyExists = await Notification.findOne({ userId: reply.createdBy,
+    createdBy: req.user.userId,
+    answerReplyId: reply._id,
+    answerCommentId: reply.commentId,
+    answerId: comment.answerId,
+    type: 'answerCommentReplyLiked',});
+   if (!notificationAlreadyExists) {
 
+    const notification = new Notification({
+      userId: reply.createdBy, // The user who created the post
+      createdBy: req.user.userId,
+      answerReplyId: reply._id,
+      answerCommentId: reply.commentId,
+      answerId: comment.answerId,
+      type: 'answerCommentReplyLiked',
+      message: `${req.user.username} liked your reply`
+    });
+    await notification.save();
+    const populatedNotification = await notification.populate('createdBy', '_id name avatar');
+    io.to(reply.createdBy.toString()).emit('notification', populatedNotification);
+   }
+  }
   res.status(StatusCodes.OK).json({
     message: isLiked ? "Reply unliked" : "Reply liked",
     reply: replyWithDetails[0]
@@ -1206,6 +1244,30 @@ export const likeAnswerComment = async (req, res) => {
       }
     }
   ]);
+  if(req.user.userId !== comment.createdBy.toString() &&!isLiked) {
+    const notificationAlreadyExists = await Notification.findOne({ userId: comment.createdBy, 
+      createdBy: userId,
+      answerId: comment.answerId,
+      answerCommentId: commentId, type: 'answerCommentLiked' });
+    if (!notificationAlreadyExists) {
+      const notification = new Notification({
+        userId: comment.createdBy, // The user who created the post
+        createdBy: userId,
+        answerId: comment.answerId,
+        answerCommentId: commentId,
+        message: `${req.user.username} liked your comment`,
+        type: 'answerCommentLiked',
+      });
+      await notification.save();
+      const populatedNotification = await Notification.findById(notification._id)
+      .populate("createdBy", "_id name avatar")
+      io.to(comment.createdBy.toString()).emit("notification", populatedNotification);
+        res.status(StatusCodes.OK).json({
+          message: isLiked ? "Comment unliked" : "Comment liked",
+          comment: commentWithDetails[0]
+        });
+    }
+  }
 
   res.status(StatusCodes.OK).json({
     message: isLiked ? "Comment unliked" : "Comment liked",
