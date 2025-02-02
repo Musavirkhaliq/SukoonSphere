@@ -54,7 +54,7 @@ const postNotificationSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-);
+);  
 
 const PostNotification = mongoose.model("PostNotification", postNotificationSchema);
 

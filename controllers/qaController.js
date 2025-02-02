@@ -881,7 +881,7 @@ export const createAnswerComment = async (req, res) => {
   ]);
  if (answer.createdBy.toString() !== req.user.userId) {
           const notification = new Notification({
-            userId: commentWithUser[0].createdBy, // The user who created the post
+            userId: answer.createdBy, // The user who created the post
             createdBy: req.user.userId,
             answerId: answerId,
             type: 'answerComment',
@@ -895,6 +895,8 @@ export const createAnswerComment = async (req, res) => {
 
           io.to(answer.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
         }
+        const user = await User.findById({ _id: answer.createdBy });
+        console.log({user1: req.user, user2: user})
   res.status(StatusCodes.CREATED).json({
     message: "Comment created successfully",
     comment: commentWithUser[0]
