@@ -8,12 +8,16 @@ import CompanyLogo from "../../../assets/images/SukoonSphere_Logo.png";
 import links from "@/utils/SharedComp/PageLinks";
 import DesktopNav from "./DesktopNav";
 import UserMenu from "./UserMenu";
-import { MdOutlineNotificationsActive, MdOutlinePassword } from "react-icons/md";
+import {
+  MdOutlineNotificationsActive,
+  MdOutlinePassword,
+} from "react-icons/md";
 import { BiLogIn, BiUserPlus } from "react-icons/bi";
 import { FiUserPlus } from "react-icons/fi";
 import { BiMessageSquareAdd } from "react-icons/bi";
 import { CiMedal } from "react-icons/ci";
 import { BiUser } from "react-icons/bi";
+import { IoNotifications } from "react-icons/io5";
 import NotificationDropdown from "../NotificationDropdown";
 function NavMenu() {
   const [activeSublink, setActiveSublink] = useState(null);
@@ -27,7 +31,7 @@ function NavMenu() {
     setActiveSublink(index === activeSublink ? null : index);
   };
   const { user: loggedInUser } = useUser();
-  
+
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (activeSublink !== null) {
@@ -105,12 +109,12 @@ function NavMenu() {
       {/* Desktop Nav */}
       <nav className="hidden lg:flex w-full bg-[var(--white-color)] sticky top-0 items-center justify-between shadow-[0px_1px_10px_rgba(0,0,0,0.1)] z-50 transition-all ease-in-out p-2 h-[65px]">
         <div className="flex w-full justify-between items-center px-4 lg:px-20">
-        <Link to="/">
-          <img
-            src={CompanyLogo}
-            className="object-contain w-14"
-            alt="Logo Loading..."
-          />
+          <Link to="/">
+            <img
+              src={CompanyLogo}
+              className="object-contain w-14"
+              alt="Logo Loading..."
+            />
           </Link>
           
           <DesktopNav links={links} />
@@ -141,7 +145,6 @@ function NavMenu() {
       <header className="lg:hidden  left-0 right-0 bg-[var(--white-color)] h-14 z-50">
         <div className="flex items-center justify-between h-full px-4">
           <div className="flex items-center gap-3">
-
             <Link to="/">
               <img
                 src={CompanyLogo}
@@ -149,7 +152,6 @@ function NavMenu() {
                 alt="Logo"
               />
             </Link>
-
           </div>
           <div className="flex items-center gap-4">
             {user && (
@@ -205,23 +207,25 @@ function NavMenu() {
                 >
                   {link.icon}
                   <div
-                    className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${activeSublink === index
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-4 pointer-events-none"
-                      }`}
+                    className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${
+                      activeSublink === index
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 translate-y-4 pointer-events-none"
+                    }`}
                   >
                     <div className="flex flex-col space-y-3">
                       {link.sublinks.map((sublink) => {
                         // Check if the sublink is for videos or podcasts
-                        
+
                         return (
                           <NavLink
                             key={sublink.name}
                             to={sublink.address}
                             className={({ isActive }) =>
-                              `flex items-center gap-3 p-2 rounded-xl whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95 ${isActive
-                                ? "bg-[var(--blue--100)] text-[var(--ternery)] shadow-sm"
-                                : "hover:bg-[var(--grey--200)] text-[var(--grey--800)]"
+                              `flex items-center gap-3 p-2 rounded-xl whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95 ${
+                                isActive
+                                  ? "bg-[var(--blue--100)] text-[var(--ternery)] shadow-sm"
+                                  : "hover:bg-[var(--grey--200)] text-[var(--grey--800)]"
                               }`
                             }
                             onClick={() => setActiveSublink(null)}
@@ -239,9 +243,10 @@ function NavMenu() {
                 <NavLink
                   to={link.address}
                   className={({ isActive }) =>
-                    `p-2 text-2xl transform transition-all duration-150 hover:scale-110 active:scale-95 ${isActive
-                      ? "text-[var(--ternery)]"
-                      : "text-[var(--grey--800)] hover:text-[var(--ternery)]"
+                    `p-2 text-2xl transform transition-all duration-150 hover:scale-110 active:scale-95 ${
+                      isActive
+                        ? "text-[var(--ternery)]"
+                        : "text-[var(--grey--800)] hover:text-[var(--ternery)]"
                     }`
                   }
                 >
@@ -262,10 +267,11 @@ function NavMenu() {
               <BsThreeDotsVertical />
             </div>
             <div
-              className={`absolute bottom-full right-2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${activeSublink === "settings"
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4 pointer-events-none"
-                }`}
+              className={`absolute bottom-full right-2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${
+                activeSublink === "settings"
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4 pointer-events-none"
+              }`}
             >
               <div className="flex flex-col space-y-3">
                 {settingsLinks.map((link) =>
@@ -324,25 +330,26 @@ const UserSection = ({ user, miniMenu, toggleMiniMenu, handleLogout }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [miniMenu, toggleMiniMenu]);
-
+ 
   return (
-    <div ref={menuRef}>
+    <div ref={menuRef} className="relative">
       <div className="hidden lg:flex items-center justify-center gap-2">
         <Link to={`about/user/${user._id}`}>
           <div className="group relative">
             <img
-              className="w-9 h-9 object-cover rounded-full border-[3px] border-[var(--grey--600)] hover:border-[var(--ternery)]"
+              className="w-8 h-8 object-cover rounded-full border-[3px] border-[var(--grey--600)] hover:border-[var(--ternery)]"
               src={
                 user?.avatar ||
-                "https://cdn-icons-png.flaticon.com/512/147/147142.png"
+                "https://e7.pngegg.com/pngimages/81/570/png-clipart-profile-logo-computer-icons-user-user-blue-heroes-thumbnail.png"
               }
-              alt="User"
+              alt={user?.name || "User"}
             />
             <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-[var(--grey--900)] text-[var(--white-color)] px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
               View Profile
             </div>
           </div>
         </Link>
+     
         {miniMenu ? (
           <RxCross2
             className="block cursor-pointer size-8 hover:text-[var(--ternery)] hover:bg-[var(--grey--200)] rounded-full p-1 transition-transform duration-300"
@@ -356,6 +363,7 @@ const UserSection = ({ user, miniMenu, toggleMiniMenu, handleLogout }) => {
         )}
       </div>
       <UserMenu user={user} miniMenu={miniMenu} handleLogout={handleLogout} />
+    
     </div>
   );
 };
