@@ -243,7 +243,6 @@ export const likeArticleComment = async (req, res) => {
         commentId: commentId,
         createdBy: userId,
         articleId: comment.articleId,
-        message: `${req.user.username} liked your comment`,
         type: 'articleCommentLiked',});
       if (!notificationAlreadyExists) {
         const notification = new Notification({
@@ -255,7 +254,7 @@ export const likeArticleComment = async (req, res) => {
           type: 'articleCommentLiked',
         });
         await notification.save();
-  
+  console.log(notification)
         const populatedNotification = await Notification.findById(notification._id)
         .populate("userId", "_id name avatar")
         io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
