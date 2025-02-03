@@ -28,6 +28,7 @@ import {
   ArticleLikedNotification,
   ArticleReplyNotification,
 } from "../notifications/ArticleNotificationCards";
+import { FollowNotification } from "../notifications/UserNotificationCards";
 
 const Dropdown = ({ user, onClose }) => {
   const [items, setItems] = useState([]);
@@ -164,6 +165,9 @@ const Dropdown = ({ user, onClose }) => {
                         item={item}
                       />
                     );
+                  // User Notification cases
+                  case "follow":
+                    return <FollowNotification key={index} item={item} />;
                 }
               })}
             </div>
