@@ -5,34 +5,35 @@ import {
   IoChatbubble,
   IoHeart,
 } from "react-icons/io5";
+import { BiSolidUpvote } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 
 const NOTIFICATION_TYPES = {
-  POST_LIKE: {
-    icon: IoHeart,
-    iconColor: "text-red-500",
-    message: "Liked your post",
+  ARTICLE_LIKED: {
+    icon: BiSolidUpvote,
+    iconColor: "text-grey-900",
+    message: "upvoted your article",
   },
-  POST_COMMENT: {
+  ARTICLE_COMMENT: {
     icon: IoChatbubble,
     iconColor: "text-gray-900",
-    message: "commented on your post",
+    message: "commented on your article",
   },
-  POST_REPLY: {
+  ARTICLE_REPLY: {
     icon: IoArrowUndo,
     iconColor: "text-blue-500",
-    message: "replied to your comment",
+    message: "replied to your comment on article",
   },
-  COMMENT_LIKE: {
+  ARTICLE_COMMENT_LIKED: {
     icon: IoHeart,
     iconColor: "text-red-500",
-    message: "liked your comment",
+    message: "liked your comment on article",
   },
-  REPLY_LIKE: {
+  ARTICLE_COMMENT_REPLY_LIKED: {
     icon: IoHeart,
     iconColor: "text-red-500",
-    message: "liked your reply",
+    message: "liked your reply on article",
   },
 };
 
@@ -49,7 +50,7 @@ const NotificationItem = ({ item, type }) => {
 
   return (
     <Link
-      to={`/posts/${item?.postId?._id}`}
+      to={`/articles/article/${item?.articleId}`}
       className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 transition-colors"
     >
       <div className="flex-shrink-0">
@@ -65,24 +66,29 @@ const NotificationItem = ({ item, type }) => {
               className="w-6 h-6 rounded-full object-cover"
             />
           </Link>
-          <Link to={`/about/user/${item.createdBy._id}`}>
+          <Link
+            to={`/about/user/${item.createdBy._id}`}
+            className="line-clamp-2"
+          >
             <span className="text-sm font-medium text-[var(--ternery)] line-clamp-2 capitalize hover:underline block">
               {item.createdBy?.name}{" "}
             </span>
           </Link>
-          <span className="text-[var(--grey--900)]">{config.message}</span>
+          <span className="text-[var(--grey--900)] line-clamp-2">
+            {config.message}
+          </span>
         </div>
 
         <div className="flex items-center space-x-2 text-xs text-gray-500">
           <IoCalendarOutline className="w-3 h-3" />
-          <span>{formatDistanceToNow(new Date(item.createdAt))}</span>
+          <span>{formatDistanceToNow(new Date(item?.createdAt))}</span>
         </div>
       </div>
 
       {item.postId?.imageUrl && (
         <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0">
           <img
-            src={item.postId.imageUrl}
+            src={item?.postId?.imageUrl}
             alt="Post thumbnail"
             className="w-full h-full object-cover"
           />
@@ -93,22 +99,18 @@ const NotificationItem = ({ item, type }) => {
 };
 
 // Export individual components using the shared NotificationItem component
-export const PostLikeNotification = ({ item }) => (
-  <NotificationItem item={item} type="POST_LIKE" />
+export const ArticleLikedNotification = ({ item }) => (
+  <NotificationItem item={item} type="ARTICLE_LIKED" />
 );
-
-export const PostCommentNotification = ({ item }) => (
-  <NotificationItem item={item} type="POST_COMMENT" />
+export const ArticleCommentNotification = ({ item }) => (
+  <NotificationItem item={item} type="ARTICLE_COMMENT" />
 );
-
-export const PostReplyNotification = ({ item }) => (
-  <NotificationItem item={item} type="POST_REPLY" />
+export const ArticleReplyNotification = ({ item }) => (
+  <NotificationItem item={item} type="ARTICLE_REPLY" />
 );
-
-export const PostCommentLikeNotification = ({ item }) => (
-  <NotificationItem item={item} type="COMMENT_LIKE" />
+export const ArticleCommentLikedNotification = ({ item }) => (
+  <NotificationItem item={item} type="ARTICLE_COMMENT_LIKED" />
 );
-
-export const PostReplyLikeNotification = ({ item }) => (
-  <NotificationItem item={item} type="REPLY_LIKE" />
+export const ArticleCommentReplyLikedNotification = ({ item }) => (
+  <NotificationItem item={item} type="ARTICLE_COMMENT_REPLY_LIKED" />
 );
