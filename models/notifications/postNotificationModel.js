@@ -35,10 +35,24 @@ const postNotificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Reply',
     },
+    articleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Article',
+    },
+    articleCommentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comment',
+    },
+    articleReplyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Reply',
+    },
     type: {
       type: String,
       enum: ['like', 'comment', 'reply', 'commentLiked', 'replyLiked',
-       "answered", "answerLiked","answerCommentLiked","answerCommentReplyLiked","answerComment" ,"answerReply",],
+       "answered", "answerLiked","answerCommentLiked","answerCommentReplyLiked","answerComment" ,"answerReply",
+       "articleLiked", "articleCommentLiked", "articleCommentReplyLiked","articleComment","articleReply",
+      ],
       required: true,
     },
     message: {

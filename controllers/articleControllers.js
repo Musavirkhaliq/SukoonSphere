@@ -2,7 +2,10 @@ import Article from "../models/articles/articleModel.js";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
+import Notification from "../models/notifications/postNotificationModel.js";
+
 import { UnauthenticatedError, BadRequestError } from "../errors/customErors.js";
+import { io } from "../server.js";
 
 // Get all articles with pagination, search, and filters
 export const getAllArticles = async (req, res) => {
@@ -431,6 +434,25 @@ export const likeArticle = async (req, res) => {
   } else {
     article.likes.push(userId);
     await article.save();
+
+    const notificationAlreadyExists = await Notification.findOne({ userId: article.author,
+      createdBy: userId,
+      articleId: articleId,
+      type: 'articleLiked',
+       });
+    if (!notificationAlreadyExists) {
+      const notification = new Notification({
+        userId: article.author, // The user who created the post
+        createdBy: userId,
+        articleId: articleId,
+        type: 'articleLiked',
+        message: `${req.user.name} liked your article`,
+      });
+      await notification.save();
+      const populatedNotification = await Notification.findById(notification._id)
+        .populate('createdBy', 'name avatar')
+        io.to(article.author.toString()).emit('notification', populatedNotification);
+    }
     return res
       .status(StatusCodes.OK)
       .json({ message: "Article liked successfully", article });
