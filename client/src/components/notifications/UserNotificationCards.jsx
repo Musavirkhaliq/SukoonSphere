@@ -7,38 +7,13 @@ import {
   IoHeart,
   IoArrowUndo,
 } from "react-icons/io5";
-import { RiQuestionAnswerFill } from "react-icons/ri";
+import { RiQuestionAnswerFill, RiUserFollowFill } from "react-icons/ri";
 
 const NOTIFICATION_TYPES = {
-  QUESTION_ANSWERED: {
-    icon: RiQuestionAnswerFill,
+  FOLLOWED: {
+    icon: RiUserFollowFill,
     iconColor: "text-grey-900",
-    message: "answered your question",
-  },
-  ANSWER_COMMENT: {
-    icon: IoChatbubble,
-    iconColor: "text-gray-900",
-    message: "commented on your answer",
-  },
-  ANSWER_LIKED: {
-    icon: IoHeart,
-    iconColor: "text-red-500",
-    message: "liked your answer",
-  },
-  ANSWER_COMMENT_LIKED: {
-    icon: IoHeart,
-    iconColor: "text-red-500",
-    message: "liked your comment on answer",
-  },
-  ANSWER_COMMENT_REPLY_LIKED: {
-    icon: IoHeart,
-    iconColor: "text-red-500",
-    message: "liked your reply on answer",
-  },
-  ANSWER_COMMENT_REPLY: {
-    icon: IoArrowUndo,
-    iconColor: "text-blue-500",
-    message: "replied to your comment on answer",
+    message: "has followed you",
   },
 };
 
@@ -96,56 +71,10 @@ const NotificationItem = ({ item, type, link }) => {
   );
 };
 
-export const QuestionAnsweredNotification = ({ item }) => (
+export const FollowNotification = ({ item }) => (
   <NotificationItem
     item={item}
-    type="QUESTION_ANSWERED"
-    link={`/QA-section/question/${item?.questionId}`}
-  />
-);
-
-export const AnswerCommentNotification = ({ item }) => (
-  <NotificationItem
-    item={item}
-    type="ANSWER_COMMENT"
-    link={`/QA-section/question/answer/${item?.answerId}/comments`}
-  />
-);
-
-export const AnswerLikedNotification = ({ item }) => (
-  <NotificationItem
-    item={item}
-    type="ANSWER_LIKED"
-    link={`/QA-section/question/${item?.questionId}`}
-  />
-);
-
-export const AnswerCommentLikedNotification = ({ item }) => (
-  <NotificationItem
-    item={item}
-    type="ANSWER_COMMENT_LIKED"
-    link={`/QA-section/question/${item?.questionId}`}
-  />
-);
-export const AnswerReplyLikedNotification = ({ item }) => (
-  <NotificationItem
-    item={item}
-    type="ANSWER_REPLY_LIKED"
-    link={`/QA-section/question/answer/${item?.answerId}/comments/${item?.commentId}/reply`}
-  />
-);
-
-export const AnswerCommentReplyLikedNotification = ({ item }) => (
-  <NotificationItem
-    item={item}
-    type="ANSWER_COMMENT_REPLY_LIKED"
-    link={`/QA-section/question/answer/${item?.answerId}/comments/${item?.commentId}/reply`}
-  />
-);
-export const AnswerReplyNotification = ({ item }) => (
-  <NotificationItem
-    item={item}
-    type="ANSWER_COMMENT_REPLY"
-    link={`/QA-section/question/answer/${item?.answerId}/comments/${item?.commentId}/reply`}
+    type="FOLLOWED"
+    link={`/about/user/${item.createdBy._id}`}
   />
 );
