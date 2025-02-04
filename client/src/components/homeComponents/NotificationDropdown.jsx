@@ -59,13 +59,13 @@ const Dropdown = ({ user, onClose }) => {
     <>
       {isVisible && (
         <div
-          className={`fixed inset-0 bg-black/40 z-[70] transition-opacity duration-300`}
+          className={`fixed inset-0 bg-black/40 z-[70] transition-opacity duration-300 `}
           onClick={() => setIsVisible(false)}
         ></div>
       )}
       <div
         className={`fixed top-0 right-0 w-full sm:w-full md:w-[450px] h-screen bg-white z-[80] 
-                    transform transition-transform duration-300 ease-in-out 
+                    transform transition-transform duration-300 ease-in-out rounded-lg
                     shadow-xl ${isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}`}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">

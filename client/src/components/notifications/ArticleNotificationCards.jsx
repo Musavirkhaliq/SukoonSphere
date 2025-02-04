@@ -51,21 +51,23 @@ const NotificationItem = ({ item, type }) => {
   return (
     <Link
       to={`/articles/article/${item?.articleId}`}
-      className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 transition-colors"
+      className="px-4 py-2.5 hover:bg-black/5 cursor-pointer flex items-center space-x-3 transition-colors"
     >
-      <div className="flex-shrink-0">
-        <Icon className={`w-5 h-5 ${config.iconColor}`} />
+      <div className="flex-shrink-0 relative">
+      <Link to={`/about/user/${item.createdBy._id}`}>
+            <img
+              src={getAvatarUrl(item.createdBy)}
+              alt={item.createdBy?.name}
+              className=" w-10 h-10 rounded-full object-cover"            />
+          </Link>
+          <div className="absolute  -bottom-2 -right-2 z-10 bg-white/90  p-1 rounded-full ">
+          <Icon className={`w-4 h-4 ${config.iconColor}  `} />
+        </div>
       </div>
 
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center space-x-2">
-          <Link to={`/about/user/${item.createdBy._id}`}>
-            <img
-              src={getAvatarUrl(item.createdBy)}
-              alt={item.createdBy?.name}
-              className="w-6 h-6 rounded-full object-cover"
-            />
-          </Link>
+         
           <Link
             to={`/about/user/${item.createdBy._id}`}
             className="line-clamp-2"
@@ -79,7 +81,7 @@ const NotificationItem = ({ item, type }) => {
           </span>
         </div>
 
-        <div className="flex items-center space-x-2 text-xs text-gray-500">
+        <div className="flex items-center space-x-2 text-xs text-[var(--grey--800)]">
           <IoCalendarOutline className="w-3 h-3" />
           <span>{formatDistanceToNow(new Date(item?.createdAt))}</span>
         </div>
