@@ -41,6 +41,8 @@ export const createArticleComment = async (req, res) => {
     const populatedNotification = await Notification.findById(notification._id)
     .populate("createdBy", "_id name avatar")
     io.to(article.author.toString()).emit('notification', populatedNotification);
+    const notificationCount = await Notification.countDocuments({userId: article.author});
+    io.to(userId.toString()).emit('notificationCount', ({notificationCount : notificationCount}));
   }
 
   res.status(StatusCodes.CREATED).json({ comment });

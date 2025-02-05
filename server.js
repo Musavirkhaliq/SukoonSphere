@@ -20,7 +20,10 @@ import ArticleRouter from "./routes/articleRouter.js";
 import VideoRouter from "./routes/videoRouter.js";
 import PodcastRouter from "./routes/podcastRouter.js";
 import GalleryRouter from "./routes/galleryRouter.js";
-import NotificationRouter from "./routes/notificationRouter.js"; // Import the notification routes
+import NotificationRouter from "./routes/notificationRouter.js"; 
+
+// models
+import Notification from "./models/notifications/postNotificationModel.js";
 
 // Public
 import path, { dirname } from "path";
@@ -93,9 +96,13 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   // Join a room based on user ID
-  socket.on('join', (userId) => {
+  socket.on('join', async (userId) => {
       socket.join(userId);
       console.log(`User ${userId} joined room`);
+
+      // Fetch the total number of notifications for the user
+      const notificationCount = await Notification.countDocuments({userId});
+      io.to(userId).emit('notificationCount', notificationCount);
   });
 
   socket.on('disconnect', () => {
