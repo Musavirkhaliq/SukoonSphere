@@ -9,6 +9,7 @@ import Question from "../models/qaSection/questionModel.js";
 import Notification from "../models/notifications/postNotificationModel.js";
 import UserSuggestion from "../models/UserSuggestion.js";
 import { io } from "../server.js";
+import Answer from "../models/qaSection/answerModel.js";
 
 export const getUserProfile = async (req, res) => {
   const user = await User.findById(req.user.userId).select(
@@ -20,6 +21,16 @@ export const getUserProfile = async (req, res) => {
 export const getUserDetailsById = async (req, res) => {
   const { id: userId } = req.params;
   const user = await User.findById(userId).select("-password");
+  const totalPosts = await Post.find({ createdBy: userId }).countDocuments();
+  const totalQuestions = await Question.find({ createdBy: userId }).countDocuments();
+  const totalAnswers = await Answer.find({ createdBy: userId }).countDocuments();
+  const totalArticles = await ArticleModel.find({ author: userId }).countDocuments();
+  user.counts = {
+    totalPosts,
+    totalQuestions,
+    totalAnswers,
+    totalArticles
+  };
   res.status(StatusCodes.OK).json(user);
 };
 

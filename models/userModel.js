@@ -59,6 +59,12 @@ const userSchema = mongoose.Schema({
       ref: "Answers",
     },
   ],
+  counts: {
+    totalPosts: Number,
+    totalQuestions: Number,
+    totalAnswers: Number,
+    totalArticles: Number,
+  },
 });
 
 export default mongoose.model("User", userSchema);

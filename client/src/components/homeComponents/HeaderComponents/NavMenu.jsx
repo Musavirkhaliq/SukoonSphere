@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { RxCross2 } from "react-icons/rx";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -16,13 +16,14 @@ import { BiLogIn, BiUserPlus } from "react-icons/bi";
 import { FiUserPlus } from "react-icons/fi";
 import { BiMessageSquareAdd } from "react-icons/bi";
 import { CiMedal } from "react-icons/ci";
-import { BiUser } from "react-icons/bi";
-import { IoNotifications } from "react-icons/io5";
 import NotificationDropdown from "../NotificationDropdown";
+import socket from "@/utils/socket/socket";
+
 function NavMenu() {
   const [activeSublink, setActiveSublink] = useState(null);
   const [miniMenu, setMiniMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   const navigate = useNavigate();
   const { user, logout } = useUser();
@@ -32,7 +33,7 @@ function NavMenu() {
   };
   const { user: loggedInUser } = useUser();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (activeSublink !== null) {
         setActiveSublink(null);
@@ -102,8 +103,17 @@ function NavMenu() {
   const closeDropdown = () => {
     setShowNotifications(false);
   };
-  
+  useEffect(() => {
+    socket.emit("join", loggedInUser?._id);
 
+    socket.on("notificationCount", (count) => {
+      setNotificationCount(count ); // Update the notification count
+    });
+
+    return () => {
+      socket.off("notificationCount"); // Clean up the listener on unmount
+    };
+  }, [loggedInUser]);
   return (
     <>
       {/* Desktop Nav */}
@@ -123,6 +133,10 @@ function NavMenu() {
            <div className="relative">
             <button onClick={handleNotificationClick} className="text-2xl text-gray-800">
               <MdOutlineNotificationsActive />
+              {notificationCount > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notificationCount}</span>
+              )}
+              
             </button>
             {showNotifications && (
               <NotificationDropdown user={loggedInUser}  onClose={closeDropdown} />
@@ -175,6 +189,9 @@ function NavMenu() {
               <div className="relative">
             <button onClick={handleNotificationClick} className="text-2xl text-gray-800">
               <MdOutlineNotificationsActive />
+              {notificationCount > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notificationCount}</span>
+              )}
             </button>
             {showNotifications && (
               <NotificationDropdown user={loggedInUser}  onClose={closeDropdown} />
