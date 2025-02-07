@@ -75,6 +75,9 @@ export const ArticleComments = createOptimizedComponent(
 export const CommentPopup = createOptimizedComponent(
   () => import("./articleComponents/CommentPopup")
 );
+export const SearchAndFilterBar = createOptimizedComponent(
+  () => import("./articleComponents/SearchAndFilterBar ")
+);
 
 // Post Components
 

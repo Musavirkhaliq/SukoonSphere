@@ -14,7 +14,7 @@ import {
   FaRegCommentAlt,
 } from "react-icons/fa";
 import { IoCloseOutline } from "react-icons/io5";
-import { PageIntro } from "@/components";
+import { ArticleCard, PageIntro, SearchAndFilterBar } from "@/components";
 import { FiCalendar, FiClock } from "react-icons/fi";
 import { MdMultipleStop } from "react-icons/md";
 import { BiUpvote } from "react-icons/bi";
@@ -144,52 +144,16 @@ const Articles = () => {
 
       {/* Search and Filter Section */}
       <div className="flex flex-col gap-4 mb-6 bg-white rounded-lg shadow-md p-4 md:p-6">
-        {/* Search bar */}
-        <div className="relative">
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search articles..."
-            className="w-full md:w-1/3 lg:w-1/4 bg-[var(--white-color)] py-2 px-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-          />
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          {searchInput && (
-            <button
-              onClick={() => {
-                setSearchInput("");
-                setSearchParams((prev) => {
-                  const newParams = new URLSearchParams(prev);
-                  newParams.delete("search");
-                  return newParams;
-                });
-              }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            >
-              <IoCloseOutline className="w-5 h-5" />
-            </button>
-          )}
-        </div>
+        {/* Search bar Filter buttons*/}
 
-        {/* Filter buttons */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-2 md:mt-0">
-          <div className="flex flex-wrap gap-2">
-            {filterOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => handleFilterChange(option.value)}
-                className={`px-3 py-1.5 text-sm rounded-full transition-colors flex items-center gap-2 ${
-                  currentFilter === option.value
-                    ? "bg-[var(--primary)] text-white"
-                    : " text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {option.icon}
-                <span>{option.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <SearchAndFilterBar
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+          setSearchParams={setSearchParams}
+          filterOptions={filterOptions}
+          currentFilter={currentFilter}
+          handleFilterChange={handleFilterChange}
+        />
       </div>
       {/* Articles Grid */}
       {status === "loading" ? (
@@ -217,68 +181,7 @@ const Articles = () => {
         <div className="space-y-8">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {allArticles.map((article, index) => (
-              <Link
-                key={`${article._id}-${index}`}
-                to={`/articles/article/${article._id}`}
-                className="group bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col"
-              >
-                <div className="relative h-48 bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {article.imageUrl ? (
-                      <img
-                        src={article.imageUrl}
-                        alt={article.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <FaBookOpen className="w-12 h-12 text-blue-200 group-hover:scale-110 transition-transform duration-200" />
-                    )}
-                  </div>
-                </div>
-
-                <div className="p-6 flex-1 flex flex-col">
-                  <h2 className="text-xl font-semibold text-[var(--grey--900)] group-hover:text-blue-600 transition-colors duration-200 mb-3 line-clamp-2">
-                    {article.title}
-                  </h2>
-                  <div className="flex flex-col gap-3 mt-auto">
-                    <div className="flex items-center justify-end gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <BiUpvote className="w-5 h-5 text-[var(--grey--900)]" />
-                        <span className="text-[var(--grey--600)]">
-                          {article.likes?.length || 0}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FaRegCommentAlt className="w-4 h-4 text-[var(--grey--900)]" />
-                        <span className="text-[var(--grey--600)]">
-                          {article.comments?.length || 0}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm text-[var(--grey--600)] pt-4 border-t border-gray-100">
-                      <div className="flex items-center">
-                        {article.authorAvatar ? (
-                          <img
-                            src={article.authorAvatar}
-                            alt={article.authorName}
-                            className="w-6 h-6 mr-2 object-cover rounded-full"
-                          />
-                        ) : (
-                          <FaUser className="w-4 h-4 mr-2" />
-                        )}
-                        <span>{article.authorName || "Anonymous"}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <FaCalendarAlt className="w-4 h-4 mr-2 text-[var(--grey--900)]" />
-                        <span>
-                          {new Date(article.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+              <ArticleCard article={article} index={index} />
             ))}
           </div>
 

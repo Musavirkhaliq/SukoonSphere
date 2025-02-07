@@ -1,70 +1,70 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import PostActions from "@/components/shared/PostActions";
-import { FaBookOpen, FaCalendarAlt, FaEdit, FaTrash } from "react-icons/fa";
+import { FaBookOpen, FaCalendarAlt, FaRegCommentAlt } from "react-icons/fa";
+import { BiUpvote } from "react-icons/bi";
 
-const ArticleCard = ({ article, isOwnProfile, onEdit, onDelete }) => {
+const ArticleCard = ({ article, index }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 flex flex-col h-full">
-      {/* Card Image */}
-      {article.imageUrl ? (
-        <div className="aspect-video w-full overflow-hidden">
-          <img
-            src={article.imageUrl}
-            alt={article.title}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-      ) : (
-        <FaBookOpen className="w-24 h-12 text-blue-200 group-hover:scale-110 transition-transform duration-200" />
-      )}
-
-      {/* Card Header */}
-      <div className="p-4 flex-grow">
-        <Link
-          to={`/articles/article/${article._id}`}
-          className="block mb-3 group"
-        >
-          <h2 className="text-xl font-semibold text-[var(--grey--900)] line-clamp-2 group-hover:text-blue-600 transition-colors">
-            {article.title}
-          </h2>
-        </Link>
-
-        {/* Meta Information */}
-        <div className="flex items-center gap-2 text-sm text-[var(--grey--600)] mb-4">
-          <FaCalendarAlt className="w-4 h-4" />
-          <span>
-            {new Date(article.createdAt).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
-          </span>
+    <Link
+      key={`${article._id}-${index}`}
+      to={`/articles/article/${article._id}`}
+      className="group bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col"
+    >
+      <div className="relative h-48 bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
+          {article.imageUrl ? (
+            <img
+              src={article.imageUrl}
+              alt={article.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <FaBookOpen className="w-12 h-12 text-blue-200 group-hover:scale-110 transition-transform duration-200" />
+          )}
         </div>
       </div>
 
-      {/* Card Footer */}
-      {isOwnProfile && (
-        <div className="p-4 border-t border-gray-100 bg-gray-50">
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => onEdit(article)}
-              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-              title="Edit article"
-            >
-              <FaEdit className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onDelete(article)}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              title="Delete article"
-            >
-              <FaTrash className="w-4 h-4" />
-            </button>
+      <div className="p-6 flex-1 flex flex-col">
+        <h2 className="text-xl font-semibold text-[var(--grey--900)] group-hover:text-blue-600 transition-colors duration-200 mb-3 line-clamp-2">
+          {article.title}
+        </h2>
+        <div className="flex flex-col gap-3 mt-auto">
+          <div className="flex items-center justify-end gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <BiUpvote className="w-5 h-5 text-[var(--grey--900)]" />
+              <span className="text-[var(--grey--600)]">
+                {article.likes?.length || 0}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FaRegCommentAlt className="w-4 h-4 text-[var(--grey--900)]" />
+              <span className="text-[var(--grey--600)]">
+                {article.comments?.length || 0}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-sm text-[var(--grey--600)] pt-4 border-t border-gray-100">
+            <div className="flex items-center">
+              {article.authorAvatar ? (
+                <img
+                  src={article.authorAvatar}
+                  alt={article.authorName}
+                  className="w-6 h-6 mr-2 object-cover rounded-full"
+                />
+              ) : (
+                <FaUser className="w-4 h-4 mr-2" />
+              )}
+              <span>{article.authorName || "Anonymous"}</span>
+            </div>
+            <div className="flex items-center">
+              <FaCalendarAlt className="w-4 h-4 mr-2 text-[var(--grey--900)]" />
+              <span>{new Date(article.createdAt).toLocaleDateString()}</span>
+            </div>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </Link>
   );
 };
 
