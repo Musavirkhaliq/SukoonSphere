@@ -6,7 +6,7 @@ import Answer from "./components/Answer";
 import { useUser } from "@/context/UserContext";
 import DeleteModal from "@/components/shared/DeleteModal";
 import { useState } from "react";
-
+import AnswersCommentSlide from "@/components/qa/AnswersCommentSlide";
 
 const SingleAnswerOutlet = () => {
   const { user } = useUser();
@@ -36,6 +36,7 @@ const SingleAnswerOutlet = () => {
       console.log(error);
     }
   };
+  const [showCommentSlide, setShowCommentSlide] = useState(true);
 
   return (
     <div className="bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 mb-6 border border-gray-100">
@@ -75,7 +76,15 @@ const SingleAnswerOutlet = () => {
         </div>
       </div>
       <Answer answer={answer} key={answer._id} user={user} answerCount={1} />
-      <Outlet context={{ answer, setTotalComments }} />
+      {showCommentSlide && (
+        <AnswersCommentSlide
+          isOpen={showCommentSlide}
+          onClose={() => setShowCommentSlide(false)}
+          answerId={answer._id}
+        />
+      )}
+
+      {/* <Outlet context={{ answer, setTotalComments }} /> */}
       <DeleteModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
