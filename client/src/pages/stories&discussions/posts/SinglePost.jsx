@@ -4,6 +4,7 @@ import customFetch from "../../../utils/customFetch";
 import PostCard from "@/components/posts/PostCard";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
+import PostCommentSlide from "@/components/posts/PostCommentSlide";
 
 const SinglePost = () => {
   const [showComments, setShowComments] = useState(true);
@@ -23,7 +24,6 @@ const SinglePost = () => {
   useEffect(() => {
     fetchComments();
   }, [post?._id, showComments, post?.totalComments]);
-
 
   const addComment = async (e) => {
     e.preventDefault();
@@ -62,6 +62,7 @@ const SinglePost = () => {
       console.log({ likeError: error });
     }
   };
+  const [showCommentSlide, setShowCommentSlide] = useState(true);
 
   return (
     <div className="flex flex-col gap-2">
@@ -72,14 +73,22 @@ const SinglePost = () => {
         onCommentClick={() => setShowComments((prev) => !prev)}
         user={user}
       />
-      <Outlet
+      {showCommentSlide && (
+        <PostCommentSlide
+          isOpen={showCommentSlide}
+          onClose={() => setShowCommentSlide(false)}
+          postId={post._id}
+        />
+      )}
+
+      {/* <Outlet
         context={{
           addComment,
           handleDeleteComment,
           comments,
           handleLikeComment,
         }}
-      />
+      /> */}
     </div>
   );
 };
