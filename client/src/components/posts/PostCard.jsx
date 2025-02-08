@@ -13,6 +13,7 @@ import PostActions from "../shared/PostActions";
 import { toast } from "react-toastify";
 import EditPostModal from "./EditPostModal";
 import { formatDistanceToNow } from "date-fns";
+import PostCommentSlide from "./PostCommentSlide";
 
 const PostCard = ({
   post,
@@ -28,6 +29,7 @@ const PostCard = ({
   const [likesCount, setLikesCount] = useState(post?.totalLikes || 0);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPost, setCurrentPost] = useState(post);
+  const [showCommentSlide, setShowCommentSlide] = useState(false);
   const navigate = useNavigate();
   const handleDelete = () => {
     setShowDeleteModal(true);
@@ -74,7 +76,7 @@ const PostCard = ({
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-white rounded-lg shadow-sm p-4 relative">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-2">
             <UserAvatar
@@ -126,23 +128,24 @@ const PostCard = ({
             <span>{likesCount}</span>
           </button>
 
-          {comment === "link" ? (
-            <Link
-              to={`/posts/${currentPost._id}`}
-              className="flex items-center gap-1 hover:text-blue-500"
-            >
-              <FaRegComment />
-              <span>{currentPost.totalComments || 0}</span>
-            </Link>
-          ) : (
+          {/* {comment === "link" ? ( */}
+          <div
+            onClick={() => setShowCommentSlide(true)}
+            className="flex items-center gap-1 hover:text-blue-500 cursor-pointer"
+          >
+            <FaRegComment />
+            <span>{currentPost.totalComments || 0}</span>
+          </div>
+          {/* )  */}
+          {/* : (
             <button
               className="flex items-center gap-1 hover:text-blue-500"
               onClick={() => onCommentClick(currentPost._id)}
             >
               <FaRegComment />
               <span>{totalComments}</span>
-            </button>
-          )}
+            </button> */}
+          {/* )} */}
 
           {currentPost.editedAt && (
             <span className="text-xs text-gray-400 ml-auto">
@@ -154,7 +157,13 @@ const PostCard = ({
           )}
         </div>
       </div>
-
+      {showCommentSlide && (
+        <PostCommentSlide
+          isOpen={showCommentSlide}
+          onClose={() => setShowCommentSlide(false)}
+          postId={currentPost._id}
+        />
+      )}
       {showDeleteModal && (
         <DeleteModal
           isOpen={showDeleteModal}

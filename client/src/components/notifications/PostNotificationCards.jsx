@@ -49,7 +49,7 @@ const NotificationItem = ({ item, type }) => {
 
   return (
     <Link
-      to={` `}
+      to={`/posts/${item.postId._id}`}
       className="px-4 py-2.5 hover:bg-black/5 cursor-pointer flex items-center space-x-3 transition-colors"
     >
       <div className="flex-shrink-0 relative">
