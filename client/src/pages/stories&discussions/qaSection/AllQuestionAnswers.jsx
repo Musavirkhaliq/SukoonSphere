@@ -8,14 +8,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import Answer from "./components/Answer";
 import AnswerFilter from "@/components/qa/AnswerFilter";
 import { toast } from "react-toastify";
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useInView } from 'react-intersection-observer';
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
 
 const AllQuestionAnswers = () => {
   const { user } = useUser();
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('newest');
+  const [activeFilter, setActiveFilter] = useState("newest");
   const { id } = useParams();
   const { ref, inView } = useInView();
 
@@ -26,16 +26,20 @@ const AllQuestionAnswers = () => {
     hasNextPage: queryHasNextPage,
     isFetchingNextPage,
     status,
-    refetch
+    refetch,
   } = useInfiniteQuery({
-    queryKey: ['answers', id, activeFilter],
+    queryKey: ["answers", id, activeFilter],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await customFetch.get(`/qa-section/question/${id}/answers?page=${pageParam}&limit=10&sortBy=${activeFilter}`);
+      const response = await customFetch.get(
+        `/qa-section/question/${id}/answers?page=${pageParam}&limit=10&sortBy=${activeFilter}`
+      );
       return response.data;
     },
     getNextPageParam: (lastPage) => {
       if (!lastPage.pagination) return undefined;
-      return lastPage.pagination.hasNextPage ? lastPage.pagination.currentPage + 1 : undefined;
+      return lastPage.pagination.hasNextPage
+        ? lastPage.pagination.currentPage + 1
+        : undefined;
     },
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -51,7 +55,7 @@ const AllQuestionAnswers = () => {
 
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDeleteQuestion = async () => {
@@ -59,23 +63,25 @@ const AllQuestionAnswers = () => {
       await customFetch.delete(`/qa-section/question/${id}`);
       toast.success("Question deleted successfully");
       setShowDeleteModal(false);
-      navigate('/qa-section')
+      navigate("/qa-section");
     } catch (error) {
       console.log(error);
       toast.error("Failed to delete question");
     }
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return <div className="text-center py-4">Loading answers...</div>;
   }
 
-  if (status === 'error') {
-    return <div className="text-center text-red-500 py-4">Error loading answers</div>;
+  if (status === "error") {
+    return (
+      <div className="text-center text-red-500 py-4">Error loading answers</div>
+    );
   }
 
   const question = data?.pages[0]?.question || {};
-  const allAnswers = data?.pages.flatMap(page => page.answers) || [];
+  const allAnswers = data?.pages.flatMap((page) => page.answers) || [];
   const pagination = data?.pages[data.pages.length - 1]?.pagination;
 
   return (
@@ -102,7 +108,9 @@ const AllQuestionAnswers = () => {
         <h3 className="text-lg md:text-2xl mb-2 font-bold text-[var(--grey--900)] hover:text-[var(--ternery)] transition-colors duration-200">
           {question?.questionText}
         </h3>
-        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">{question?.context}</p>
+        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">
+          {question?.context}
+        </p>
         <div className="flex flex-wrap gap-2 mb-2">
           {question?.tags?.map((tag, index) => (
             <span
@@ -116,7 +124,7 @@ const AllQuestionAnswers = () => {
       </div>
 
       {/* Answer Filter */}
-      <AnswerFilter 
+      <AnswerFilter
         activeFilter={activeFilter}
         onFilterChange={handleFilterChange}
       />
@@ -124,11 +132,11 @@ const AllQuestionAnswers = () => {
       {/* Answers List */}
       <div className="space-y-4">
         {allAnswers.map((answer) => (
-          <Answer 
-            key={answer._id} 
-            answer={answer} 
-            user={user} 
-            answerCount={pagination?.totalAnswers || 0} 
+          <Answer
+            key={answer._id}
+            answer={answer}
+            user={user}
+            answerCount={pagination?.totalAnswers || 0}
           />
         ))}
 
@@ -159,6 +167,6 @@ const AllQuestionAnswers = () => {
       />
     </div>
   );
-}
+};
 
 export default AllQuestionAnswers;

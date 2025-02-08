@@ -55,7 +55,9 @@ const QuestionCard = ({ question }) => {
         <h3 className="text-lg md:text-2xl mb-2 font-bold text-[var(--grey--900)] hover:text-[var(--ternery)] transition-colors duration-200">
           {questionText}
         </h3>
-        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">{context}</p>
+        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">
+          {context}
+        </p>
         <div className="flex flex-wrap gap-2 mb-4">
           {tags?.map((tag, index) => (
             <span
