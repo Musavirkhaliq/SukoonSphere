@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const articleCommentSchema = new mongoose.Schema(
   {
+    articleUserId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     articleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Article",

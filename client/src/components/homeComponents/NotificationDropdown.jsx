@@ -54,7 +54,6 @@ const Dropdown = ({ user, onClose }) => {
       socket.off("notification");
     };
   }, [user]);
-  console.log({ items });
   return (
     <>
       {isVisible && (

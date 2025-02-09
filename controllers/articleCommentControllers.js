@@ -20,6 +20,7 @@ export const createArticleComment = async (req, res) => {
   }
 
   const comment = await ArticleComment.create({
+    articleUserId: article.author,
     articleId,
     content,
     createdBy: userId,
@@ -41,8 +42,8 @@ export const createArticleComment = async (req, res) => {
     const populatedNotification = await Notification.findById(notification._id)
     .populate("createdBy", "_id name avatar")
     io.to(article.author.toString()).emit('notification', populatedNotification);
-    const notificationCount = await Notification.countDocuments({userId: article.author});
-    io.to(userId.toString()).emit('notificationCount', ({notificationCount : notificationCount}));
+    const totalNotifications = await Notification.find({userId: article.author}).countDocuments();
+    io.to(article.author.toString()).emit('notificationCount', totalNotifications);
   }
 
   res.status(StatusCodes.CREATED).json({ comment });
@@ -139,6 +140,8 @@ export const createArticleReply = async (req, res) => {
     const populatedNotification = await Notification.findById(notification._id)
     .populate("createdBy", "_id name avatar")
     io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
+    const totalNotifications = await Notification.find({userId: comment.createdBy}).countDocuments();
+    io.to(comment.createdBy.toString()).emit('notificationCount', totalNotifications)
   }
 
 
@@ -200,6 +203,16 @@ export const deleteArticleComment = async (req, res) => {
 
   comment.deleted = true;
   await comment.save();
+  const notification = await Notification.findOne({ userId: comment.articleUserId,
+    createdBy: userId,
+    articleId: comment.articleId,
+    type: 'articleComment',
+     });
+  if (notification) {
+    notification.deleteOne();
+  }
+  const totalNotifications = await Notification.find({userId: comment.articleUserId}).countDocuments();
+  io.to(comment.articleUserId.toString()).emit('notificationCount', totalNotifications);
 
   res.status(StatusCodes.OK).json({ message: "Comment deleted successfully" });
 };
@@ -220,6 +233,17 @@ export const deleteArticleReply = async (req, res) => {
 
   reply.deleted = true;
   await reply.save();
+  const comment = await ArticleComment.findById({ _id: reply.commentId });
+  const notification = await Notification.findOne({ userId: comment.createdBy,
+    createdBy: userId,
+    articleId: comment.articleId,
+    type: 'articleReply',
+     });
+  if (notification) {
+    notification.deleteOne();
+  }
+  const totalNotifications = await Notification.find({userId: comment.createdBy}).countDocuments();
+  io.to(comment.createdBy.toString()).emit('notificationCount', totalNotifications);
 
   res.status(StatusCodes.OK).json({ message: "Reply deleted successfully" });
 };
@@ -235,14 +259,22 @@ export const likeArticleComment = async (req, res) => {
   }
 
   if (comment.likes.includes(userId)) {
-    comment.likes = comment.likes.filter(
-      (id) => id.toString() !== userId.toString()
-    );
+    comment.likes = comment.likes.filter((id) => id.toString() !== userId.toString());
+    const notification = await Notification.findOne({userId: comment.createdBy,
+      createdBy: userId,
+      articleCommentId: commentId,
+      articleId: comment.articleId,
+      type: 'articleCommentLiked',});
+      if (notification) {
+        notification.deleteOne();
+      }
+      const totalNotifications = await Notification.find({userId: comment.createdBy}).countDocuments();
+      io.to(comment.createdBy.toString()).emit('notificationCount', totalNotifications);
   } else {
     comment.likes.push(userId);
     if(req.user.userId !== comment.createdBy) {
       const notificationAlreadyExists = await Notification.findOne({userId: comment.createdBy,
-        commentId: commentId,
+        articleCommentId: commentId,
         createdBy: userId,
         articleId: comment.articleId,
         type: 'articleCommentLiked',});
@@ -250,16 +282,17 @@ export const likeArticleComment = async (req, res) => {
         const notification = new Notification({
           userId: comment.createdBy, // The user who created the comment
           createdBy: userId,
-          commentId: commentId,
+          articleCommentId: commentId,
           articleId: comment.articleId,
           message: `${req.user.username} liked your comment`,
           type: 'articleCommentLiked',
         });
         await notification.save();
-  console.log(notification)
         const populatedNotification = await Notification.findById(notification._id)
         .populate("userId", "_id name avatar")
         io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
+        const totalNotifications = await Notification.find({userId: comment.createdBy}).countDocuments();
+        io.to(comment.createdBy.toString()).emit('notificationCount', totalNotifications)
       }
     }
   }
@@ -279,14 +312,25 @@ export const likeArticleReply = async (req, res) => {
     throw new BadRequestError("Reply not found");
   }
 
+  const comment = await ArticleComment.findById(reply.commentId);
   if (reply.likes.includes(userId)) {
     reply.likes = reply.likes.filter((id) => id.toString() !== userId.toString());
-  } else {
+    const notification = await Notification.findOne({userId: reply.createdBy,
+      createdBy: userId,
+      articleCommentId: reply.commentId,
+      articleId: comment.articleId,
+      type: 'articleCommentReplyLiked',});
+      if (notification) {
+        notification.deleteOne();
+      }
+      const totalNotifications = await Notification.find({userId: reply.createdBy}).countDocuments();
+      io.to(reply.createdBy.toString()).emit('notificationCount', totalNotifications);
+    }
+   else {
     reply.likes.push(userId);
     if(req.user.userId !== reply.createdBy) {
-      const comment = await ArticleComment.findById(reply.commentId);
       const notificationAlreadyExists = await Notification.findOne({userId: reply.createdBy,
-        commentId: reply.commentId,
+        articleCommentId: reply.commentId,
         articleId: comment.articleId,
         message: `${req.user.username} liked your reply`,
         createdBy: userId,
@@ -295,7 +339,7 @@ export const likeArticleReply = async (req, res) => {
         const notification = new Notification({
           userId: reply.createdBy, // The user who created the comment
           createdBy: userId,
-          commentId: reply.commentId,
+          articleCommentId: reply.commentId,
           articleId: comment.articleId,
           message: `${req.user.username} liked your reply`,
           type: 'articleCommentReplyLiked',
@@ -303,6 +347,8 @@ export const likeArticleReply = async (req, res) => {
         await notification.save();
         const populatedNotification = await Notification.findById(notification._id).populate('createdBy', '_id name avatar');
         io.to(reply.createdBy.toString()).emit('notification', populatedNotification);
+        const totalNotifications = await Notification.find({userId: reply.createdBy}).countDocuments();
+        io.to(reply.createdBy.toString()).emit('notificationCount', totalNotifications);
       }
     } 
     
