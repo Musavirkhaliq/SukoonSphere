@@ -428,6 +428,16 @@ export const likeArticle = async (req, res) => {
   if (article?.likes?.includes(userId)) {
     article.likes = article.likes.filter((id) => id.toString() !== userId.toString());
     await article.save();
+    const notification = await Notification.findOne({ userId: article.author,
+      createdBy: userId,
+      articleId: articleId,
+      type: 'articleLiked',
+       });
+    if (notification) {
+      notification.deleteOne();
+    }
+    const totalNotifications = await Notification.find({userId: article.author}).countDocuments();
+    io.to(article.author.toString()).emit('notificationCount', totalNotifications)
     return res
       .status(StatusCodes.OK)
       .json({ message: "Article unliked successfully", article });

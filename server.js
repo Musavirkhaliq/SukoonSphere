@@ -61,7 +61,11 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors({
   origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
+  pingInterval: 25000, // Send ping every 25s
+  pingTimeout: 60000,  // Disconnect if no response in 60s
+
 }));
 
 // API Routes
