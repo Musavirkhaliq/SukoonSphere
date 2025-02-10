@@ -15,7 +15,7 @@ const ProfileDetails = ({ user }) => {
         )}
         {
           // logedInUser?.role === "contributor" &&
-          user.role === "contributor" && logedInUser._id === user._id && (
+          user?.role === "contributor" && logedInUser?._id === user._id && (
             <>
               <RenderProfileLinks name="Videos" link="videos" />
               <RenderProfileLinks name="Podcast" link="podcasts" />

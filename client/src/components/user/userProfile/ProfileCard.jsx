@@ -159,7 +159,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
         <div className="flex justify-center space-x-8 mt-4 border-y border-gray-100 py-3">
           <div className="text-center group cursor-pointer">
             <div className="font-bold text-gray-800 group-hover:text-[var(--ternery)] transition-colors duration-300">
-              {user?.posts?.length || 0}
+              {user?.counts?.totalPosts || 0}
             </div>
             <div className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
               Posts
@@ -188,7 +188,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
           <div className="flex flex-col items-center justify-center text-center group cursor-pointer transform hover:scale-105 transition-all duration-300">
             <FaQuestion className="text-pink-500 text-xl mb-1 group-hover:text-pink-600" />
             <div className="text-sm font-semibold group-hover:text-[var(--ternery)]">
-              {user?.questions?.length || 0}
+              {user?.counts?.totalQuestions || 0}
             </div>
             <div className="text-xs text-gray-500 group-hover:text-gray-700">
               Questions Asked
@@ -197,7 +197,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
           <div className="flex flex-col items-center justify-center text-center group cursor-pointer transform hover:scale-105 transition-all duration-300">
             <FcAnswers className="text-blue-500 text-xl mb-1 group-hover:text-blue-600" />
             <div className="text-sm font-semibold group-hover:text-[var(--ternery)]">
-              {user?.answers?.length || 0}
+              {user?.counts?.totalAnswers || 0}
             </div>
             <div className="text-xs text-gray-500 group-hover:text-gray-700">
               Answers Posted
@@ -207,7 +207,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
             <div className="flex flex-col items-center justify-center text-center group cursor-pointer transform hover:scale-105 transition-all duration-300">
               <FaBookmark className="text-purple-500 text-xl mb-1 group-hover:text-purple-600" />
               <div className="text-sm font-semibold group-hover:text-[var(--ternery)]">
-                {user?.articles?.length || 0}
+                {user?.counts?.totalArticles || 0}
               </div>
               <div className="text-xs text-gray-500 group-hover:text-gray-700">
                 Articles Posted

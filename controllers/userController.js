@@ -1,15 +1,15 @@
 import { StatusCodes } from "http-status-codes";
 import User from "../models/userModel.js";
-import cloudinary from "cloudinary";
-import { formatImage } from "../middleware/multer.js";
 import { deleteFile } from '../utils/fileUtils.js';
 import RequestContribute from "../models/requestContribute/requestContributeModel.js";
 import sendContributorKeyEmail from "../utils/sendContributorKeyEmail.js";
 import ArticleModel from "../models/articles/articleModel.js";
 import Post from "../models/postModel.js";
 import Question from "../models/qaSection/questionModel.js";
-import Answer from "../models/qaSection/answerModel.js";
+import Notification from "../models/notifications/postNotificationModel.js";
 import UserSuggestion from "../models/UserSuggestion.js";
+import { io } from "../server.js";
+import Answer from "../models/qaSection/answerModel.js";
 
 export const getUserProfile = async (req, res) => {
   const user = await User.findById(req.user.userId).select(
@@ -21,6 +21,16 @@ export const getUserProfile = async (req, res) => {
 export const getUserDetailsById = async (req, res) => {
   const { id: userId } = req.params;
   const user = await User.findById(userId).select("-password");
+  const totalPosts = await Post.find({ createdBy: userId }).countDocuments();
+  const totalQuestions = await Question.find({ createdBy: userId }).countDocuments();
+  const totalAnswers = await Answer.find({ createdBy: userId }).countDocuments();
+  const totalArticles = await ArticleModel.find({ author: userId }).countDocuments();
+  user.counts = {
+    totalPosts,
+    totalQuestions,
+    totalAnswers,
+    totalArticles
+  };
   res.status(StatusCodes.OK).json(user);
 };
 
@@ -90,10 +100,30 @@ export const followOrUnfollowUser = async (req, res) => {
       // Unfollow
       currentUser.following = currentUser.following.filter(id => id.toString() !== targetUserId);
       targetUser.followers = targetUser.followers.filter(id => id.toString() !== currentUserId);
+
+      const notification = await  Notification.create({ userId: targetUserId,
+         createdBy: currentUserId,
+         type: 'follow',
+         message: `${currentUser.name} stopped following you` });
+
+         const populatedNotification = await Notification.findById(notification._id)
+          .populate("createdBy", "_id name avatar");
+io.to(targetUserId).emit('notification', populatedNotification);
+
     } else {
       // Follow
       currentUser.following.push(targetUserId);
       targetUser.followers.push(currentUserId);
+
+      const notification = await  Notification.create({ userId: targetUserId,
+         createdBy: currentUserId,
+         type: 'follow',
+         message: `${currentUser.name} started following you` });
+
+         const populatedNotification = await Notification.findById(notification._id)
+          .populate("createdBy", "_id name avatar");
+io.to(targetUserId).emit('notification', populatedNotification);
+
     }
 
     await Promise.all([currentUser.save(), targetUser.save()]);

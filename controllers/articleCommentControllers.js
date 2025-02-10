@@ -2,7 +2,11 @@ import { StatusCodes } from "http-status-codes";
 import Article from "../models/articles/articleModel.js";
 import ArticleComment from "../models/articles/articleCommentsModel.js";
 import ArticleReply from "../models/articles/articleReplyModel.js";
+import Notification from "../models/notifications/postNotificationModel.js";
 import { BadRequestError, UnauthorizedError } from "../errors/customErors.js";
+import mongoose from "mongoose";
+import User from "../models/userModel.js";
+import { io } from "../server.js";
 
 // Create comment
 export const createArticleComment = async (req, res) => {
@@ -16,6 +20,7 @@ export const createArticleComment = async (req, res) => {
   }
 
   const comment = await ArticleComment.create({
+    articleUserId: article.author,
     articleId,
     content,
     createdBy: userId,
@@ -24,6 +29,22 @@ export const createArticleComment = async (req, res) => {
   // Add comment to article's comments array
   article.comments.push(comment._id);
   await article.save();
+  if(req.user.userId !== article.author) {
+    const notification = new Notification({
+      userId: article.author,
+      createdBy: userId,
+      articleId: articleId,
+      type: 'articleComment',
+      message: `${req.user.username} commented on your article`,
+    });
+    await notification.save();
+
+    const populatedNotification = await Notification.findById(notification._id)
+    .populate("createdBy", "_id name avatar")
+    io.to(article.author.toString()).emit('notification', populatedNotification);
+    const totalNotifications = await Notification.find({userId: article.author}).countDocuments();
+    io.to(article.author.toString()).emit('notificationCount', totalNotifications);
+  }
 
   res.status(StatusCodes.CREATED).json({ comment });
 };
@@ -106,6 +127,23 @@ export const createArticleReply = async (req, res) => {
       await parentReply.save();
     }
   }
+  if(req.user.userId !== comment.createdBy) {
+    const notification = new Notification({
+      userId: comment.createdBy,
+      createdBy: userId,
+      articleId: comment.articleId,
+      type: 'articleReply',
+      message: `${req.user.username} replied on your comment`,
+    });
+    await notification.save();
+
+    const populatedNotification = await Notification.findById(notification._id)
+    .populate("createdBy", "_id name avatar")
+    io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
+    const totalNotifications = await Notification.find({userId: comment.createdBy}).countDocuments();
+    io.to(comment.createdBy.toString()).emit('notificationCount', totalNotifications)
+  }
+
 
   // Populate the reply with user details before sending response
   const populatedReply = await ArticleReply.findById(reply._id)
@@ -165,6 +203,16 @@ export const deleteArticleComment = async (req, res) => {
 
   comment.deleted = true;
   await comment.save();
+  const notification = await Notification.findOne({ userId: comment.articleUserId,
+    createdBy: userId,
+    articleId: comment.articleId,
+    type: 'articleComment',
+     });
+  if (notification) {
+    notification.deleteOne();
+  }
+  const totalNotifications = await Notification.find({userId: comment.articleUserId}).countDocuments();
+  io.to(comment.articleUserId.toString()).emit('notificationCount', totalNotifications);
 
   res.status(StatusCodes.OK).json({ message: "Comment deleted successfully" });
 };
@@ -185,6 +233,17 @@ export const deleteArticleReply = async (req, res) => {
 
   reply.deleted = true;
   await reply.save();
+  const comment = await ArticleComment.findById({ _id: reply.commentId });
+  const notification = await Notification.findOne({ userId: comment.createdBy,
+    createdBy: userId,
+    articleId: comment.articleId,
+    type: 'articleReply',
+     });
+  if (notification) {
+    notification.deleteOne();
+  }
+  const totalNotifications = await Notification.find({userId: comment.createdBy}).countDocuments();
+  io.to(comment.createdBy.toString()).emit('notificationCount', totalNotifications);
 
   res.status(StatusCodes.OK).json({ message: "Reply deleted successfully" });
 };
@@ -200,14 +259,46 @@ export const likeArticleComment = async (req, res) => {
   }
 
   if (comment.likes.includes(userId)) {
-    comment.likes = comment.likes.filter(
-      (id) => id.toString() !== userId.toString()
-    );
+    comment.likes = comment.likes.filter((id) => id.toString() !== userId.toString());
+    const notification = await Notification.findOne({userId: comment.createdBy,
+      createdBy: userId,
+      articleCommentId: commentId,
+      articleId: comment.articleId,
+      type: 'articleCommentLiked',});
+      if (notification) {
+        notification.deleteOne();
+      }
+      const totalNotifications = await Notification.find({userId: comment.createdBy}).countDocuments();
+      io.to(comment.createdBy.toString()).emit('notificationCount', totalNotifications);
   } else {
     comment.likes.push(userId);
+    if(req.user.userId !== comment.createdBy) {
+      const notificationAlreadyExists = await Notification.findOne({userId: comment.createdBy,
+        articleCommentId: commentId,
+        createdBy: userId,
+        articleId: comment.articleId,
+        type: 'articleCommentLiked',});
+      if (!notificationAlreadyExists) {
+        const notification = new Notification({
+          userId: comment.createdBy, // The user who created the comment
+          createdBy: userId,
+          articleCommentId: commentId,
+          articleId: comment.articleId,
+          message: `${req.user.username} liked your comment`,
+          type: 'articleCommentLiked',
+        });
+        await notification.save();
+        const populatedNotification = await Notification.findById(notification._id)
+        .populate("userId", "_id name avatar")
+        io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
+        const totalNotifications = await Notification.find({userId: comment.createdBy}).countDocuments();
+        io.to(comment.createdBy.toString()).emit('notificationCount', totalNotifications)
+      }
+    }
   }
 
   await comment.save();
+
   res.status(StatusCodes.OK).json({ comment });
 };
 
@@ -221,10 +312,46 @@ export const likeArticleReply = async (req, res) => {
     throw new BadRequestError("Reply not found");
   }
 
+  const comment = await ArticleComment.findById(reply.commentId);
   if (reply.likes.includes(userId)) {
     reply.likes = reply.likes.filter((id) => id.toString() !== userId.toString());
-  } else {
+    const notification = await Notification.findOne({userId: reply.createdBy,
+      createdBy: userId,
+      articleCommentId: reply.commentId,
+      articleId: comment.articleId,
+      type: 'articleCommentReplyLiked',});
+      if (notification) {
+        notification.deleteOne();
+      }
+      const totalNotifications = await Notification.find({userId: reply.createdBy}).countDocuments();
+      io.to(reply.createdBy.toString()).emit('notificationCount', totalNotifications);
+    }
+   else {
     reply.likes.push(userId);
+    if(req.user.userId !== reply.createdBy) {
+      const notificationAlreadyExists = await Notification.findOne({userId: reply.createdBy,
+        articleCommentId: reply.commentId,
+        articleId: comment.articleId,
+        message: `${req.user.username} liked your reply`,
+        createdBy: userId,
+        type: 'articleCommentReplyLiked',});
+      if (!notificationAlreadyExists) {
+        const notification = new Notification({
+          userId: reply.createdBy, // The user who created the comment
+          createdBy: userId,
+          articleCommentId: reply.commentId,
+          articleId: comment.articleId,
+          message: `${req.user.username} liked your reply`,
+          type: 'articleCommentReplyLiked',
+        });
+        await notification.save();
+        const populatedNotification = await Notification.findById(notification._id).populate('createdBy', '_id name avatar');
+        io.to(reply.createdBy.toString()).emit('notification', populatedNotification);
+        const totalNotifications = await Notification.find({userId: reply.createdBy}).countDocuments();
+        io.to(reply.createdBy.toString()).emit('notificationCount', totalNotifications);
+      }
+    } 
+    
   }
 
   await reply.save();

@@ -1,3 +1,4 @@
+import AnswersCommentSlide from "@/components/qa/AnswersCommentSlide";
 import DeleteModal from "@/components/shared/DeleteModal";
 import PostActions from "@/components/shared/PostActions";
 import UserAvatar from "@/components/shared/UserAvatar";
@@ -10,6 +11,7 @@ import { toast } from "react-toastify";
 
 const Answer = ({ answer: initialAnswer, user, answerCount }) => {
   const navigate = useNavigate();
+  const [showCommentModal, setShowCommentModal] = useState(false);
   const [showAnswerDeleteModal, setShowAnswerDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isLiked, setIsLiked] = useState(
@@ -130,13 +132,13 @@ const Answer = ({ answer: initialAnswer, user, answerCount }) => {
           <FaRegHeart className={isLiked ? "fill-current" : ""} />
           <span>{likeCount}</span>
         </button>
-        <Link
-          to={`/QA-section/question/answer/${answer._id}/comments`}
-          className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+        <div
+          onClick={() => setShowCommentModal(true)}
+          className="flex items-center gap-2 hover:text-blue-500 transition-colors cursor-pointer"
         >
           <FaRegComment />
           <span>{answer.totalComments}</span>
-        </Link>
+        </div>
         {answer.editedAt && (
           <span className="text-xs text-gray-400 ml-auto">
             edited{" "}
@@ -146,6 +148,15 @@ const Answer = ({ answer: initialAnswer, user, answerCount }) => {
           </span>
         )}
       </div>
+
+      {showCommentModal && (
+        <AnswersCommentSlide
+          isOpen={showCommentModal}
+          onClose={() => setShowCommentModal(false)}
+          answerId={answer._id}
+        />
+      )}
+
       <DeleteModal
         isOpen={showAnswerDeleteModal}
         onClose={() => setShowAnswerDeleteModal(false)}
