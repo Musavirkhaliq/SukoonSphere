@@ -28,7 +28,7 @@ const SignIn = () => {
         setError(result.error);
       }
     } catch (error) {
-      setError("An unexpected error occurred");
+      setError(error?.response?.data?.msg || "An unexpected error occurred");
       console.error(error);
     }
   };

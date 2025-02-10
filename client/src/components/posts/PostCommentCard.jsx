@@ -113,6 +113,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
       toast.error(error.response?.data?.msg || "Failed to add reply");
     }
   };
+  console.log({ comment });
 
   return (
     <>
@@ -121,7 +122,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <UserAvatar
-              createdBy={comment.username}
+              createdBy={comment.createdBy}
               username={comment.username}
               userAvatar={comment.userAvatar}
               createdAt={comment.createdAt}
