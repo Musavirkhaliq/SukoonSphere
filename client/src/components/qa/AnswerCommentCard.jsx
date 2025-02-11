@@ -248,6 +248,7 @@ const AnswerCommentCard = ({ comment, answerId, onCommentUpdate }) => {
           <div className="ml-4 mt-2 space-y-3">
             {replies.map((reply) => (
               <AnswerCommnetReply
+                handleSubmitReply={handleSubmitReply}
                 reply={reply}
                 key={reply._id}
                 replyId={reply._id}

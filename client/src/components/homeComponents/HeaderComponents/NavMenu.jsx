@@ -12,7 +12,7 @@ import {
   MdOutlineNotificationsActive,
   MdOutlinePassword,
 } from "react-icons/md";
-import { BiLogIn, BiUserPlus } from "react-icons/bi";
+import { BiBell, BiLogIn, BiUserPlus } from "react-icons/bi";
 import { FiUserPlus } from "react-icons/fi";
 import { BiMessageSquareAdd } from "react-icons/bi";
 import { CiMedal } from "react-icons/ci";
@@ -53,53 +53,53 @@ function NavMenu() {
       console.error("Logout failed:", error);
     }
   };
-  const settingsLinks = user 
-  ? [
-      ...(loggedInUser?.role !== "contributor" 
-        ? [
-            ...(loggedInUser?.role === "admin" 
-              ? [
-                  {
-                    name: "Notifications",
-                    address: "/admin",
-                    icon: <MdOutlineNotificationsActive />,
-                  },
-                ]
-              : []),
-            {
-              name: "Become a contributor",
-              address: "/user/request-contributor",
-              icon: <CiMedal />,
-            },
-          ] 
-        : []),
-      {
-        name: "Change Password",
-        address: "/user/change-password",
-        icon: <MdOutlinePassword />,
-      },
-      {
-        name: "Logout",
-        icon: <RxCross2 />,
-        onClick: handleLogout,
-      },
-    ] 
-  : [
-      {
-        name: "Sign Up",
-        address: "/auth/sign-up",
-        icon: <FiUserPlus />,
-      },
-      {
-        name: "Login",
-        address: "/auth/sign-in",
-        icon: <BiLogIn />,
-      },
-    ];
-    const handleNotificationClick = () => {
-      setShowNotifications(!showNotifications);
-    };
-    
+  const settingsLinks = user
+    ? [
+        ...(loggedInUser?.role !== "contributor"
+          ? [
+              ...(loggedInUser?.role === "admin"
+                ? [
+                    {
+                      name: "Notifications",
+                      address: "/admin",
+                      icon: <MdOutlineNotificationsActive />,
+                    },
+                  ]
+                : []),
+              {
+                name: "Become a contributor",
+                address: "/user/request-contributor",
+                icon: <CiMedal />,
+              },
+            ]
+          : []),
+        {
+          name: "Change Password",
+          address: "/user/change-password",
+          icon: <MdOutlinePassword />,
+        },
+        {
+          name: "Logout",
+          icon: <RxCross2 />,
+          onClick: handleLogout,
+        },
+      ]
+    : [
+        {
+          name: "Sign Up",
+          address: "/auth/sign-up",
+          icon: <FiUserPlus />,
+        },
+        {
+          name: "Login",
+          address: "/auth/sign-in",
+          icon: <BiLogIn />,
+        },
+      ];
+  const handleNotificationClick = () => {
+    setShowNotifications(!showNotifications);
+  };
+
   const closeDropdown = () => {
     setShowNotifications(false);
   };
@@ -107,7 +107,7 @@ function NavMenu() {
     socket.emit("join", loggedInUser?._id);
 
     socket.on("notificationCount", (count) => {
-      setNotificationCount(count ); // Update the notification count
+      setNotificationCount(count); // Update the notification count
     });
 
     return () => {
@@ -118,37 +118,44 @@ function NavMenu() {
     <>
       {/* Desktop Nav */}
       <nav className="hidden lg:flex w-full bg-[var(--white-color)] sticky top-0 items-center justify-between shadow-[0px_1px_10px_rgba(0,0,0,0.1)] z-50 transition-all ease-in-out p-2 h-[65px]">
-        <div className="flex w-full justify-between items-center px-4 lg:px-20">
+        <div className="flex w-full justify-between items-center px-4 lg:px-20 ">
           <Link to="/">
             <img
               src={CompanyLogo}
-              className="object-contain w-14"
+              className="object-contain w-32 mt-3"
               alt="Logo Loading..."
             />
           </Link>
-          
+
           <DesktopNav links={links} />
           {user ? (
-          <div className="flex items-center justify-center gap-2">
-           <div className="relative">
-            <button onClick={handleNotificationClick} className="text-2xl text-gray-800">
-              <MdOutlineNotificationsActive />
-              {notificationCount > 0 && (
-                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notificationCount}</span>
-              )}
-              
-            </button>
-            {showNotifications && (
-              <NotificationDropdown user={loggedInUser}  onClose={closeDropdown} />
-            )}
-          </div>
-          <UserSection
-              user={user}
-              miniMenu={miniMenu}
-              toggleMiniMenu={toggleMiniMenu}
-              handleLogout={handleLogout}
-            />
+            <div className="flex items-center justify-center gap-2">
+              <div className="relative">
+                <button
+                  onClick={handleNotificationClick}
+                  className="text-2xl text-gray-800"
+                >
+                  <MdOutlineNotificationsActive className="w-6 h-6 text-gray-600 mt-1 mr-2  " />
 
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-3 right-0 bg-red-500 text-white text-xs rounded-full p-1 w-4 h-fit">
+                      {notificationCount > 99 ? "99+" : notificationCount}
+                    </span>
+                  )}
+                </button>
+                {showNotifications && (
+                  <NotificationDropdown
+                    user={loggedInUser}
+                    onClose={closeDropdown}
+                  />
+                )}
+              </div>
+              <UserSection
+                user={user}
+                miniMenu={miniMenu}
+                toggleMiniMenu={toggleMiniMenu}
+                handleLogout={handleLogout}
+              />
             </div>
           ) : (
             <AuthButtons />
@@ -158,11 +165,11 @@ function NavMenu() {
       {/* New Mobile Top Header */}
       <header className="lg:hidden  left-0 right-0 bg-[var(--white-color)] h-14 z-50">
         <div className="flex items-center justify-between h-full px-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center mt-3">
             <Link to="/">
               <img
                 src={CompanyLogo}
-                className="object-contain h-8 w-auto"
+                className="object-contain w-28"
                 alt="Logo"
               />
             </Link>
@@ -175,28 +182,36 @@ function NavMenu() {
             )}
             {user ? (
               <>
-              <Link to={`/about/user/${user._id}`}>
-                <img
-                  src={
-                    user?.avatar ||
-                    "https://cdn-icons-png.flaticon.com/512/147/147142.png"
-                  }
-                  alt="User"
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              </Link>
-              
-              <div className="relative">
-            <button onClick={handleNotificationClick} className="text-2xl text-gray-800">
-              <MdOutlineNotificationsActive />
-              {notificationCount > 0 && (
-                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notificationCount}</span>
-              )}
-            </button>
-            {showNotifications && (
-              <NotificationDropdown user={loggedInUser}  onClose={closeDropdown} />
-            )}
-          </div>
+                <Link to={`/about/user/${user._id}`}>
+                  <img
+                    src={
+                      user?.avatar ||
+                      "https://cdn-icons-png.flaticon.com/512/147/147142.png"
+                    }
+                    alt="User"
+                    className="w-7 h-7 rounded-full object-cover"
+                  />
+                </Link>
+
+                <div className="relative">
+                  <button
+                    onClick={handleNotificationClick}
+                    className="text-2xl text-gray-800"
+                  >
+                    <MdOutlineNotificationsActive className="w-6 h-6 mt-1" />
+                    {notificationCount > 0 && (
+                      <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
+                        {notificationCount}
+                      </span>
+                    )}
+                  </button>
+                  {showNotifications && (
+                    <NotificationDropdown
+                      user={loggedInUser}
+                      onClose={closeDropdown}
+                    />
+                  )}
+                </div>
               </>
             ) : (
               <Link to="/auth/sign-in">
@@ -347,14 +362,14 @@ const UserSection = ({ user, miniMenu, toggleMiniMenu, handleLogout }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [miniMenu, toggleMiniMenu]);
- 
+
   return (
     <div ref={menuRef} className="relative">
       <div className="hidden lg:flex items-center justify-center gap-2">
         <Link to={`about/user/${user._id}`}>
           <div className="group relative">
             <img
-              className="w-8 h-8 object-cover rounded-full border-[3px] border-[var(--grey--600)] hover:border-[var(--ternery)]"
+              className="w-7 h-7 object-cover rounded-full border-[3px] border-[var(--grey--600)] hover:border-[var(--ternery)]"
               src={
                 user?.avatar ||
                 "https://e7.pngegg.com/pngimages/81/570/png-clipart-profile-logo-computer-icons-user-user-blue-heroes-thumbnail.png"
@@ -366,7 +381,7 @@ const UserSection = ({ user, miniMenu, toggleMiniMenu, handleLogout }) => {
             </div>
           </div>
         </Link>
-     
+
         {miniMenu ? (
           <RxCross2
             className="block cursor-pointer size-8 hover:text-[var(--ternery)] hover:bg-[var(--grey--200)] rounded-full p-1 transition-transform duration-300"
@@ -380,7 +395,6 @@ const UserSection = ({ user, miniMenu, toggleMiniMenu, handleLogout }) => {
         )}
       </div>
       <UserMenu user={user} miniMenu={miniMenu} handleLogout={handleLogout} />
-    
     </div>
   );
 };

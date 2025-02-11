@@ -56,6 +56,7 @@ const PostCard = ({
     }
   };
 
+  console.log({ post });
   const handleLike = async () => {
     if (!user) {
       toast.error("Please login to like this post!");
