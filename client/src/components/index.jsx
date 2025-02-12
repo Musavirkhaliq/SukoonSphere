@@ -128,3 +128,17 @@ export const UserFollowing = createOptimizedComponent(
 export const YoutubeEmbed = createOptimizedComponent(
   () => import("./mediaLibrary/videos/YoutubeEmbed")
 );
+
+// Chat Components
+export const ChatHeader = createOptimizedComponent(
+  () => import("./chatsComponents/ChatHeader")
+)
+export const ChatInput = createOptimizedComponent(
+  () => import("./chatsComponents/ChatInput")
+)
+export const ChatMessages = createOptimizedComponent(
+  () => import("./chatsComponents/ChatMessages")
+)
+export const ChatSidebar = createOptimizedComponent(
+  () => import("./chatsComponents/ChatSidebar")
+)
