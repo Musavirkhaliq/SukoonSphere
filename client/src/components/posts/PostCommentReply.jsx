@@ -3,7 +3,7 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
-import { FaThumbsUp } from "react-icons/fa";
+import { FaReply, FaThumbsUp } from "react-icons/fa";
 import DeleteModal from "../shared/DeleteModal";
 import PostActions from "../shared/PostActions";
 import UserAvatar from "../shared/UserAvatar";
@@ -15,6 +15,31 @@ const PostCommentReply = ({ reply, onReplyUpdate }) => {
   const [editContent, setEditContent] = useState(reply.content);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showReplyForm, setShowReplyForm] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+
+  const handleSubmitReply = async () => {
+    if (!user) {
+      toast.error("Please login to reply!");
+      return;
+    }
+    if (!replyContent.trim()) {
+      toast.error("Reply cannot be empty!");
+      return;
+    }
+    try {
+      await customFetch.post(`/posts/comments/${reply._id}/replies`, {
+        content: replyContent,
+        replyToUserId: reply.createdBy._id,
+      });
+      setReplyContent("");
+      setShowReplyForm(false);
+      onReplyUpdate();
+      toast.success("Reply added successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.msg || "Failed to add reply");
+    }
+  };
 
   const handleLike = async () => {
     if (!user) {
@@ -145,7 +170,39 @@ const PostCommentReply = ({ reply, onReplyUpdate }) => {
             <FaThumbsUp />
             <span>{reply.likes.length}</span>
           </button>
+          <button
+            onClick={() => setShowReplyForm(!showReplyForm)}
+            className="flex items-center gap-1 text-gray-500 hover:text-primary"
+          >
+            <FaReply />
+            Reply
+          </button>
         </div>
+        {showReplyForm && (
+          <div className="mt-4">
+            <textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="Write your reply..."
+              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
+              rows="2"
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => {
+                  setShowReplyForm(false);
+                  setReplyContent("");
+                }}
+                className="btn-red !py-1"
+              >
+                Cancel
+              </button>
+              <button onClick={handleSubmitReply} className="btn-2 !py-1">
+                Reply
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Delete Modal */}
