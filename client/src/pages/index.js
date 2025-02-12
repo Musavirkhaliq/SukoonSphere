@@ -64,5 +64,9 @@ export { default as HowToCreateAVideo } from "./userManuals/HowToCreateAVideo";
 export { default as HowToCreateAnArticle} from "./userManuals/HowToCreateAnArticle";
 
 
+
+// Chats
+export {default as Chat } from "./chats/Chat";
+
 // Home
 export { default as Home } from "./Home";
