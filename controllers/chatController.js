@@ -23,7 +23,8 @@ export const startChat = async (req, res) => {
 
 
 export const getUserChats = async (req, res) => {
-    const chats = await Chat.find({ participants: req.user.id })
+  const {userId} = req.user;
+    const chats = await Chat.find({ participants: userId })
       .populate("participants", "name avatar") // Get user details
       .sort({ updatedAt: -1 });
 

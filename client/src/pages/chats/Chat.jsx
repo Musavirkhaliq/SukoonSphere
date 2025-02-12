@@ -1,10 +1,27 @@
 
 // Chat.js (Main Component)
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import{ChatSidebar} from '../../components/index.jsx'
 import { Outlet } from 'react-router-dom';
+import customFetch from '../../utils/customFetch';
 
 const Chat = () => {
+  const [chats, setChats] = useState([]);
+  const fetchChats = async () => {
+    try {
+      const { data } = await customFetch.get(`/chats`);
+      console.log({ data });
+      setChats(data);
+      return;
+    } catch (error) {}
+  };
+  useEffect(() => {
+    fetchChats();
+  }, []);
+
+
+
+
   const [activeConversation, setActiveConversation] = useState(4);
   
   // Sample data - Replace with your actual data
@@ -32,9 +49,7 @@ const Chat = () => {
     <div className="flex h-screen bg-gray-50 p-4">
       <div className="flex w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
         <ChatSidebar
-          conversations={conversations}
-          activeId={activeConversation}
-          onSelectConversation={setActiveConversation}
+          chats={chats}
         />
         <div className="flex-1 flex flex-col">
           <Outlet context={{ activeUser, messages }} />
