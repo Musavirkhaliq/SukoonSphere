@@ -9,6 +9,8 @@ import {
 } from "react-icons/io5";
 import { RiQuestionAnswerFill } from "react-icons/ri";
 
+
+
 const NOTIFICATION_TYPES = {
   QUESTION_ANSWERED: {
     icon: RiQuestionAnswerFill,
@@ -43,6 +45,7 @@ const NOTIFICATION_TYPES = {
 };
 
 const NotificationItem = ({ item, type, link }) => {
+  console.log({time:item.createdAt})
   const config = NOTIFICATION_TYPES[type];
   const Icon = config.icon;
   const getAvatarUrl = (user) => {
