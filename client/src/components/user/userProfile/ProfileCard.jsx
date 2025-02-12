@@ -67,6 +67,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
   try {
     const { data } = await customFetch.post(`chats`,{_userId:user._id});
     console.log({data})
+    navigate(`/chats/${data._id}`);
   } catch (error) {
     console.error("Error sending message:", error);
     toast.error(error.response?.data?.msg || "Failed to send message");
