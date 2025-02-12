@@ -21,6 +21,8 @@ import VideoRouter from "./routes/videoRouter.js";
 import PodcastRouter from "./routes/podcastRouter.js";
 import GalleryRouter from "./routes/galleryRouter.js";
 import NotificationRouter from "./routes/notificationRouter.js"; 
+import MessageRouter from "./routes/messageRouter.js";
+import ChatRouter from "./routes/chatRouter.js";
 
 // models
 import Notification from "./models/notifications/postNotificationModel.js";
@@ -77,7 +79,9 @@ app.use("/api/v1/articles", ArticleRouter);
 app.use("/api/v1/gallery", GalleryRouter);
 app.use("/api/v1/videos", VideoRouter);
 app.use("/api/v1/podcasts", PodcastRouter);
-app.use("/api/v1/notifications", NotificationRouter); // Use the notification routes
+app.use("/api/v1/notifications", NotificationRouter); 
+app.use("/api/v1/messages", MessageRouter);
+app.use("/api/v1/chats", ChatRouter);
 
 // Serve Static Files
 app.use("/public", express.static(path.resolve(__dirname, "./public")));

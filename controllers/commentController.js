@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import { BadRequestError, UnauthorizedError } from "../errors/customErors.js";
 import PostComments from "../models/postCommentsModel.js";
 import PostReplies from "../models/postReplyModel.js";
-import mongoose from "mongoose";
 
 export const editPostComment = async (req, res) => {
   const { id: commentId } = req.params;

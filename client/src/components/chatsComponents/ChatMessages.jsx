@@ -2,7 +2,7 @@
 import React from 'react';
 import { FaPlay } from 'react-icons/fa';
 
-const ChatMessages = ({ messages }) => {
+const ChatMessages = ({ messages,activeUser }) => {
   return (
     <div className="flex-1 p-4 overflow-y-auto">
       <div className="space-y-4">

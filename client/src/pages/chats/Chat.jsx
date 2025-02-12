@@ -1,11 +1,8 @@
 
 // Chat.js (Main Component)
 import React, { useState } from 'react';
-import{
-  ChatSidebar,  
-  ChatHeader,
-  ChatInput,
-  ChatMessages,} from '../../components/index.jsx'
+import{ChatSidebar} from '../../components/index.jsx'
+import { Outlet } from 'react-router-dom';
 
 const Chat = () => {
   const [activeConversation, setActiveConversation] = useState(4);
@@ -40,9 +37,7 @@ const Chat = () => {
           onSelectConversation={setActiveConversation}
         />
         <div className="flex-1 flex flex-col">
-          <ChatHeader activeUser={activeUser} />
-          <ChatMessages messages={messages} />
-          <ChatInput onSendMessage={handleSendMessage} />
+          <Outlet context={{ activeUser, messages }} />
         </div>
       </div>
     </div>

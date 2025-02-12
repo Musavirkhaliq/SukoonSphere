@@ -24,6 +24,7 @@ import Videos from "@/pages/contributors/videos/Videos";
 import { PodcastHome } from "@/pages";
 import ContributorPodcasts from "@/pages/contributors/podcasts/ContributorPodcasts";
 import Chat from "@/pages/chats/Chat";
+import ChatOutlet from "@/pages/chats/ChatOutlet";
 
 export const userRoutes = [
   // Users Routes
@@ -111,5 +112,15 @@ export const userRoutes = [
         <Chat />
       </Suspense>
     ),
+    children: [
+      {
+        index: true,
+        element: <ChatOutlet />,
+      },
+      {
+        path: ":id",
+        element: <ChatOutlet />,
+      },
+    ],
   },
 ];

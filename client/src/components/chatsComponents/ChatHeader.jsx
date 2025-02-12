@@ -1,6 +1,7 @@
 // ChatHeader.js
 import React from 'react';
 import { FiPhone, FiVideo, FiMoreHorizontal } from 'react-icons/fi';
+import { Outlet } from 'react-router-dom';
 
 const ChatHeader = ({ activeUser }) => {
   return (
