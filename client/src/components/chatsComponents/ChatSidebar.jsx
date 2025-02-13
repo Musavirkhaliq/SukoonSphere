@@ -1,60 +1,109 @@
-// ChatSidebar.js
-import { useUser } from "@/context/UserContext";
-import customFetch from "@/utils/customFetch";
-import React, { useEffect, useState } from "react";
-import { BiMessageRoundedDots } from "react-icons/bi";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
+import customFetch from '@/utils/customFetch';
 
-const ChatSidebar = ({ chats }) => {
+const ChatSidebar = ({ setActiveUser, onClose }) => {
   const { user } = useUser();
-  
+  const [chats, setChats] = useState([]);
+
+  const fetchChats = async () => {
+    try {
+      const { data } = await customFetch.get('/chats');
+      setChats(data);
+    } catch (error) {
+      console.error('Error fetching chats:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchChats();
+  }, []);
+
   return (
-    <div className="w-80 border-r border-gray-200">
+    <div className="flex flex-col h-full bg-white">
+      {/* Header */}
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <img
-            src={user?.avatar}
-            alt={user?.name}
-            className="w-10 h-10 bg-gray-200 rounded-full"
-          />
-          <div className="flex-1">
-            <h4 className="font-semibold">{user?.name}</h4>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            {user?.avatar ? (
+              <img
+                src={user.avatar || "/placeholder.svg"}
+                alt={user.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500 font-medium">
+                  {user?.name?.[0]}
+                </span>
+              </div>
+            )}
+            <div className="flex flex-col">
+              <span className="font-medium text-gray-900">{user?.name}</span>
+              <span className="text-sm text-gray-500">Online</span>
+            </div>
           </div>
+          <button
+            onClick={onClose}
+            className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
       </div>
-      <div className="overflow-y-auto h-[calc(100vh-180px)]">
-        {chats?.map((chat) => {
-          const person = chat.participants.find(
-            (participant) => participant._id !== user._id
-          );
 
-          return (
-            <Link
-              to={`/chats/${chat._id}`}
-              key={chat._id}
-              
-              className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer `}
-            >
-              <div className="relative">
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                  {person?.name.charAt(0)}
+      {/* Chat List */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-1 p-3">
+          {chats?.map((chat) => {
+            const person = chat.participants.find(
+              (participant) => participant._id !== user._id
+            );
+
+            return (
+              <Link
+                key={chat._id}
+                to={`/chats/${chat._id}`}
+                onClick={() => {
+                  setActiveUser(person);
+                  onClose?.();
+                }}
+                className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <div className="relative flex-shrink-0">
+                  {person?.avatar ? (
+                    <img
+                      src={person.avatar || "/placeholder.svg"}
+                      alt={person.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-500 font-medium">
+                        {person?.name?.[0]}
+                      </span>
+                    </div>
+                  )}
+                  {chat.online && (
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                  )}
                 </div>
-                {chat.online && (
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                )}
-              </div>
-              <div className="ml-3 flex-1">
-                <div className="font-medium">{person?.name}</div>
-                <div className="text-sm text-gray-500 truncate">
-                  {chat.lastMessage?chat.lastMessage :'No Messages'}
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-gray-900">{person?.name}</div>
+                  <div className="text-sm text-gray-500 truncate">
+                    {chat.lastMessage || 'No messages'}
+                  </div>
                 </div>
-              </div>
-            
-            </Link>
-          );
-        })}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 };
+
 export default ChatSidebar;

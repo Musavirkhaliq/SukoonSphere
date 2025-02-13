@@ -1,23 +1,41 @@
-// ChatHeader.js
 import React from 'react';
-import { FiPhone, FiVideo, FiMoreHorizontal } from 'react-icons/fi';
-import { Outlet } from 'react-router-dom';
 
-const ChatHeader = ({ activeUser }) => {
+const ChatHeader = ({ activeUser, onMenuClick }) => {
   return (
-    <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+    <div className="px-4 py-3 flex items-center justify-between bg-white">
+      <button 
+        onClick={onMenuClick}
+        className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-        <div>
-          <h2 className="font-semibold">{activeUser.name}</h2>
+        <div className="relative">
+          {activeUser?.avatar ? (
+            <img
+              src={activeUser.avatar || "/placeholder.svg"}
+              alt={activeUser.name}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-500 font-medium">
+                {activeUser?.name?.[0]}
+              </span>
+            </div>
+          )}
+          {activeUser?.online && (
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+          )}
         </div>
+    
       </div>
-      <div className="flex items-center space-x-4">
-        <FiPhone className="w-5 h-5 text-gray-500 cursor-pointer" />
-        <FiVideo className="w-5 h-5 text-gray-500 cursor-pointer" />
-        <FiMoreHorizontal className="w-5 h-5 text-gray-500 cursor-pointer" />
-      </div>
+
     </div>
   );
 };
+
 export default ChatHeader;
