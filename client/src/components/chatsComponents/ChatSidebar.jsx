@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 import customFetch from '@/utils/customFetch';
 
-const ChatSidebar = ({ setActiveUser, onClose }) => {
+const ChatSidebar = ({ onClose }) => {
   const { user } = useUser();
   const [chats, setChats] = useState([]);
 
@@ -68,7 +68,6 @@ const ChatSidebar = ({ setActiveUser, onClose }) => {
                 key={chat._id}
                 to={`/chats/${chat._id}`}
                 onClick={() => {
-                  setActiveUser(person);
                   onClose?.();
                 }}
                 className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"

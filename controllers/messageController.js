@@ -12,21 +12,28 @@ export const sendMessage = async (req, res) => {
     await message.save();
 
     // Update chat's lastMessage and updatedAt
-    await Chat.findByIdAndUpdate(chatId, { 
+    const chat = await Chat.findByIdAndUpdate(chatId, { 
       lastMessage: content, 
       updatedAt: Date.now() 
     });
-io.to(sender).emit('newMessage', message);
+    const receiverId = chat.participants.find(id => id.toString() !== sender.toString());
+    io.to(receiverId.toString()).emit('newMessage', message);
     res.status(201).json(message);
   } 
 
 export const getMessages = async (req, res) => {
-  const messages = await Message.find({ chatId: req.params.chatId })
- 
-    .populate("sender", "name avatar") // Get sender details
-    .sort({ timestamp: 1 }); // Oldest first
-  res.status(200).json({messages});
-};
+    const {chatId} = req.params;
+    const {userId} = req.user;
+  const messages = await Message.find({ chatId: chatId })
+    .populate("sender", "name avatar")
+    .sort({ createdAt: 1 });
+
+    // here
+    const chat = await Chat.findById(chatId);
+    const receiverId = chat.participants.find(id => id.toString() !== userId.toString());
+    const receiver = await userModel.findById(receiverId).select("name avatar _id");
+    res.status(200).json({messages,receiver});
+  } 
 
 export const getActiveUser = async (req, res) => {
   const {chatId} = req.params;

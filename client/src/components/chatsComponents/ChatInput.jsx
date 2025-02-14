@@ -3,11 +3,14 @@ import customFetch from "@/utils/customFetch";
 import React, { useState } from "react";
 import { BiSend } from "react-icons/bi";
 import { toast } from "react-toastify";
-
-const ChatInput = ({ chatId }) => {
+import EmojiPicker from "emoji-picker-react";
+const ChatInput = ({ chatId,fetchChatMessages }) => {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [showPicker, setShowPicker] = useState(false);
+  const handleEmojiClick = (emojiObject) => {
+    setContent((prev) => prev + emojiObject.emoji);
+  };
   const handleSend = async (e) => {
     e.preventDefault();
     if (content.trim()) {
@@ -18,6 +21,7 @@ const ChatInput = ({ chatId }) => {
           chatId,
         });
         setContent("");
+        fetchChatMessages()
       } catch (error) {
         toast.error("something went wrong");
       }
@@ -26,7 +30,7 @@ const ChatInput = ({ chatId }) => {
   };
 
   return (
-    <div className="fixed bottom-0 bg-white w-full p-4 border-t border-gray-200 flex items-center justify-between">
+    <div className=" bottom-0 bg-white w-full p-4 border-t border-gray-200 flex items-center justify-between">
       <div className="flex items-center space-x-2 w-full">
         <textarea
           type="text"
@@ -49,6 +53,13 @@ const ChatInput = ({ chatId }) => {
       >
         <BiSend className="w-5 h-5" />
       </button>
+      <button onClick={() => setShowPicker((prev) => !prev)}>😊</button>
+
+      {showPicker && (
+        <div style={{ position: "absolute", marginTop: "10px", top: "100%", left: "0" }}>
+          <EmojiPicker onEmojiClick={handleEmojiClick} />
+        </div>
+      )}
     </div>
   );
 };
