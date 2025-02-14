@@ -1,16 +1,25 @@
 // ChatInput.js
 import customFetch from "@/utils/customFetch";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { BiSend } from "react-icons/bi";
 import { toast } from "react-toastify";
 import EmojiPicker from "emoji-picker-react";
-const ChatInput = ({ chatId,fetchChatMessages }) => {
+import { BsEmojiSmile } from "react-icons/bs";
+
+const ChatInput = ({ chatId, fetchChatMessages }) => {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-  const handleEmojiClick = (emojiObject) => {
-    setContent((prev) => prev + emojiObject.emoji);
+  const emojiRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const handleEmojiClick = (emoji) => {
+    if (emoji && emoji.emoji) {
+      setContent((prev) => prev + emoji.emoji);
+      inputRef.current.focus();
+    }
   };
+
   const handleSend = async (e) => {
     e.preventDefault();
     if (content.trim()) {
@@ -21,45 +30,59 @@ const ChatInput = ({ chatId,fetchChatMessages }) => {
           chatId,
         });
         setContent("");
-        fetchChatMessages()
+        fetchChatMessages();
       } catch (error) {
-        toast.error("something went wrong");
+        toast.error("Something went wrong");
       }
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiRef.current && !emojiRef.current.contains(event.target)) {
+        setShowPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className=" bottom-0 bg-white w-full p-4 border-t border-gray-200 flex items-center justify-between">
-      <div className="flex items-center space-x-2 w-full">
+    <div className="bottom-0 bg-white w-full p-4 border-t border-gray-200 flex items-center gap-2 sm:gap-4 justify-between relative">
+      <button onClick={() => setShowPicker((prev) => !prev)} className="relative" ref={emojiRef}>
+        <BsEmojiSmile size={24} />
+      </button>
+
+      {showPicker && (
+        <div
+          ref={emojiRef}
+          className="absolute bottom-20 left-0 w-full md:w-96  bg-white shadow-sm rounded-t-lg overflow-hidden"
+        >
+          <EmojiPicker onEmojiClick={handleEmojiClick} width="100%" height={400} />
+        </div>
+      )}
+
+      <div className="flex items-center w-full">
         <textarea
-          type="text"
+          ref={inputRef}
           rows={1}
-          resize="none"
           style={{ resize: "none" }}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Type a message..."
-          className="bg-gray-50 flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+          className="bg-gray-50 flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-sm sm:text-base"
         />
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-          EMOJI
-        </button>
       </div>
       <button
         onClick={handleSend}
-        className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+        className="p-1 sm:p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
         disabled={loading}
       >
         <BiSend className="w-5 h-5" />
       </button>
-      <button onClick={() => setShowPicker((prev) => !prev)}>😊</button>
-
-      {showPicker && (
-        <div style={{ position: "absolute", marginTop: "10px", top: "100%", left: "0" }}>
-          <EmojiPicker onEmojiClick={handleEmojiClick} />
-        </div>
-      )}
     </div>
   );
 };
