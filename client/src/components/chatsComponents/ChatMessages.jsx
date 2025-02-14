@@ -1,38 +1,11 @@
-import customFetch from "@/utils/customFetch";
-import socket from "@/utils/socket/socket";
+
 import { format } from "date-fns";
-import React, { useEffect, useState } from "react";
 
-const ChatMessages = ({ chatId, user }) => {
-  const [messages, setMessages] = useState([]);
-
-  const fetchChatMessages = async () => {
-    try {
-      const { data } = await customFetch.get(`/messages/${chatId}`);
-      setMessages(data?.messages || []);
-    } catch (error) {
-      console.error("Error fetching chat messages:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchChatMessages();
-  }, [chatId]);
-
-  useEffect(() => {
-    socket.emit("join", user._id);
-    socket.on("newMessage", (item) => {
-      setMessages((prevItems) => [...prevItems, item]);
-    });
-    return () => {
-      socket.off("newMessage");
-    };
-  }, [user]);
-
-  if (!messages.length) return <div className="text-gray-500 text-center p-4">No Messages</div>;
+const ChatMessages = ({ user, messages }) => {
+   if (!messages.length) return <div className="text-gray-500 text-center p-4">No Messages</div>;
 
   return (
-    <div className="flex flex-col p-4 gap-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100  text-white rounded-lg">
+    <div className="flex flex-col p-4 gap-2 overflow-y-scroll h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100  text-white rounded-lg">
       {messages.map((message, index) => {
         const isOwnMessage = user._id === message.sender._id;
         return (
