@@ -18,7 +18,7 @@ const Chat = () => {
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen bg-gray-50">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 

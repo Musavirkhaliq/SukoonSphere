@@ -41,7 +41,7 @@ const ChatOutlet = () => {
 
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full">
       <div className="flex-none border-b">
         <ChatHeader 
           activeUser={activeUser} 
@@ -53,7 +53,7 @@ const ChatOutlet = () => {
         <ChatMessages user={user} messages={messages} />
       </div>
       
-      <div className="flex-none p-4 bg-gray-100">
+      <div className="flex-none ">
         <ChatInput chatId={id} fetchChatMessages={fetchChatMessages} />
       </div>
     </div>
