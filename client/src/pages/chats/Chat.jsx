@@ -1,21 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Outlet, useParams } from 'react-router-dom';
-import customFetch from '@/utils/customFetch.js';
+import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { ChatSidebar } from '@/components';
 
 const Chat = () => {
-  const [activeUser, setActiveUser] = useState({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { id } = useParams();
-
-  const fetchActiveUser = async () => {
-    const response = await customFetch.get(`/messages/active-user/${id}`);
-    setActiveUser(response.data.user);
-  };
-
-  useEffect(() => {
-    fetchActiveUser();
-  }, [id]);
 
   return (
     <div className="h-screen bg-gray-50">
@@ -38,7 +26,6 @@ const Chat = () => {
             `}
           >
             <ChatSidebar
-              setActiveUser={setActiveUser} 
               onClose={() => setIsSidebarOpen(false)}
             />
           </div>
@@ -47,7 +34,6 @@ const Chat = () => {
           <div className="flex-1 w-full bg-white lg:border-l">
             <Outlet 
               context={{ 
-                activeUser, 
                 toggleSidebar: () => setIsSidebarOpen(!isSidebarOpen) 
               }} 
             />
