@@ -19,10 +19,15 @@ export const sendMessage = async (req, res) => {
     });
 
     // Get receiver ID
-    const receiverId = chat.participants.find((id) => id.toString() !== sender.toString());
+    const receiverId = chat.participants.find(
+      (id) => id.toString() !== sender.toString()
+    );
 
     // Emit new message to receiver
-    io.to(receiverId.toString()).emit("newMessage", {message});
+    // io.to(receiverId.toString()).emit("newMessage", {message});
+    for (const participantId of chat.participants) {
+      io.to(participantId.toString()).emit("newMessage", { message });
+    }
 
     res.status(201).json(message);
   } catch (error) {
@@ -43,8 +48,12 @@ export const getMessages = async (req, res) => {
 
     // Get receiver details
     const chat = await Chat.findById(chatId);
-    const receiverId = chat.participants.find((id) => id.toString() !== userId.toString());
-    const receiver = await userModel.findById(receiverId).select("name avatar _id");
+    const receiverId = chat.participants.find(
+      (id) => id.toString() !== userId.toString()
+    );
+    const receiver = await userModel
+      .findById(receiverId)
+      .select("name avatar _id");
 
     // Mark messages as seen
     await Message.updateMany(
@@ -74,7 +83,9 @@ export const markMessagesAsSeen = async (req, res) => {
 
     // Notify sender that messages were seen
     const chat = await Chat.findById(chatId);
-    const senderId = chat.participants.find((id) => id.toString() !== userId.toString());
+    const senderId = chat.participants.find(
+      (id) => id.toString() !== userId.toString()
+    );
     io.to(senderId.toString()).emit("messagesSeen", { chatId });
 
     res.status(200).json({ success: true });
@@ -84,6 +95,6 @@ export const markMessagesAsSeen = async (req, res) => {
 };
 
 export const deleteAllMessages = async (req, res) => {
-    await Message.deleteMany({});
-    res.status(200).json({ message: "All messages deleted successfully" });
+  await Message.deleteMany({});
+  res.status(200).json({ message: "All messages deleted successfully" });
 };
