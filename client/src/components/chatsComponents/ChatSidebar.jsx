@@ -1,24 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 import customFetch from '@/utils/customFetch';
+import socket from '@/utils/socket/socket';
 
 const ChatSidebar = ({ onClose }) => {
   const { user } = useUser();
   const [chats, setChats] = useState([]);
-
+  const { id } = useParams();
+  console.log({id})
   const fetchChats = async () => {
     try {
       const { data } = await customFetch.get('/chats');
-      setChats(data);
+      setChats(data.chats);
+
     } catch (error) {
       console.error('Error fetching chats:', error);
     }
   };
-
+  
   useEffect(() => {
     fetchChats();
   }, []);
+
+  const handleChatClick = (chat) => () => {
+    onClose?.();
+    if (chat.totalUnreadMessages > 0) {
+      setChats(chats.map(c => c._id === chat._id ? { ...c, totalUnreadMessages: 0 } : c))
+    }
+  }
+  const handleNewMessage = (message) => {
+  fetchChats();
+ 
+  };
+  useEffect(() => {
+    
+    socket.on("newMessage", handleNewMessage);
+  
+    return () => {
+      socket.off("newMessage", handleNewMessage);
+    };
+  }, []);
+  
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -67,9 +90,7 @@ const ChatSidebar = ({ onClose }) => {
               <Link
                 key={chat._id}
                 to={`/chats/${chat._id}`}
-                onClick={() => {
-                  onClose?.();
-                }}
+                onClick={handleChatClick(chat)}
                 className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
               >
                 <div className="relative flex-shrink-0">
@@ -95,6 +116,9 @@ const ChatSidebar = ({ onClose }) => {
                   <div className="text-sm text-gray-500 truncate">
                     {chat.lastMessage || 'No messages'}
                   </div>
+                  {chat._id !== id && <div className="text-sm text-gray-500 truncate">
+                    {`unread ${chat.totalUnreadMessages}`}
+                  </div>}
                 </div>
               </Link>
             );
