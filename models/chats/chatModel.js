@@ -1,18 +1,19 @@
 import mongoose from "mongoose";
 
 const chatSchema = new mongoose.Schema(
-    {
-        participants: [{
-             type: mongoose.Schema.Types.ObjectId,
-             ref: "User", 
-             required: true
-        },],  
-        lastMessage: { type: String }, 
-        updatedAt: { type: Date, default: Date.now },
-      },
+  {
+    participants: [
       {
-        timestamps: true
-      }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+    ],
+    lastMessage: { type: String },
+  },
+  {
+    timestamps: true,
+  }
 );
 chatSchema.index({ participants: 1 });
 chatSchema.index({ updatedAt: -1 });

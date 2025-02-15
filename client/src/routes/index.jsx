@@ -9,6 +9,8 @@ import { adminRoutes } from "./adminRoutes";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
 import { userManuals } from "./userManuals";
 import { dashboardRoutes } from "./dashboardRoutes";
+import ChatLayout from "@/layouts/ChatLayout";
+import { chatRoutes } from "./chatRoutes";
 const HomeLayout = lazy(() => import("@/layouts/HomeLayout"));
 
 export const routes = [
@@ -31,4 +33,13 @@ export const routes = [
     ],
   },
   ...authRoutes,
+  {
+    path: "/chats",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <ChatLayout />
+      </Suspense>
+    ),
+    children: [...chatRoutes],
+  },
 ];
