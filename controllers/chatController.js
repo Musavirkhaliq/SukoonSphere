@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import Chat from "../models/chats/chatModel.js";
+import User from "../models/userModel.js";
 import Message from "../models/chats/messageModel.js";
 import mongoose from "mongoose";
 
@@ -20,63 +21,104 @@ export const startChat = async (req, res) => {
 };
 
 export const getUserChats = async (req, res) => {
-  try {
-    const { userId } = req.user;
-
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Invalid user ID" });
-    }
-
-    const objectIdUserId = new mongoose.Types.ObjectId(userId);
-
-    const chats = await Chat.aggregate([
-      { $match: { participants: objectIdUserId } }, // Find chats where user is a participant
-      {
-        $lookup: {
-          from: "messages",
-          let: { chatId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$chatId", "$$chatId"] },
-                seen: false,
-                sender: { $ne: objectIdUserId },
+    try {
+      const { userId } = req.user;
+      const { search } = req.query; // Get the search query from request
+  
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)  
+          .json({ message: "Invalid user ID" });
+      }
+  
+      const objectIdUserId = new mongoose.Types.ObjectId(userId);
+  
+      const chats = await Chat.aggregate([
+        { $match: { participants: objectIdUserId } }, // Find chats where user is a participant
+        {
+          $lookup: {
+            from: "messages",
+            let: { chatId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ["$chatId", "$$chatId"] },
+                  seen: false,
+                  sender: { $ne: objectIdUserId },
+                },
               },
-            },
-            { $count: "unreadCount" },
-          ],
-          as: "unreadMessages",
-        },
-      },
-      {
-        $addFields: {
-          totalUnreadMessages: {
-            $ifNull: [{ $arrayElemAt: ["$unreadMessages.unreadCount", 0] }, 0],
+              { $count: "unreadCount" },
+            ],
+            as: "unreadMessages",
           },
         },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "participants",
-          foreignField: "_id",
-          pipeline: [
-            { $project: { _id: 1, name: 1, avatar: 1 } }, // Fetch only required fields
-          ],
-          as: "participants",
+        {
+          $addFields: {
+            totalUnreadMessages: {
+              $ifNull: [{ $arrayElemAt: ["$unreadMessages.unreadCount", 0] }, 0],
+            },
+          },
         },
-      },
-      { $sort: { updatedAt: -1 } }, // Sort chats by last update
-      { $project: { unreadMessages: 0 } }, // Remove unnecessary field
-    ]);
+        {
+          $lookup: {
+            from: "users",
+            localField: "participants",
+            foreignField: "_id",
+            pipeline: [
+              { $project: { _id: 1, name: 1, avatar: 1 } }, // Fetch only required fields
+            ],
+            as: "participants",
+          },
+        },
+        {
+          $addFields: {
+            participantsNames: {
+              $map: {
+                input: "$participants",
+                as: "participant",
+                in: "$$participant.name",
+              },
+            },
+          },
+        },
+        ...(search
+          ? [
+              { 
+                $match: {
+                  participantsNames: {
+                    $regex: search,
+                    $options: "i",
+                  },
+                },
+              },
+            ]
+          : []),
+        { $sort: { updatedAt: -1 } }, // Sort chats by last update
+        { $project: { unreadMessages: 0, participantsNames: 0 } }, // Remove unnecessary fields
+      ]);
+      const currentUser = await User.findById(userId).select("followers following");
+      const followedUserIds = [...new Set([...currentUser.followers, ...currentUser.following])];
+      let users = [];
+    if (search) {
+      users = await User.find({
+        _id: { $in: followedUserIds }, // Only users who are followers or following
+        name: { $regex: search, $options: "i" }, // Apply search filter
+      }).select("_id name avatar");
+    }
+      res.status(StatusCodes.OK).json({ chats, users });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Failed to fetch user chats",
+        error: error.message,
+      });
+    }
+  };
+  
 
-    res.status(StatusCodes.OK).json({ chats });
-  } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Failed to fetch user chats",
-      error: error.message,
-    });
-  }
-};
+//   delete chat
+
+export const deleteAllChats = async (req, res) => {
+    await Chat.deleteMany({});
+    res.status(200).json({ message: "All chats deleted successfully" });
+  };
+  

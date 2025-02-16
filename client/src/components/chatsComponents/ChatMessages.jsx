@@ -1,7 +1,6 @@
 import { format } from "date-fns";
 
 const ChatMessages = ({ user, messages }) => {
-  console.log({ messages });
   if (!messages?.length)
     return <div className="text-gray-500 text-center p-4">No Messages</div>;
 
@@ -33,11 +32,7 @@ const ChatMessages = ({ user, messages }) => {
                   : "bg-gray-800 text-white rounded-bl-none"
               }`}
             >
-              {!isOwnMessage && (
-                <p className="text-blue-400 font-semibold mb-1">
-                  {message?.sender?.name}
-                </p>
-              )}
+             
               <p className="break-words leading-tight">{message?.content}</p>
               <span className="block text-xs text-gray-400 mt-1 text-right">
                 {format(new Date(message?.updatedAt), "h:mm a")}

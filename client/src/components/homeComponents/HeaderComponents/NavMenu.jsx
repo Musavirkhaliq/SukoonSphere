@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { RxCross2 } from "react-icons/rx";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import { BsChatDots, BsThreeDotsVertical } from "react-icons/bs";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { useUser } from "@/context/UserContext";
 import CompanyLogo from "../../../assets/images/SukoonSphere_Logo.png";
@@ -18,6 +18,7 @@ import { BiMessageSquareAdd } from "react-icons/bi";
 import { CiMedal } from "react-icons/ci";
 import NotificationDropdown from "../NotificationDropdown";
 import socket from "@/utils/socket/socket";
+import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
 
 function NavMenu() {
   const [activeSublink, setActiveSublink] = useState(null);
@@ -176,9 +177,15 @@ function NavMenu() {
           </div>
           <div className="flex items-center gap-4">
             {user && (
+             <>
+              <Link to="/chats">
+                <BsChatDots className="text-2xl" />
+              </Link>
               <Link to="/Posts">
                 <BiMessageSquareAdd className="text-2xl" />
               </Link>
+             
+              </>
             )}
             {user ? (
               <>
