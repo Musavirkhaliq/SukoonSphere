@@ -102,25 +102,6 @@ export const userRoutes = [
           </Suspense>
         ),
       },
-    
-    ],
-  },
-  {
-    path: "/chats",
-    element: (
-      <Suspense fallback={<LoadingSpinner />}>
-        <Chat />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: <ChatOutlet />,
-      },
-      {
-        path: ":id",
-        element: <ChatOutlet />,
-      },
     ],
   },
 ];
