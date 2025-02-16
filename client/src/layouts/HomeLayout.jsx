@@ -6,7 +6,7 @@ import { Suspense, lazy } from "react"
 import LoadingSpinner from "@/components/loaders/LoadingSpinner"
 
 // Lazy load components
-const Header = lazy(() => import("../components/shared/Header"))
+const NavMenu = lazy(() => import("../components/homeComponents/HeaderComponents/NavMenu"))
 const Footer = lazy(() => import("../components/shared/Footer"))
 
 // Memoize logout action
@@ -25,7 +25,7 @@ const HomeLayout = () => {
     <Wrapper>
       <ScrollRestoration />
       <Suspense fallback={<LoadingSpinner />}>
-        <Header />
+        <NavMenu />
       </Suspense>
       <Suspense fallback={<LoadingSpinner />}>
         <Outlet />

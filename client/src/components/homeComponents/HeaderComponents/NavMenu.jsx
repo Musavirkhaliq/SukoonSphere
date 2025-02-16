@@ -20,7 +20,7 @@ import NotificationDropdown from "../NotificationDropdown";
 import socket from "@/utils/socket/socket";
 import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
 
-function NavMenu() {
+function NavMenu({showMobile = true}) {
   const [activeSublink, setActiveSublink] = useState(null);
   const [miniMenu, setMiniMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -128,7 +128,7 @@ function NavMenu() {
             />
           </Link>
 
-          <DesktopNav links={links} />
+          <DesktopNav  />
           {user ? (
             <div className="flex items-center justify-center gap-2">
               <div className="relative">
@@ -232,7 +232,7 @@ function NavMenu() {
         </div>
       </header>
       {/* Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--white-color)] shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-50">
+     {showMobile &&  <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--white-color)] shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-50">
         <div className="flex justify-around items-center h-16">
           {links.map((link, index) => (
             <div key={link.name} className="relative group">
@@ -351,7 +351,7 @@ function NavMenu() {
             </div>
           </div>
         </div>
-      </nav>
+      </nav>}
     </>
   );
 }
