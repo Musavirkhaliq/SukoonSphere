@@ -1,6 +1,17 @@
+import { useEffect, useRef } from "react";
 import { format } from "date-fns";
 
 const ChatMessages = ({ user, messages }) => {
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   if (!messages?.length)
     return <div className="text-gray-500 text-center p-4">No Messages</div>;
 
@@ -32,20 +43,28 @@ const ChatMessages = ({ user, messages }) => {
                   : "bg-[var(--grey--900)] text-white rounded-bl-none"
               }`}
             >
-             
               <span className="break-words ">{message?.content}</span>
-             <div className="flex items-center justify-end gap-1"> <span className="block text-[9px] text-gray-200  text-right">
-                {format(new Date(message?.updatedAt), "h:mm a")}
-              </span>
-              {isOwnMessage && (
-                <span className="block text-[9px] text-gray-400  text-right">
-                  {message?.seen ? <span className="text-green-500">✓✓ </span> : <span className="text-[--white-color]">✓</span>}
+              <div className="flex items-center justify-end gap-1">
+                {" "}
+                <span className="block text-[9px] text-gray-200  text-right">
+                  {format(new Date(message?.updatedAt), "h:mm a")}
                 </span>
-              )}</div>
+                {isOwnMessage && (
+                  <span className="block text-[9px] text-gray-400  text-right">
+                    {message?.seen ? (
+                      <span className="text-green-500">✓✓ </span>
+                    ) : (
+                      <span className="text-[--white-color]">✓</span>
+                    )}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         );
       })}
+      <div ref={messagesEndRef} />{" "}
+      {/* Invisible element at the bottom of the messages */}
     </div>
   );
 };
