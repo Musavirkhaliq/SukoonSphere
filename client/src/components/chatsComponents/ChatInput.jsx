@@ -51,7 +51,7 @@ const ChatInput = ({ chatId, fetchChatMessages }) => {
   }, []);
 
   return (
-    <div className="bottom-12 md:bottom-0  bg-white w-full p-4 border-t border-gray-200 flex items-center gap-2 sm:gap-4 justify-between relative">
+    <div className="fixed md:relative bottom-0 bg-white w-full p-4 border-t border-gray-200 flex items-center gap-2 sm:gap-4 justify-between  ">
       <button onClick={() => setShowPicker((prev) => !prev)} className="relative" ref={emojiRef}>
         <BsEmojiSmile size={24} />
       </button>
@@ -78,7 +78,7 @@ const ChatInput = ({ chatId, fetchChatMessages }) => {
       </div>
       <button
         onClick={handleSend}
-        className="p-1 sm:p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+        className="p-2 bg-blue-600 text-white rounded-full "
         disabled={loading}
       >
         <BiSend className="w-5 h-5" />

@@ -55,7 +55,7 @@ const ChatOutlet = () => {
         <ChatHeader activeUser={activeUser} onMenuClick={toggleSidebar} />
       </div>
 
-      <div className="flex-1 overflow-hidden bg-gray-50">
+      <div className="flex-1 overflow-hidden bg-gray-50 mb-14 md:mb-0">
         <ChatMessages user={user} messages={messages} />
       </div>
 

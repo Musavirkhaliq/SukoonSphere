@@ -2,8 +2,8 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { MdOutlineKeyboardArrowUp } from 'react-icons/md';
 import { BsFillTriangleFill } from 'react-icons/bs';
-
-function DesktopNav({ links }) {
+import links from '@/utils/SharedComp/PageLinks';
+function DesktopNav() {
   return (
     <div className="hidden lg:flex justify-center flex-grow">
       <ul className="flex mt-[.8rem] h-10 gap-5 items-center">
