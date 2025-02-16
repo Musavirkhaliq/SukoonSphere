@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 import { ChatSidebar } from "@/components";
 
 const Chat = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { id } = useParams();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(id ? false : true);
 
   return (
     <div
       style={{ height: `calc(100vh - 70px)` }}
-      className=" bg-gray-50 relative container"
+      className=" bg-gray-50 relative"
     >
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
@@ -20,13 +21,13 @@ const Chat = () => {
 
       <div
         style={{ height: `calc(100vh - 70px)` }}
-        className=" flex flex-col container"
+        className=" flex flex-col "
       >
         <div className="flex-1 flex h-full">
           {/* Sidebar */}
           <div
             className={`
-              fixed inset-y-0 left-0 z-30 w-80 bg-white transform transition-transform duration-300 ease-in-out
+              fixed inset-y-0 left-0 z-30 w-full md:w-80 bg-white transform transition-transform duration-300 ease-in-out
               lg:relative lg:transform-none lg:transition-none
               ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             `}
