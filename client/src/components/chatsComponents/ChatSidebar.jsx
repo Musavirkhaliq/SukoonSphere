@@ -46,13 +46,6 @@ const ChatSidebar = ({ onClose }) => {
     };
   }, []);
 
-  // Helper function to format the timestamp
-  const getLastMessageTime = (timestamp) => {
-    if (!timestamp) return "";
-    const date = new Date(timestamp);
-    return format(date, "HH:mm");
-  };
-
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
       {/* Header */}
