@@ -66,4 +66,4 @@ const ChatOutlet = () => {
   );
 };
 
-export default ChatOutlet;
+export default React.memo(ChatOutlet);
