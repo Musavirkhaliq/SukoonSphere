@@ -25,7 +25,7 @@ const ChatOutlet = () => {
 
   useEffect(() => {
     fetchChatMessages();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     const handleNewMessage = (message) => {
