@@ -1,0 +1,126 @@
+Jan 25 04:54:08 sukoon systemd[1]: Starting apache2.service - The Apache HTTP Server...
+[0;38;5;245m░░ [0m[0;32mSubject: A start job for unit apache2.service has begun execution[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA start job for unit apache2.service has begun execution.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 158.[0m
+Jan 25 04:54:08 sukoon systemd[1]: Started apache2.service - The Apache HTTP Server.
+[0;38;5;245m░░ [0m[0;32mSubject: A start job for unit apache2.service has finished successfully[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA start job for unit apache2.service has finished successfully.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 158.[0m
+Jan 26 00:00:01 sukoon systemd[1]: Reloading apache2.service - The Apache HTTP Server...
+[0;38;5;245m░░ [0m[0;32mSubject: A reload job for unit apache2.service has begun execution[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA reload job for unit apache2.service has begun execution.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 16941.[0m
+Jan 26 00:00:01 sukoon systemd[1]: Reloaded apache2.service - The Apache HTTP Server.
+[0;38;5;245m░░ [0m[0;32mSubject: A reload job for unit apache2.service has finished[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA reload job for unit apache2.service has finished.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 16941 and the job result is done.[0m
+Jan 27 00:00:10 sukoon systemd[1]: Reloading apache2.service - The Apache HTTP Server...
+[0;38;5;245m░░ [0m[0;32mSubject: A reload job for unit apache2.service has begun execution[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA reload job for unit apache2.service has begun execution.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 36302.[0m
+Jan 27 00:00:13 sukoon systemd[1]: Reloaded apache2.service - The Apache HTTP Server.
+[0;38;5;245m░░ [0m[0;32mSubject: A reload job for unit apache2.service has finished[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA reload job for unit apache2.service has finished.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 36302 and the job result is done.[0m
+Jan 27 05:49:57 sukoon systemd[1]: Reloading apache2.service - The Apache HTTP Server...
+[0;38;5;245m░░ [0m[0;32mSubject: A reload job for unit apache2.service has begun execution[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA reload job for unit apache2.service has begun execution.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 41831.[0m
+Jan 27 05:49:57 sukoon systemd[1]: Reloaded apache2.service - The Apache HTTP Server.
+[0;38;5;245m░░ [0m[0;32mSubject: A reload job for unit apache2.service has finished[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA reload job for unit apache2.service has finished.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 41831 and the job result is done.[0m
+Jan 27 06:15:20 sukoon systemd[1]: Stopping apache2.service - The Apache HTTP Server...
+[0;38;5;245m░░ [0m[0;32mSubject: A stop job for unit apache2.service has begun execution[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA stop job for unit apache2.service has begun execution.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 43393.[0m
+Jan 27 06:15:20 sukoon systemd[1]: apache2.service: Deactivated successfully.
+[0;38;5;245m░░ [0m[0;32mSubject: Unit succeeded[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe unit apache2.service has successfully entered the 'dead' state.[0m
+Jan 27 06:15:20 sukoon systemd[1]: Stopped apache2.service - The Apache HTTP Server.
+[0;38;5;245m░░ [0m[0;32mSubject: A stop job for unit apache2.service has finished[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA stop job for unit apache2.service has finished.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 43393 and the job result is done.[0m
+Jan 27 06:15:20 sukoon systemd[1]: apache2.service: Consumed 38.595s CPU time, 47.2M memory peak, 0B memory swap peak.
+[0;38;5;245m░░ [0m[0;32mSubject: Resources consumed by unit runtime[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe unit apache2.service completed and consumed the indicated resources.[0m
+Jan 27 06:22:22 sukoon systemd[1]: Starting apache2.service - The Apache HTTP Server...
+[0;38;5;245m░░ [0m[0;32mSubject: A start job for unit apache2.service has begun execution[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA start job for unit apache2.service has begun execution.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 43810.[0m
+Jan 27 06:22:22 sukoon apachectl[71618]: (98)Address already in use: AH00072: make_sock: could not bind to address [::]:80
+Jan 27 06:22:22 sukoon apachectl[71618]: (98)Address already in use: AH00072: make_sock: could not bind to address 0.0.0.0:80
+Jan 27 06:22:22 sukoon apachectl[71618]: no listening sockets available, shutting down
+Jan 27 06:22:22 sukoon apachectl[71618]: AH00015: Unable to open logs
+Jan 27 06:22:22 sukoon systemd[1]: [0;1;39m[0;1;31m[0;1;39mapache2.service: Control process exited, code=exited, status=1/FAILURE[0m
+[0;38;5;245m░░ [0m[0;32mSubject: Unit process exited[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mAn ExecStart= process belonging to unit apache2.service has exited.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe process' exit code is 'exited' and its exit status is 1.[0m
+Jan 27 06:22:22 sukoon systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mapache2.service: Failed with result 'exit-code'.[0m
+[0;38;5;245m░░ [0m[0;32mSubject: Unit failed[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe unit apache2.service has entered the 'failed' state with result 'exit-code'.[0m
+Jan 27 06:22:22 sukoon systemd[1]: [0;1;31m[0;1;39m[0;1;31mFailed to start apache2.service - The Apache HTTP Server.[0m
+[0;38;5;245m░░ [0m[0;32mSubject: A start job for unit apache2.service has failed[0m
+[0;38;5;245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38;5;245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mA start job for unit apache2.service has finished with a failure.[0m
+[0;38;5;245m░░[0m [0;32m[0m
+[0;38;5;245m░░[0m [0;32mThe job identifier is 43810 and the job result is failed.[0m
