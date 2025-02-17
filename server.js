@@ -47,7 +47,7 @@ const app = express();
 const server = http.createServer(app); // Create server instance
 const io = new Server(server, {
   cors: {
-    origin: "https://www.sukoonsphere.org/", // Allow your front-end origin
+    origin: "https://www.sukoonsphere.org", // Allow your front-end origin
     methods: ["GET", "POST"],
     credentials: true, // Allow credentials if needed
   },
@@ -62,7 +62,7 @@ app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors({
-  origin: "https://www.sukoonsphere.org/",
+  origin: "https://www.sukoonsphere.org",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
   pingInterval: 25000, // Send ping every 25s

@@ -14,3 +14,9 @@ Error: Cannot find module '/root/SukoonSphere.org/client/pnpm'
 }
 
 Node.js v22.11.0
+
+> client@0.0.0 preview /root/Working_Directory/SukoonSphere/client
+> vite preview "--host"
+
+  ➜  Local:   http://localhost:4173/
+  ➜  Network: http://148.135.136.174:4173/
