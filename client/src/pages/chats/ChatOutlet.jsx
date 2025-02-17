@@ -47,7 +47,7 @@ const ChatOutlet = () => {
       socket.off("newMessage", handleNewMessage);
       socket.off("messagesSeen", handleMessagesSeen);
     };
-  }, [id, fetchChatMessages]);
+  }, [id]);
 
   return (
     <div className="flex flex-col h-full">
