@@ -14,7 +14,7 @@ export const chatRoutes = [
     children: [
       {
         index: true,
-        element: <ChatOutlet />,
+        element: <h1>ChatOutletDatanewJIbrish</h1>,
       },
       {
         path: ":id",
