@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { format } from "date-fns";
+import timeAgo from "@/utils/convertTime";
 
 const ChatMessages = ({ user, messages }) => {
   const messagesEndRef = useRef(null);
@@ -47,7 +48,8 @@ const ChatMessages = ({ user, messages }) => {
               <div className="flex items-center justify-end gap-1">
                 {" "}
                 <span className="block text-[9px] text-gray-200  text-right">
-                  {format(new Date(message?.updatedAt), "h:mm a")}
+                  {/* {timeAgo(message?.updatedAt), "h:mm a")} */}
+                  {timeAgo(message?.updatedAt)}
                 </span>
                 {isOwnMessage && (
                   <span className="block text-[9px] text-gray-400  text-right">

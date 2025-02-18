@@ -81,7 +81,7 @@ const ChatSidebar = ({ onClose }) => {
                   user?.name || "Anonymous"
                 )}&background=random`
               }
-              alt={user.name}
+              alt={user?.name}
               className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500"
             />
             <div>
@@ -154,29 +154,31 @@ const ChatSidebar = ({ onClose }) => {
         {chats.length === 0 ? (
           <p className="text-center text-gray-500 p-4">No chats found</p>
         ) : (
-          chats.map((chat) => {
-            const person = chat.participants.find((p) => p._id !== user._id);
+          chats?.map((chat) => {
+            const person = chat?.participants?.find(
+              (p) => p?._id !== user?._id
+            );
             // const isActive = chat._id === id;
             return (
               <ChatList
                 user={user}
                 person={person}
-                key={chat._id}
+                key={chat?._id}
                 chat={chat}
-                isActive={chat._id === id}
+                isActive={chat?._id === id}
                 onClose={onClose}
               />
             );
           })
         )}
-        {searchChatResults.length > 0 && (
+        {searchChatResults?.length > 0 && (
           <div className="p-3">
             <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">
               Chats
             </h2>
-            {searchChatResults.map((person) => (
+            {searchChatResults?.map((person) => (
               <SearchChatPersons
-                key={person._id}
+                key={person?._id}
                 person={person}
                 handlePersonClick={handlePersonClick}
               />
