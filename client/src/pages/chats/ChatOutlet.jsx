@@ -11,32 +11,67 @@ const ChatOutlet = () => {
   const { toggleSidebar } = useOutletContext();
   const [messages, setMessages] = useState([]);
   const [activeUser, setActiveUser] = useState({});
+  const [isInitialFetch, setIsInitialFetch] = useState(true);
 
-  // Fetch chat messages (memoized to prevent unnecessary re-creation)
+  // Fetch chat messages
   const fetchChatMessages = useCallback(async () => {
     try {
       const { data } = await customFetch.get(`/messages/${id}`);
       setMessages(data?.messages || []);
       setActiveUser(data?.receiver);
+      setIsInitialFetch(false);
     } catch (error) {
       console.error("Error fetching chat messages:", error);
     }
   }, [id]);
 
+  // Mark messages as seen
+  const seenMessages = useCallback(async () => {
+    try {
+      const unseenMessages = messages.some(
+        (msg) => !msg.seen && msg.sender._id !== user?.userId
+      );
+      
+      if (unseenMessages) {
+        const { data } = await customFetch.patch(`/messages/mark-as-seen/${id}`);
+        return data;
+      }
+    } catch (error) {
+      console.error("Error marking messages as seen:", error);
+    }
+  }, [id, messages, user?.userId]);
+
+  // Initial fetch of messages
   useEffect(() => {
     fetchChatMessages();
   }, [fetchChatMessages]);
 
+  // Handle real-time updates and seen status
   useEffect(() => {
     const handleNewMessage = (message) => {
-      if (message.chatId === id) {
-        setMessages((prev) => [...prev, message]);
+      if (message?.chatId === id) {
+        setMessages((prev) => {
+          // Prevent duplicate messages
+          const messageExists = prev.some((msg) => msg?._id === message?._id);
+          if (messageExists) return prev;
+          return [...prev, message];
+        });
+        
+        // Mark messages as seen only if the user is active in this chat
+        if (message?.sender?._id !== user?.userId) {
+          seenMessages();
+        }
       }
     };
 
     const handleMessagesSeen = ({ chatId }) => {
       if (chatId === id) {
-        fetchChatMessages();
+        setMessages((prev) =>
+          prev.map((msg) => ({
+            ...msg,
+            seen: true
+          }))
+        );
       }
     };
 
@@ -47,7 +82,14 @@ const ChatOutlet = () => {
       socket.off("newMessage", handleNewMessage);
       socket.off("messagesSeen", handleMessagesSeen);
     };
-  }, [id, fetchChatMessages]);
+  }, [id, user?.userId, seenMessages]);
+
+  // Mark messages as seen when viewing chat
+  useEffect(() => {
+    if (!isInitialFetch) {
+      seenMessages();
+    }
+  }, [seenMessages, isInitialFetch]);
 
   return (
     <div className="flex flex-col h-full">
