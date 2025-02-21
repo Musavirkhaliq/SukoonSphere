@@ -1,151 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import timeAgo from "@/utils/convertTime";
-import { IoDownload } from "react-icons/io5";
-import { BsFileEarmarkText, BsPlayCircle, BsImage, BsFileEarmarkMusic } from "react-icons/bs";
+import MessageContent from "./MessageContent";
+import customFetch from "@/utils/customFetch";
+import { FaTrash } from "react-icons/fa";
+import { toast } from "react-toastify";
+import DeleteModal from "../shared/DeleteModal";
 
-const FileAttachment = ({ attachment }) => {
-  const [imageError, setImageError] = useState(false);
-  const baseUrl = "http://localhost:5100";
-
-  const DownloadButton = ({ className = "" }) => (
-    <a
-      href={`${baseUrl}${attachment.filePath}`}
-      download={attachment.fileName}
-      className={`group flex items-center gap-2 px-2 py-1 bg-gray-800 bg-opacity-70 rounded hover:bg-opacity-90 transition-all ${className}`}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <IoDownload className="text-white text-sm" />
-      <span className="text-white text-xs">Download</span>
-    </a>
-  );
-
-  const FileInfo = ({ className = "" }) => (
-    <div className={`text-xs text-gray-200 ${className}`}>
-      <p className="truncate max-w-[200px]">{attachment.fileName}</p>
-      <p>{(attachment.fileSize / 1024).toFixed(1)} KB</p>
-    </div>
-  );
-
-  switch (attachment.fileType) {
-    case 'image':
-      return (
-        <div className="relative group">
-          {imageError ? (
-            <div className="w-64 h-64 bg-gray-800 rounded flex flex-col items-center justify-center p-4">
-              <BsImage className="text-gray-400 text-4xl mb-2" />
-              <span className="text-gray-400 text-sm text-center">Failed to load image</span>
-              <FileInfo className="mt-2 text-center" />
-            </div>
-          ) : (
-            <>
-              <img
-                src={`${baseUrl}${attachment.filePath}`}
-                alt={attachment.fileName}
-                className="max-w-64 max-h-64 rounded-lg object-cover"
-                onError={() => setImageError(true)}
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <DownloadButton />
-              </div>
-              <FileInfo className="mt-1" />
-            </>
-          )}
-        </div>
-      );
-    
-    case 'video':
-      return (
-        <div className="relative max-w-64">
-          <div className="relative rounded-lg overflow-hidden bg-gray-900">
-            <video
-              src={`${baseUrl}${attachment.filePath}`}
-              className="w-full max-h-64 rounded-lg"
-              controls
-            />
-            <div className="absolute top-2 right-2">
-              <DownloadButton />
-            </div>
-          </div>
-          <FileInfo className="mt-1" />
-        </div>
-      );
-    
-    case 'audio':
-      return (
-        <div className="bg-gray-800 rounded-lg p-3 max-w-64">
-          <div className="flex items-center gap-3 mb-2">
-            <BsFileEarmarkMusic className="text-gray-400 text-2xl" />
-            <FileInfo />
-          </div>
-          <audio
-            src={`${baseUrl}${attachment.filePath}`}
-            className="min-w-full w-full"
-            controls
-          />
-          <div className="mt-2 flex justify-end">
-            <DownloadButton />
-          </div>
-        </div>
-      );
-    
-    case 'document':
-    default:
-      return (
-        <div className="bg-gray-800 rounded-lg p-3 max-w-64">
-          <div className="flex items-center gap-3 mb-2">
-            <BsFileEarmarkText className="text-gray-400 text-2xl" />
-            <FileInfo />
-          </div>
-          <div className="flex justify-end">
-            <DownloadButton />
-          </div>
-        </div>
-      );
-  }
-};
-
-const MessageContent = ({ message, isOwnMessage }) => (
-  <div
-    className={`relative max-w-[75%] p-2 text-sm rounded-lg shadow-md ${
-      isOwnMessage
-        ? "bg-blue-600 text-white rounded-br-none"
-        : "bg-[var(--grey--900)] text-white rounded-bl-none"
-    }`}
-  >
-    {message.content && (
-      <span className="break-words block">{message.content}</span>
-    )}
-    
-    {message.hasAttachment && (
-      <div className="space-y-2">
-        {message.attachments.map((attachment, index) => (
-          <div key={index} className="rounded-lg overflow-hidden">
-            <FileAttachment attachment={attachment} />
-          </div>
-        ))}
-      </div>
-    )}
-    
-    <div className="flex items-center justify-end gap-1">
-      <span className="block text-[10px] text-gray-200 text-right">
-        {timeAgo(message?.updatedAt)}
-      </span>
-      {isOwnMessage && (
-        <span className="block text-[10px] text-gray-400 text-right">
-          {message?.seen ? (
-            <span className="text-green-500">✓✓</span>
-          ) : (
-            <span className="text-white opacity-70">✓</span>
-          )}
-        </span>
-      )}
-    </div>
-  </div>
-);
-
-// Rest of the ChatMessages component remains the same
-const ChatMessages = ({ user, messages }) => {
+const ChatMessages = ({ user, messages, setMessages }) => {
   const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -155,20 +21,54 @@ const ChatMessages = ({ user, messages }) => {
     scrollToBottom();
   }, [messages]);
 
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (chatContainerRef.current ) {
+        setContextMenu(null);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  const deleteMessageById = async () => {
+    if (!selectedMessage) return;
+    setDeleting(true);
+    try {
+      const { _id, chatId } = selectedMessage;
+      await customFetch.delete(`/messages/delete-message/${_id}/${chatId}`);
+      toast.success("Message deleted successfully");
+      setMessages((prev) => prev.filter((m) => m._id !== _id));
+      setContextMenu(null); // Close delete menu
+    } catch (error) {
+      toast.error("Failed to delete message");
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
   if (!messages?.length)
     return <div className="text-gray-500 text-center p-4">No Messages</div>;
 
   return (
-    <div className="flex flex-col p-4 gap-2 overflow-y-scroll h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 text-white rounded-lg">
+    <div ref={chatContainerRef} className="relative flex flex-col p-4 gap-2 overflow-y-scroll h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 text-white rounded-lg">
       {messages?.map((message, index) => {
         const isOwnMessage = user?._id === message?.sender?._id;
-        
+
         return (
           <div
             key={index}
-            className={`flex items-end ${
-              isOwnMessage ? "justify-end" : "justify-start"
-            }`}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setContextMenu(message._id);
+              setSelectedMessage(message);
+            }}
+            className={`relative flex items-end ${isOwnMessage ? "justify-end" : "justify-start"}`}
           >
             {!isOwnMessage && (
               message?.sender?.avatar ? (
@@ -183,13 +83,34 @@ const ChatMessages = ({ user, messages }) => {
                 </div>
               )
             )}
-            
+
             <MessageContent message={message} isOwnMessage={isOwnMessage} />
+
+            {contextMenu === message._id && (
+              <div className="absolute right-0 mt-2 bg-gray-800 text-white p-2 rounded-md shadow-lg z-10">
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="text-red-500 text-sm hover:underline flex items-center gap-2"
+                >
+                  <FaTrash /> Delete
+                </button>
+              </div>
+            )}
           </div>
         );
       })}
-      
+
       <div ref={messagesEndRef} />
+      
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDelete={deleteMessageById}
+        title="Delete Message"
+        itemType="message"
+        isLoading={deleting}
+        message="Are you sure you want to delete this message? This action cannot be undone."
+      />
     </div>
   );
 };

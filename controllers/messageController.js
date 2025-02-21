@@ -63,7 +63,7 @@ export const getMessages = async (req, res) => {
     const { chatId } = req.params;
     const { userId } = req.user;
 
-    const messages = await Message.find({ chatId }).populate(
+    const messages = await Message.find({ chatId ,deletedBy:{$ne:userId}}).populate(
       "sender",
       "name avatar"
     );
@@ -107,7 +107,6 @@ export const markMessagesAsSeen = async (req, res) => {
 };
 
 export const deleteAllMessages = async (req, res) => {
-  try {
     const messages = await Message.find({});
     
     // Delete associated files
@@ -124,7 +123,56 @@ export const deleteAllMessages = async (req, res) => {
     
     await Message.deleteMany({});
     res.status(200).json({ message: "All messages deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to delete messages", error });
-  }
+  
 };
+export const deleteMessageById = async (req, res) => {
+    const { messageId, chatId } = req.params;
+    const { userId } = req.user;
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+    if (!chat.participants.includes(userId)) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    message.deletedBy.push(userId);
+    await message.save();
+    res.status(200).json({ message: "Message deleted successfully" });
+  };
+
+  export const deleteAllMessagesByChatId = async (req, res) => {
+      const { chatId } = req.params;
+      const { userId } = req.user;
+  
+      // Check if chat exists and user has access
+      const chat = await Chat.findById(chatId);
+      if (!chat) {
+        return res.status(404).json({ message: "Chat not found" });
+      }
+  
+      // Verify user is a participant
+      if (!chat.participants.includes(userId)) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+  
+      // Update all messages in a single operation
+      const result = await Message.updateMany(
+        { 
+          chatId,
+          deletedBy: { $ne: userId } // Only update messages not already deleted by this user
+        },
+        { 
+          $addToSet: { deletedBy: userId } 
+        }
+      );
+      res.status(200).json({ 
+        message: "All messages deleted successfully",
+        modifiedCount: result.modifiedCount
+      });
+  
+    } 
+  

@@ -94,11 +94,11 @@ const ChatOutlet = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-none border-b">
-        <ChatHeader activeUser={activeUser} onMenuClick={toggleSidebar} />
+        <ChatHeader activeUser={activeUser} onMenuClick={toggleSidebar} totalMessages={messages?.length} setMessages={setMessages} />
       </div>
 
       <div className="flex-1 overflow-hidden bg-gray-50 mb-14 md:mb-0">
-        <ChatMessages user={user} messages={messages} />
+        <ChatMessages user={user} messages={messages} setMessages={setMessages} />
       </div>
 
       <div className="flex-none">

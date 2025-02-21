@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import {
   FaRegHeart,
   FaRegComment,
-  FaUserPlus,
-  FaUserMinus,
 } from "react-icons/fa";
 import DeleteModal from "../shared/DeleteModal";
 import customFetch from "@/utils/customFetch";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import UserAvatar from "../shared/UserAvatar";
 import PostActions from "../shared/PostActions";
 import { toast } from "react-toastify";
