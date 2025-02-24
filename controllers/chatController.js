@@ -22,6 +22,7 @@ export const startChat = async (req, res) => {
       userId: _userId,
       chatDisabled: true,
       type: "requestChat",
+      chatId: chat._id,
     });
     await notification.save();
     io.to(_userId).emit("notification", notification);
@@ -60,6 +61,20 @@ export const acceptChatRequest = async (req, res) => {
     return res
       .status(StatusCodes.NOT_FOUND)
       .json({ message: "Chat not found" });
+  }
+  const notification = await Notification.findOneAndUpdate(
+    {
+      chatId: chatId,
+    },
+    {
+      $set: { chatDisabled: false },
+    },
+    { new: true }
+  );
+  if (!notification) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: "Notification not found" });
   }
 
   res.status(StatusCodes.OK).json(updatedChat);

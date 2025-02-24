@@ -47,6 +47,10 @@ const postNotificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Reply',
     },
+    chatId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Chat',
+    },
     chatDisabled: {
       type: Boolean,
       default: true,
