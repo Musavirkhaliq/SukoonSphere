@@ -34,7 +34,7 @@ export const routes = [
   },
   ...authRoutes,
   {
-    path: "/chats",
+    path: "/",
     element: (
       <Suspense fallback={<LoadingSpinner />}>
         <ChatLayout />

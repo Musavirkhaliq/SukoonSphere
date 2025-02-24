@@ -1,24 +1,70 @@
 import { StatusCodes } from "http-status-codes";
 import Chat from "../models/chats/chatModel.js";
 import User from "../models/userModel.js";
-import Message from "../models/chats/messageModel.js";
+import Notification from "../models/notifications/postNotificationModel.js";
 import mongoose from "mongoose";
+import { io } from "../server.js";
 
 export const startChat = async (req, res) => {
-  const { _userId } = req.body; // The user to chat with
-  const { userId } = req.user; // The current/active user
+  const { _userId } = req.body;
+  const { userId } = req.user;
 
   let chat = await Chat.findOne({
     participants: { $all: [userId, _userId] },
   });
 
   if (!chat) {
-    chat = new Chat({ participants: [userId, _userId] });
+    chat = new Chat({ participants: [userId, _userId] ,createdBy:userId });
     await chat.save();
+    const notification = new Notification({
+      message: `You have a new chat request`,
+      createdBy: userId,
+      userId: _userId,
+      chatDisabled: true,
+      type: "requestChat",
+    });
+    await notification.save();
+    io.to(_userId).emit("notification", notification);
   }
 
   res.status(StatusCodes.OK).json(chat);
 };
+export const acceptChatRequest = async (req, res) => {
+  const { chatId } = req.params;
+  const { userId } = req.user;
+
+  const chat = await Chat.findOne({
+    _id: chatId,
+  });
+  if (!chat) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: "Chat not found" });
+  }
+  if (chat.createdBy.toString() === userId.toString()) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ message: "Unauthorized" });
+  }
+
+  const updatedChat = await Chat.findOneAndUpdate(
+    {
+      _id: chatId,
+    },
+    {
+      $set: { disabled: false },
+    },
+    { new: true }
+  );
+  if (!updatedChat) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: "Chat not found" });
+  }
+
+  res.status(StatusCodes.OK).json(updatedChat);
+};
+
 
 export const getUserChats = async (req, res) => {
     try {
@@ -33,6 +79,8 @@ export const getUserChats = async (req, res) => {
   
       const objectIdUserId = new mongoose.Types.ObjectId(userId);
   
+   
+
       const chats = await Chat.aggregate([
         { $match: { participants: objectIdUserId } }, // Find chats where user is a participant
         {

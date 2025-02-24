@@ -18,7 +18,7 @@ import {
   createSuggestion,
   deleteSuggestion,
   updateSuggestionStatus,
-  userSuggestions
+  userSuggestions,
 } from "../controllers/userController.js";
 import upload from "../middleware/multer.js";
 
