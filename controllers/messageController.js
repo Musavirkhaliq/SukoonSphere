@@ -59,38 +59,36 @@ export const sendMessage = async (req, res) => {
 
 // Other controller methods remain the same...
 export const getMessages = async (req, res) => {
-  try {
     const { chatId } = req.params;
     const { userId } = req.user;
-
+    const chat = await Chat.findById(chatId);
+    
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
     const messages = await Message.find({ chatId ,deletedBy:{$ne:userId}}).populate(
       "sender",
       "name avatar"
     );
-
-    const chat = await Chat.findById(chatId);
     const receiverId = chat.participants.find(
       (id) => id.toString() !== userId.toString()
     );
     const receiver = await userModel
-      .findById(receiverId)
-      .select("name avatar _id");
-
-    res.status(200).json({ messages, receiver });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch messages", error });
-  }
-};
-
-export const markMessagesAsSeen = async (req, res) => {
-  try {
-    const { chatId } = req.params;
-    const { userId } = req.user;
-
-    const updatedMessages = await Message.updateMany(
-      { chatId, seen: false, sender: { $ne: userId } },
-      { $set: { seen: true } }
-    );
+    .findById(receiverId)
+    .select("name avatar _id");
+    
+    res.status(200).json({ messages, receiver,chat });
+  } 
+  
+  export const markMessagesAsSeen = async (req, res) => {
+    try {
+      const { chatId } = req.params;
+      const { userId } = req.user;
+      
+      const updatedMessages = await Message.updateMany(
+        { chatId, seen: false, sender: { $ne: userId } },
+        { $set: { seen: true } }
+      );
 
     if (updatedMessages.modifiedCount > 0) {
       const chat = await Chat.findById(chatId);
@@ -143,11 +141,11 @@ export const deleteMessageById = async (req, res) => {
     await message.save();
     res.status(200).json({ message: "Message deleted successfully" });
   };
-
+  
   export const deleteAllMessagesByChatId = async (req, res) => {
       const { chatId } = req.params;
       const { userId } = req.user;
-  
+      
       // Check if chat exists and user has access
       const chat = await Chat.findById(chatId);
       if (!chat) {

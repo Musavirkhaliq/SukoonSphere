@@ -11,20 +11,22 @@ const ChatOutlet = () => {
   const { toggleSidebar } = useOutletContext();
   const [messages, setMessages] = useState([]);
   const [activeUser, setActiveUser] = useState({});
+  const [chat, setChat] = useState({});
   const [isInitialFetch, setIsInitialFetch] = useState(true);
 
   // Fetch chat messages
   const fetchChatMessages = useCallback(async () => {
     try {
       const { data } = await customFetch.get(`/messages/${id}`);
-      setMessages(data?.messages || []);
+      console.log({ data });
+        setMessages(data?.messages || []);
       setActiveUser(data?.receiver);
+      setChat(data?.chat);
       setIsInitialFetch(false);
     } catch (error) {
       console.error("Error fetching chat messages:", error);
     }
   }, [id]);
-
   // Mark messages as seen
   const seenMessages = useCallback(async () => {
     try {
@@ -91,7 +93,35 @@ const ChatOutlet = () => {
     }
   }, [seenMessages, isInitialFetch]);
 
-  return (
+  const enableChat = async () => {
+    try {
+      await customFetch.patch(`/chats/accept-chat-request/${chat._id}`);
+      fetchChatMessages();
+    } catch (error) {
+      console.error("Error enabling chat:", error);
+    }
+  };
+
+  if(chat?.disabled && chat?.createdBy.toString() === user?._id.toString()){
+    return (
+      <div className="flex flex-col h-full w-full items-center justify-center">
+      waiting for other person to accept
+      </div>
+    )
+  }
+
+  if (chat?.disabled) {
+    return (
+      <div className="flex flex-col h-full w-full items-center justify-center">
+        <button onClick={enableChat}>Enable Chat</button>
+      </div>
+    );
+  }
+
+ 
+
+  console.log({user:user?._id})
+  if (!chat?.disabled) return (
     <div className="flex flex-col h-full">
       <div className="flex-none border-b">
         <ChatHeader activeUser={activeUser} onMenuClick={toggleSidebar} totalMessages={messages?.length} setMessages={setMessages} />
