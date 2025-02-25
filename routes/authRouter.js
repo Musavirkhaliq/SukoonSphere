@@ -19,12 +19,12 @@ import {
   validateResetPasswordInput,
 } from "../middleware/validationMiddleware.js";
 
-import { authenticateUser } from "../middleware/authMiddleware.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middleware/authMiddleware.js";
 import upload from "../middleware/multer.js";
 
 router.post("/register", validateRegisterInput, register);
 router.post("/login", validateLoginInput, login);
-router.delete("/logout", authenticateUser, logout);
+router.delete("/logout", optionalAuthenticateUser, logout);
 router.post("/verify-email", verifyEmail);
 router.get("/refresh-token", refreshToken);
 router.post(

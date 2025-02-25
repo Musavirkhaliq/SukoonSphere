@@ -253,14 +253,7 @@ export const likePosts = async (req, res) => {
             message: `${req.user.username} liked your post`, // Assuming you have the username available
           });
           await notification.save();
-
-          // Retrieve the populated notification
-          const populatedNotification = await Notification.findById(notification._id)
-            .populate("postId", "_id imageUrl")
-            .populate("userId", "name avatar")
-            .populate("createdBy", "_id name avatar")
-
-          io.to(post.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+          io.to(post.createdBy.toString()).emit('newNotification', notification); // Emit to the specific user's room
         }
       }
     }
@@ -325,13 +318,7 @@ export const createPostComment = async (req, res) => {
 
       await notification.save();
 
-      // Retrieve the populated notification
-      const populatedNotification = await Notification.findById(notification._id)
-        .populate("postId", "_id imageUrl")
-        .populate("userId", "name avatar")
-        .populate("createdBy", "_id name avatar");
-
-      io.to(post.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+      io.to(post.createdBy.toString()).emit('newNotification', notification); // Emit to the specific user's room
     }
 
     res.status(StatusCodes.CREATED).json({
@@ -412,7 +399,7 @@ export const createReply = async (req, res) => {
     // Fetch reply with current user details for response
     const replyWithUser = await PostReplies.aggregate([
       {
-        $match: { _id: reply._id }
+        $match: { _id: reply._id }  
       },
       {
         $lookup: {
@@ -462,13 +449,7 @@ export const createReply = async (req, res) => {
 
       await notification.save();
 
-      // Retrieve the populated notification
-      const populatedNotification = await Notification.findById(notification._id)
-        .populate("postId", "_id imageUrl")
-        .populate("userId", "name avatar")
-        .populate("createdBy", "_id name avatar");
-
-      io.to(reply.replyTo.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+      io.to(reply.replyTo.toString()).emit('newNotification', notification); // Emit to the specific user's room
     }
 
     res.status(StatusCodes.CREATED).json({
@@ -678,12 +659,9 @@ export const likePostComment = async (req, res) => {
         });
         await notification.save();
 
-        const populatedNotification = await Notification.findById(notification._id)
-          .populate("postId", "_id imageUrl")
-          .populate("userId", "name avatar")
-          .populate("createdBy", "_id name avatar");
+       
 
-        io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
+        io.to(comment.createdBy.toString()).emit('newNotification', notification);
       }
     }
 
@@ -727,12 +705,7 @@ export const likePostCommentReply = async (req, res) => {
         });
         await notification.save();
 
-        const populatedNotification = await Notification.findById(notification._id)
-          .populate("postId", "_id imageUrl")
-          .populate("userId", "name avatar")
-          .populate("createdBy", "_id name avatar");
-
-        io.to(reply.createdBy.toString()).emit('notification', populatedNotification);
+        io.to(reply.createdBy.toString()).emit('newNotification', notification);
       }
     }
 

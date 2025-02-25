@@ -11,11 +11,13 @@ export const changePasswordAction = async ({ request }) => {
   
   try {
     const response = await customFetch.post("auth/change-password", data);
-    if (response.status === 200) {
-      redirect("/auth/sign-in");
-      return { success: response.data };
-    }
+    console.log({response})
+    // if (response.status === 200) {
+    //   redirect("/auth/sign-in");
+    //   return { success: response.data };
+    // }
   } catch (error) {
+    console.log({error})
     return { error: error?.response?.data?.msg || "Something went wrong" };
   }
 };

@@ -46,10 +46,11 @@ const NotificationItem = ({ item, type }) => {
       `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "Anonymous")}&background=random`
     );
   };
+  console.log({item});
 
   return (
     <Link
-      to={`/posts/${item.postId._id}`}
+      to={`/posts/${item?.postId?._id}`}
       className="px-4 py-2.5 hover:bg-black/5 cursor-pointer flex items-center space-x-3 transition-colors"
     >
       <div className="flex-shrink-0 relative">
