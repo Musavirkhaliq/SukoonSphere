@@ -17,14 +17,17 @@ const customFetch = axios.create({
  */
 customFetch.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
       // Clear user data from localStorage on authentication error
+      await customFetch.delete("/auth/logout");
       localStorage.removeItem('user');
       localStorage.removeItem('isAuthenticated');
-      toast.error('Session expired. Please sign in again.');
+      toast.error('Session expired. logging out...');
       // Force reload the page to reset app state
-      // window.location.href = '/auth/sign-in';
+     setTimeout(() => {
+       window.location.href = '/auth/sign-in';
+     }, 1500);
     }
     return Promise.reject(error);
   }
