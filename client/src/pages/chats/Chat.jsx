@@ -8,7 +8,7 @@ const Chat = () => {
 
   return (
     <div
-      style={{ height: `calc(100vh - 70px)` }}
+      style={{ height: `calc(100vh - 65px)` }}
       className=" bg-gray-50 relative"
     >
       {/* Mobile Sidebar Overlay */}
@@ -20,7 +20,7 @@ const Chat = () => {
       )}
 
       <div
-        style={{ height: `calc(100vh - 70px)` }}
+        style={{ height: `calc(100vh - 65px)` }}
         className=" flex flex-col "
       >
         <div className="flex-1 flex h-full">
