@@ -123,7 +123,7 @@ function NavMenu({showMobile = true}) {
           <Link to="/">
             <img
               src={CompanyLogo}
-              className="object-contain w-32 mt-3"
+              className="object-contain w-32 "
               alt="Logo Loading..."
             />
           </Link>

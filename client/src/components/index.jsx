@@ -142,3 +142,6 @@ export const ChatMessages = createOptimizedComponent(
 export const ChatSidebar = createOptimizedComponent(
   () => import("./chatsComponents/ChatSidebar")
 )
+export const DefaultChat = createOptimizedComponent(
+  () => import("./chatsComponents/DefaultChat")
+)
