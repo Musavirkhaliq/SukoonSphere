@@ -2,7 +2,7 @@ import { useUser } from "@/context/UserContext";
 import UserProfileModel from "../modals/UserProfileModel";
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 
@@ -12,7 +12,6 @@ const ProfileCard = ({ user, fetchUserById }) => {
   const [isFollowing, setIsFollowing] = useState(
     user?.followers?.includes(currentUser?._id)
   );
-  console.log({user})
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const isOwnProfile = currentUser?._id === user?._id;
@@ -92,7 +91,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
           />
           <div className="mt-4 text-center md:text-left">
             <h1 className="text-xl font-semibold text-gray-900">{user?.name}</h1>
-            <p className="text-sm text-gray-600">Mental Health Expert</p>
+            {user?.role === "contributor" && <p className="text-sm text-gray-600">Mental Health Expert</p>}
           </div>
         </div>
 
@@ -104,10 +103,10 @@ const ProfileCard = ({ user, fetchUserById }) => {
               <div className="text-xl font-semibold text-gray-900">{user?.counts?.totalPosts || 0}</div>
               <div className="text-sm text-gray-600">Posts</div>
             </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
+            {user?.role === "contributor" && <div className="text-center p-3 bg-gray-50 rounded-lg">
               <div className="text-xl font-semibold text-gray-900">{user?.counts?.totalArticles || 0}</div>
               <div className="text-sm text-gray-600">Articles</div>
-            </div>
+            </div>}
             <div className="text-center p-3 bg-gray-50 rounded-lg">
               <div className="text-xl font-semibold text-gray-900">{user?.counts?.totalQuestions || 0}</div>
               <div className="text-sm text-gray-600">Questions</div>
@@ -142,7 +141,20 @@ const ProfileCard = ({ user, fetchUserById }) => {
              Message
            </button></>
             )}
-           
+            {
+              (user?.role === "user" && user?._id !== currentUser?._id && currentUser?.role === "contributor") &&(
+                <Link to={`/prescription/${user?._id}`} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                  Give Prescription
+                </Link>
+              ) 
+            }
+            {
+              (user._id === currentUser?._id && currentUser?.role !== "contributor") &&(
+                <Link to={`/prescriptions/${currentUser?._id}`} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                  see prescriptions
+                </Link>
+              ) 
+            }
           </div>
         </div>
       </div>

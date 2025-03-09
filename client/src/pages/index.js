@@ -70,3 +70,9 @@ export {default as Chat } from "./chats/Chat";
 
 // Home
 export { default as Home } from "./Home";
+
+// prescription
+export { default as GivePrescription } from "./prescription/GivePrescription";
+export { default as PatientPrescriptions } from "./prescription/PatientPrescriptions";
+export { default as SinglePrescription } from "./prescription/SinglePrescription";
+

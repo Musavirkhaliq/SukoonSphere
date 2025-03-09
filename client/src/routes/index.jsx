@@ -11,6 +11,7 @@ import { userManuals } from "./userManuals";
 import { dashboardRoutes } from "./dashboardRoutes";
 import ChatLayout from "@/layouts/ChatLayout";
 import { chatRoutes } from "./chatRoutes";
+import { prescriptionRoutes } from "./prescriptionRoutes";
 const HomeLayout = lazy(() => import("@/layouts/HomeLayout"));
 
 export const routes = [
@@ -30,6 +31,7 @@ export const routes = [
       ...userManuals,
       ...dashboardRoutes,
       adminRoutes,
+      ...prescriptionRoutes,
     ],
   },
   ...authRoutes,
