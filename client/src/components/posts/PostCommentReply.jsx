@@ -9,7 +9,7 @@ import PostActions from "../shared/PostActions";
 import UserAvatar from "../shared/UserAvatar";
 import { Link } from "react-router-dom";
 
-const PostCommentReply = ({ reply, onReplyUpdate }) => {
+const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
   const { user } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.content);
@@ -30,6 +30,7 @@ const PostCommentReply = ({ reply, onReplyUpdate }) => {
     try {
       await customFetch.post(`/posts/comments/${reply._id}/replies`, {
         content: replyContent,
+        postId,
         replyToUserId: reply.createdBy._id,
       });
       setReplyContent("");
@@ -47,7 +48,9 @@ const PostCommentReply = ({ reply, onReplyUpdate }) => {
       return;
     }
     try {
-      await customFetch.patch(`/posts/comments/replies/${reply._id}/like`);
+      await customFetch.patch(`/posts/comments/replies/${reply._id}/like`, {
+        postId,
+      });
       onReplyUpdate();
     } catch (error) {
       toast.error("Failed to like reply");
@@ -97,7 +100,6 @@ const PostCommentReply = ({ reply, onReplyUpdate }) => {
     }
   };
 
-  console.log({ reply });
 
   return (
     <>

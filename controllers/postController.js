@@ -368,7 +368,7 @@ export const getAllCommentsByPostId = async (req, res) => {
 };
 
 export const createReply = async (req, res) => {
-  const { content } = req.body;
+  const { content, postId } = req.body;
   const { id: parentId } = req.params;
 
   try {
@@ -441,7 +441,7 @@ export const createReply = async (req, res) => {
       const notification = new Notification({
         userId: reply.replyTo.toString(), // The user who was replied to
         createdBy: req.user.userId,
-        postId: comment ? comment.postId : parentReply.postId,
+        postId:postId,
         commentId: comment ? comment._id : (parentReply ? parentReply.commentId : null),
         type: 'reply',
         message: `${req.user.username} replied to your comment`, // Assuming you have the username available
@@ -684,6 +684,7 @@ export const likePostComment = async (req, res) => {
 export const likePostCommentReply = async (req, res) => {
   const { id: replyId } = req.params;
   const userId = req.user.userId;
+  const { postId } = req.body;
   const reply = await PostReplies.findById(replyId);
   if (!reply) {
     throw new BadRequestError("Reply not found");
@@ -698,13 +699,14 @@ export const likePostCommentReply = async (req, res) => {
         const notification = new Notification({
           userId: reply.createdBy, // The user who created the post
           createdBy: userId,
-          postId: reply.postId,
+          postId,
           postReplyId: replyId,
           message: `${req.user.username} liked your reply`,
           type: 'replyLiked',
         });
         await notification.save();
 
+        
         io.to(reply.createdBy.toString()).emit('newNotification', notification);
       }
     }

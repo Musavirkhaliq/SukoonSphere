@@ -78,7 +78,35 @@ export const getMessages = async (req, res) => {
     .select("name avatar _id");
     
     res.status(200).json({ messages, receiver,chat });
-  } 
+  }
+  export const totalUnseenMessages = async (req, res) => {  
+      const { userId } = req.user;
+  
+      const unseenMessages = await Message.aggregate([
+        {
+          $lookup: {
+            from: "chat", // Joining with the Chat collection
+            localField: "chatId",
+            foreignField: "_id",
+            as: "chatDetails"
+          }
+        },
+        { $unwind: "$chatDetails" },
+        {
+          $match: {
+            "chatDetails.participants": userId, // Ensuring user is a participant
+            seen: false, // Only unseen messages
+            sender: { $ne: userId } // Excluding user's own messages
+          }
+        },
+        {
+          $count: "total"
+        }
+      ]);
+  
+      res.status(200).json({ count: unseenMessages[0]?.total || 0 });
+    } 
+  
   
   export const markMessagesAsSeen = async (req, res) => {
     try {

@@ -23,11 +23,10 @@ customFetch.interceptors.response.use(
       await customFetch.delete("/auth/logout");
       localStorage.removeItem('user');
       localStorage.removeItem('isAuthenticated');
-      toast.error('Session expired. logging out...');
       // Force reload the page to reset app state
      setTimeout(() => {
        window.location.href = '/auth/sign-in';
-     }, 1500);
+     }, 800);
     }
     return Promise.reject(error);
   }

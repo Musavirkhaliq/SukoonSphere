@@ -41,3 +41,9 @@ export const deleteAllNotifications = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const totalNotificationCount = async (req, res) => {
+  const { userId } = req.user;
+    const count = await Notification.countDocuments({ userId , seen: false});
+    res.status(200).json({count});
+  } 
