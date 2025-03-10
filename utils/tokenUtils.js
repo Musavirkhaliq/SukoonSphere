@@ -14,22 +14,22 @@ export const attachCookiesToResponse = ({ res, user, refreshToken }) => {
   const accessTokenJWT = createJWT({ payload: { user } });
   const refreshTokenJWT = createJWT({ payload: { user, refreshToken } });
 
-  const Threehours = 1000 * 60 * 60 * 3;
-  const fortyfiveDays = 1000 * 60 * 60 * 24 * 45;
+  const week = 1000 * 60 * 60 * 24 * 7;
+  const sixMonths = 1000 * 60 * 60 * 24 * 30 * 6;
 
   res.cookie("accessToken", accessTokenJWT, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     signed: true,
-    expires: new Date(Date.now() + Threehours),
-    maxAge: Threehours,
+    expires: new Date(Date.now() + week),
+    maxAge: week,
   });
 
   res.cookie("refreshToken", refreshTokenJWT, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     signed: true,
-    expires: new Date(Date.now() + fortyfiveDays),
-    maxAge: fortyfiveDays,
+    expires: new Date(Date.now() + sixMonths),
+    maxAge: sixMonths,
   });
 };

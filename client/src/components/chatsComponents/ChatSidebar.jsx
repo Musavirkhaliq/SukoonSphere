@@ -88,17 +88,8 @@ const ChatSidebar = ({ onClose }) => {
               <span className="font-semibold text-gray-900 dark:text-white">
                 {user?.name}
               </span>
-              <span className="text-xs text-emerald-600 dark:text-emerald-400">
-                Online
-              </span>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-600 dark:text-gray-400 lg:hidden"
-          >
-            ✖
-          </button>
         </div>
       </div>
 
@@ -155,7 +146,9 @@ const ChatSidebar = ({ onClose }) => {
           <p className="text-center text-gray-500 p-4">No chats found</p>
         ) : (
           chats?.map((chat) => {
-            const person = chat?.participants?.find((p) => p?._id !== user?._id);
+            const person = chat?.participants?.find(
+              (p) => p?._id !== user?._id
+            );
             // const isActive = chat._id === id;
             return (
               <ChatList

@@ -12,19 +12,20 @@ import {
   MdOutlineNotificationsActive,
   MdOutlinePassword,
 } from "react-icons/md";
-import { BiBell, BiLogIn, BiUserPlus } from "react-icons/bi";
+import {  BiLogIn, BiUserPlus } from "react-icons/bi";
 import { FiUserPlus } from "react-icons/fi";
 import { BiMessageSquareAdd } from "react-icons/bi";
 import { CiMedal } from "react-icons/ci";
 import NotificationDropdown from "../NotificationDropdown";
 import socket from "@/utils/socket/socket";
-import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
+import customFetch from "@/utils/customFetch";
 
 function NavMenu({showMobile = true}) {
   const [activeSublink, setActiveSublink] = useState(null);
   const [miniMenu, setMiniMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+ const [unseenMessages, setUnseenMessages] = useState(0);
 
   const navigate = useNavigate();
   const { user, logout } = useUser();
@@ -34,17 +35,7 @@ function NavMenu({showMobile = true}) {
   };
   const { user: loggedInUser } = useUser();
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (activeSublink !== null) {
-        setActiveSublink(null);
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [activeSublink]);
-
+ 
   const handleLogout = async () => {
     try {
       await logout();
@@ -104,17 +95,39 @@ function NavMenu({showMobile = true}) {
   const closeDropdown = () => {
     setShowNotifications(false);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (activeSublink !== null) {
+        setActiveSublink(null);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [activeSublink]);
+
   useEffect(() => {
     socket.emit("join", loggedInUser?._id);
 
-    socket.on("notificationCount", (count) => {
-      setNotificationCount(count); // Update the notification count
+
+    socket.on("newNotification", () => {
+      setNotificationCount((prevCount) => prevCount + 1); // Update the notification count
     });
 
     return () => {
-      socket.off("notificationCount"); // Clean up the listener on unmount
+      socket.off("newNotification"); // Clean up the listener on unmount
     };
   }, [loggedInUser]);
+  useEffect(() => {
+   const fetchTotalNotificationsAndUnseenMessages = async () => {
+    const {data: {count: notificationCount}} = await customFetch.get(`/notifications/total/${loggedInUser?._id}`);
+    const {data: {count: unseenMessages}} = await customFetch.get(`/messages/total-unseen/${loggedInUser?._id}`);
+    setNotificationCount(notificationCount);
+    setUnseenMessages(unseenMessages);}
+   fetchTotalNotificationsAndUnseenMessages();
+  }, [loggedInUser]);
+  console.log({notificationCount, unseenMessages})
   return (
     <>
       {/* Desktop Nav */}
@@ -123,7 +136,7 @@ function NavMenu({showMobile = true}) {
           <Link to="/">
             <img
               src={CompanyLogo}
-              className="object-contain w-32 mt-3"
+              className="object-contain w-32 "
               alt="Logo Loading..."
             />
           </Link>
@@ -178,8 +191,13 @@ function NavMenu({showMobile = true}) {
           <div className="flex items-center gap-4">
             {user && (
              <>
-              <Link to="/chats">
+              <Link className="relative" to="/chats">
                 <BsChatDots className="text-2xl" />
+                {unseenMessages > 0 && (
+                    <span className="absolute -top-3 right-0 bg-blue-600 text-white text-xs rounded-full p-1 w-4 h-fit">
+                      {unseenMessages > 99 ? "99+" : unseenMessages}
+                    </span>
+                  )}
               </Link>
               <Link to="/Posts">
                 <BiMessageSquareAdd className="text-2xl" />

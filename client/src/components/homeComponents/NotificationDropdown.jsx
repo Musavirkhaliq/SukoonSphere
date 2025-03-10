@@ -29,6 +29,7 @@ import {
   ArticleReplyNotification,
 } from "../notifications/ArticleNotificationCards";
 import { FollowNotification } from "../notifications/UserNotificationCards";
+import { RequestChatNotification } from "../notifications/RequestChatNotification";
 
 const Dropdown = ({ user, onClose }) => {
   const [items, setItems] = useState([]);
@@ -167,6 +168,8 @@ const Dropdown = ({ user, onClose }) => {
                   // User Notification cases
                   case "follow":
                     return <FollowNotification key={index} item={item} />;
+                  case "requestChat":
+                    return <RequestChatNotification key={index} item={item} />;
                 }
               })}
             </div>

@@ -32,7 +32,6 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
   useEffect(() => {
     fetchReplies();
   }, []);
-  console.log({ replies });
 
   const handleLike = async () => {
     if (!user) {
@@ -101,6 +100,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
     }
     try {
       await customFetch.post(`/posts/comments/${comment._id}/replies`, {
+        postId,
         content: replyContent,
         replyToUserId: comment.createdBy._id,
       });
@@ -113,7 +113,6 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
       toast.error(error.response?.data?.msg || "Failed to add reply");
     }
   };
-  console.log({ comment });
 
   return (
     <>
@@ -243,6 +242,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
                 replyId={reply._id}
                 commentId={comment._id}
                 onReplyUpdate={fetchReplies}
+                postId={comment.postId}
               />
             ))}
           </div>
