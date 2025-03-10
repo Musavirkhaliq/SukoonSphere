@@ -47,12 +47,20 @@ const postNotificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Reply',
     },
+    chatId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Chat',
+    },
+    chatDisabled: {
+      type: Boolean,
+      default: true,
+    },
     type: {
       type: String,
       enum: ['like', 'comment', 'reply', 'commentLiked', 'replyLiked',
        "answered", "answerLiked","answerCommentLiked","answerCommentReplyLiked","answerComment" ,"answerReply",
        "articleLiked", "articleCommentLiked", "articleCommentReplyLiked","articleComment","articleReply",
-       "follow","unfollow"
+       "follow","unfollow" , "requestChat"
       ],
       required: true,
     },
@@ -60,11 +68,16 @@ const postNotificationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
+    seen: {
+      type: Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,

@@ -515,9 +515,8 @@ export const createAnswer = async (req, res) => {
       answerId: newAnswer[0]._id,
       questionId: question._id,
     });
- const populatedNotification = await Notification.findById(notification._id).populate("createdBy", "_id name avatar");
     // Emit to socket
-    io.to(question.createdBy.toString()).emit('notification', populatedNotification);
+    io.to(question.createdBy.toString()).emit('newNotification', notification);
 
      }
     await session.commitTransaction();
@@ -890,10 +889,8 @@ export const createAnswerComment = async (req, res) => {
           await notification.save();
 
           // Retrieve the populated notification
-          const populatedNotification = await Notification.findById(notification._id)
-            .populate("createdBy", "_id name avatar")
 
-          io.to(answer.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+          io.to(answer.createdBy.toString()).emit('newNotification', notification); // Emit to the specific user's room
         }
         const user = await User.findById({ _id: answer.createdBy });
         console.log({user1: req.user, user2: user})
@@ -1023,8 +1020,7 @@ export const createAnswerReply = async (req, res) => {
       message: `${req.user.username} replied to your comment`, // Assuming you have the username available
     });
     await notification.save();
-     const populatedNotification = await notification.populate('createdBy', '_id name avatar');
-     io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
+     io.to(comment.createdBy.toString()).emit('newNotification', notification);
 
   }
 
@@ -1162,8 +1158,7 @@ export const likeAnswerReply = async (req, res) => {
       message: `${req.user.username} liked your reply`
     });
     await notification.save();
-    const populatedNotification = await notification.populate('createdBy', '_id name avatar');
-    io.to(reply.createdBy.toString()).emit('notification', populatedNotification);
+    io.to(reply.createdBy.toString()).emit('newNotification', notification);
    }
   }
   res.status(StatusCodes.OK).json({
@@ -1259,9 +1254,7 @@ export const likeAnswerComment = async (req, res) => {
         type: 'answerCommentLiked',
       });
       await notification.save();
-      const populatedNotification = await Notification.findById(notification._id)
-      .populate("createdBy", "_id name avatar")
-      io.to(comment.createdBy.toString()).emit("notification", populatedNotification);
+      io.to(comment.createdBy.toString()).emit("newNotification", notification);
         res.status(StatusCodes.OK).json({
           message: isLiked ? "Comment unliked" : "Comment liked",
           comment: commentWithDetails[0]
@@ -1586,7 +1579,6 @@ export const likeAnswer = async (req, res) => {
 
   // First find the answer to check if it exists
   const existingAnswer = await Answer.findById(answerId);
-  console.log({ existingAnswer });
   if (!existingAnswer) {
     throw new BadRequestError("Answer not found");
   }
@@ -1610,13 +1602,12 @@ if(updatedAnswer.createdBy.toString() !== userId){
       userId: updatedAnswer.createdBy, // The user who created the post
       createdBy: userId,
       answerId: updatedAnswer._id,
+      questionId:existingAnswer.answeredTo,
       type: 'answerLiked',
       message: `${req.user.username} liked your answer`, // Assuming you have the username available
     });
     await notification.save();
-    const populatedNotification = await Notification.findById(notification._id)
-      .populate("createdBy", "_id name avatar")
-    io.to(updatedAnswer.createdBy.toString()).emit('notification', populatedNotification);
+    io.to(updatedAnswer.createdBy.toString()).emit('newNotification', notification);
 }
 }
   // Update total likes count

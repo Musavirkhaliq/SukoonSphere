@@ -23,6 +23,7 @@ import GalleryRouter from "./routes/galleryRouter.js";
 import NotificationRouter from "./routes/notificationRouter.js"; 
 import MessageRouter from "./routes/messageRouter.js";
 import ChatRouter from "./routes/chatRouter.js";
+import PrescriptionRouter from "./routes/prescriptionRouter.js";
 
 // models
 import Notification from "./models/notifications/postNotificationModel.js";
@@ -82,6 +83,7 @@ app.use("/api/v1/podcasts", PodcastRouter);
 app.use("/api/v1/notifications", NotificationRouter); 
 app.use("/api/v1/messages", MessageRouter);
 app.use("/api/v1/chats", ChatRouter);
+app.use("/api/v1/prescriptions", PrescriptionRouter);
 
 // Serve Static Files
 app.use("/public", express.static(path.resolve(__dirname, "./public")));
@@ -108,9 +110,6 @@ io.on('connection', (socket) => {
       socket.join(userId);
       console.log(`User ${userId} joined room`);
 
-      // Fetch the total number of notifications for the user
-      const notificationCount = await Notification.countDocuments({userId});
-      io.to(userId).emit('notificationCount', notificationCount);
   });
 
   socket.on('disconnect', () => {

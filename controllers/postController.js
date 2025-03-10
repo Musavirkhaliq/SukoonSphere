@@ -253,14 +253,7 @@ export const likePosts = async (req, res) => {
             message: `${req.user.username} liked your post`, // Assuming you have the username available
           });
           await notification.save();
-
-          // Retrieve the populated notification
-          const populatedNotification = await Notification.findById(notification._id)
-            .populate("postId", "_id imageUrl")
-            .populate("userId", "name avatar")
-            .populate("createdBy", "_id name avatar")
-
-          io.to(post.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+          io.to(post.createdBy.toString()).emit('newNotification', notification); // Emit to the specific user's room
         }
       }
     }
@@ -325,13 +318,7 @@ export const createPostComment = async (req, res) => {
 
       await notification.save();
 
-      // Retrieve the populated notification
-      const populatedNotification = await Notification.findById(notification._id)
-        .populate("postId", "_id imageUrl")
-        .populate("userId", "name avatar")
-        .populate("createdBy", "_id name avatar");
-
-      io.to(post.createdBy.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+      io.to(post.createdBy.toString()).emit('newNotification', notification); // Emit to the specific user's room
     }
 
     res.status(StatusCodes.CREATED).json({
@@ -381,7 +368,7 @@ export const getAllCommentsByPostId = async (req, res) => {
 };
 
 export const createReply = async (req, res) => {
-  const { content } = req.body;
+  const { content, postId } = req.body;
   const { id: parentId } = req.params;
 
   try {
@@ -412,7 +399,7 @@ export const createReply = async (req, res) => {
     // Fetch reply with current user details for response
     const replyWithUser = await PostReplies.aggregate([
       {
-        $match: { _id: reply._id }
+        $match: { _id: reply._id }  
       },
       {
         $lookup: {
@@ -454,7 +441,7 @@ export const createReply = async (req, res) => {
       const notification = new Notification({
         userId: reply.replyTo.toString(), // The user who was replied to
         createdBy: req.user.userId,
-        postId: comment ? comment.postId : parentReply.postId,
+        postId:postId,
         commentId: comment ? comment._id : (parentReply ? parentReply.commentId : null),
         type: 'reply',
         message: `${req.user.username} replied to your comment`, // Assuming you have the username available
@@ -462,13 +449,7 @@ export const createReply = async (req, res) => {
 
       await notification.save();
 
-      // Retrieve the populated notification
-      const populatedNotification = await Notification.findById(notification._id)
-        .populate("postId", "_id imageUrl")
-        .populate("userId", "name avatar")
-        .populate("createdBy", "_id name avatar");
-
-      io.to(reply.replyTo.toString()).emit('notification', populatedNotification); // Emit to the specific user's room
+      io.to(reply.replyTo.toString()).emit('newNotification', notification); // Emit to the specific user's room
     }
 
     res.status(StatusCodes.CREATED).json({
@@ -678,12 +659,9 @@ export const likePostComment = async (req, res) => {
         });
         await notification.save();
 
-        const populatedNotification = await Notification.findById(notification._id)
-          .populate("postId", "_id imageUrl")
-          .populate("userId", "name avatar")
-          .populate("createdBy", "_id name avatar");
+       
 
-        io.to(comment.createdBy.toString()).emit('notification', populatedNotification);
+        io.to(comment.createdBy.toString()).emit('newNotification', notification);
       }
     }
 
@@ -706,6 +684,7 @@ export const likePostComment = async (req, res) => {
 export const likePostCommentReply = async (req, res) => {
   const { id: replyId } = req.params;
   const userId = req.user.userId;
+  const { postId } = req.body;
   const reply = await PostReplies.findById(replyId);
   if (!reply) {
     throw new BadRequestError("Reply not found");
@@ -720,19 +699,15 @@ export const likePostCommentReply = async (req, res) => {
         const notification = new Notification({
           userId: reply.createdBy, // The user who created the post
           createdBy: userId,
-          postId: reply.postId,
+          postId,
           postReplyId: replyId,
           message: `${req.user.username} liked your reply`,
           type: 'replyLiked',
         });
         await notification.save();
 
-        const populatedNotification = await Notification.findById(notification._id)
-          .populate("postId", "_id imageUrl")
-          .populate("userId", "name avatar")
-          .populate("createdBy", "_id name avatar");
-
-        io.to(reply.createdBy.toString()).emit('notification', populatedNotification);
+        
+        io.to(reply.createdBy.toString()).emit('newNotification', notification);
       }
     }
 
