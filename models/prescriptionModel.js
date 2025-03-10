@@ -5,12 +5,12 @@ import mongoose from "mongoose";
 const prescriptionSchema = mongoose.Schema({
   patientId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   doctorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   demographicInfo: {
@@ -23,14 +23,23 @@ const prescriptionSchema = mongoose.Schema({
     socioeconomicStatus: { type: String },
     name: { type: String, required: true },
   },
-  presentingSymptoms: [{
-    description: { type: String,  },
-    severity: { type: String, enum: ['Mild', 'Moderate', 'Severe'], },
-    duration: { type: String, },
-    impactOnFunctioning: { type: String },
-  }],
+  presentingSymptoms: [
+    {
+      description: { type: String },
+      severity: { type: String, enum: ["Mild", "Moderate", "Severe"] },
+      duration: { type: String },
+      impactOnFunctioning: { type: String },
+    },
+  ],
   psychiatricHistory: {
-    pastDiagnoses: [{ type: String }],
+    pastDiagnoses: [
+      {
+        diagnosis: { type: String },
+        dateDiagnosed: { type: Date },
+        diagnosedBy: { type: String },
+        symptoms: [{ type: String }],
+      },
+    ],
     previousTreatments: [{ type: String }],
     treatmentAdherence: { type: String },
     hospitalizations: [{ type: String }],
@@ -68,12 +77,14 @@ const prescriptionSchema = mongoose.Schema({
   },
   culturalConsiderations: { type: String },
   comorbidities: [{ type: String }],
-  medications: [{
-    name: { type: String,  },
-    dosage: { type: String,  },
-    frequency: { type: String,  },
-    duration: { type: String },
-  }],
+  medications: [
+    {
+      name: { type: String },
+      dosage: { type: String },
+      frequency: { type: String },
+      duration: { type: String },
+    },
+  ],
   additionalNotes: { type: String },
   createdAt: { type: Date, default: Date.now },
 });

@@ -1,479 +1,546 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { 
-  FaUser, 
-  FaNotesMedical, 
-  FaHistory, 
-  FaFileMedical,
+import React from "react";
+import {
+  FaUser,
+  FaCalendarAlt,
+  FaHeartbeat,
+  FaPills,
+  FaBriefcase,
+  FaHome,
   FaUserMd,
-  FaPrint,
-  FaChevronLeft,
-  FaChevronRight
+  FaGraduationCap,
+  FaClipboardList,
+  FaPhone,
 } from "react-icons/fa";
+import {
+  MdMood,
+  MdPsychology,
+  MdFamilyRestroom,
+  MdOutlineHealthAndSafety,
+  MdNotes,
+  MdHistoryEdu,
+} from "react-icons/md";
+import { BsPeople } from "react-icons/bs";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import customFetch from "@/utils/customFetch";
-import CompanyLogo from "../../assets/images/SukoonSphere_Logo.png";
+import companyLogo from "../../assets/images/SukoonSphere_Logo.png";
 
 const SinglePrescription = () => {
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "Not specified";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
   const { id: prescriptionId } = useParams();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [prescription, setPrescription] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const printRef = useRef();
 
   useEffect(() => {
     const fetchPrescription = async () => {
       try {
-        setLoading(true);
-        const { data } = await customFetch.get(`prescriptions/${prescriptionId}`);
-        setPrescription(data.prescription);
-        console.log(data);
+        const { data } = await customFetch.get(
+          `prescriptions/${prescriptionId}`
+        );
+        setPrescription(data?.prescription);
       } catch (error) {
         console.error("Error fetching prescription:", error);
-        setError("Failed to load prescription");
-      } finally {
-        setLoading(false);
       }
     };
     fetchPrescription();
   }, [prescriptionId]);
 
-  const nextPage = () => {
-    if (currentPage < 3) setCurrentPage(currentPage + 1);
-  };
-
-  const prevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
+  const formattedDate = formatDate(prescription?.createdAt);
 
   const handlePrint = () => {
-    const printContent = document.getElementById('printable-prescription');
+    const printContents = document.getElementById("print-content").innerHTML;
     const originalContents = document.body.innerHTML;
-    
-    document.body.innerHTML = printContent.innerHTML;
-    
+    document.body.innerHTML = printContents;
     window.print();
-    
     document.body.innerHTML = originalContents;
-    
-    // Reattach event listeners and reset React state
-    window.location.reload();
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-2xl font-semibold text-blue-600">Loading prescription...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-2xl font-semibold text-red-600">{error}</div>
-      </div>
-    );
-  }
-
-  const renderPageContent = () => {
-    switch (currentPage) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-blue-800 flex items-center">
-              <FaUser className="mr-2" /> Patient Information
-            </h2>
-            
-            {/* Demographics */}
-            <div className="bg-blue-50 p-4 rounded-lg mb-6">
-              <h3 className="font-medium text-gray-700 mb-2">Demographics</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-gray-600">Name:</span>
-                  <span className="font-medium">{prescription.demographicInfo.name}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-600">Age:</span>
-                  <span className="font-medium">{prescription.demographicInfo.age} years</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-600">Gender:</span>
-                  <span className="font-medium">{prescription.demographicInfo.gender}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-600">Occupation:</span>
-                  <span className="font-medium">{prescription.demographicInfo.occupation || "Not specified"}</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Presenting Symptoms */}
-            <h2 className="text-xl font-semibold text-blue-800 flex items-center">
-              <FaNotesMedical className="mr-2" /> Presenting Symptoms
-            </h2>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              {prescription.presentingSymptoms && prescription.presentingSymptoms.length > 0 ? (
-                prescription.presentingSymptoms.map((symptom, index) => (
-                  <div key={index} className="mb-3 p-3 bg-white rounded-md shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="flex flex-col">
-                        <span className="text-gray-600">Description:</span>
-                        <span className="font-medium">{symptom.description || "Not specified"}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-gray-600">Severity:</span>
-                        <span className={`font-medium ${
-                          symptom.severity === 'Mild' ? 'text-green-600' : 
-                          symptom.severity === 'Moderate' ? 'text-yellow-600' : 
-                          symptom.severity === 'Severe' ? 'text-red-600' : ''
-                        }`}>
-                          {symptom.severity || "Not specified"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 italic">No symptoms documented</p>
-              )}
-            </div>
-            
-            {/* Psychiatric History */}
-            <h2 className="text-xl font-semibold text-blue-800 flex items-center mt-6">
-              <FaHistory className="mr-2" /> Psychiatric History
-            </h2>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="mb-4">
-                <h3 className="font-medium text-gray-700">Past Diagnoses:</h3>
-                {prescription.psychiatricHistory && prescription.psychiatricHistory.pastDiagnoses && prescription.psychiatricHistory.pastDiagnoses.length > 0 ? (
-                  <ul className="list-disc pl-5 mt-2">
-                    {prescription.psychiatricHistory.pastDiagnoses.map((diagnosis, index) => (
-                      <li key={index} className="mt-1">{diagnosis}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500 italic mt-1">No past diagnoses documented</p>
-                )}
-              </div>
-              
-              <div className="mb-2">
-                <h3 className="font-medium text-gray-700">Previous Treatments:</h3>
-                {prescription.psychiatricHistory && prescription.psychiatricHistory.previousTreatments && prescription.psychiatricHistory.previousTreatments.length > 0 ? (
-                  <ul className="list-disc pl-5 mt-2">
-                    {prescription.psychiatricHistory.previousTreatments.map((treatment, index) => (
-                      <li key={index} className="mt-1">{treatment}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500 italic mt-1">No previous treatments documented</p>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      case 2:
-        return (
-          <div className="space-y-6">
-            {/* Mental Status */}
-            <h2 className="text-xl font-semibold text-blue-800 flex items-center">
-              <FaUserMd className="mr-2" /> Mental Status Exam
-            </h2>
-            <div className="bg-blue-50 p-4 rounded-lg mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {prescription.mentalStatusExam && Object.entries(prescription.mentalStatusExam)
-                  .filter(([_, value]) => value)
-                  .map(([key, value]) => (
-                    <div key={key} className="flex flex-col">
-                      <span className="text-gray-600">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}:</span>
-                      <span className="font-medium">{value}</span>
-                    </div>
-                  ))}
-              </div>
-              {(!prescription.mentalStatusExam || Object.values(prescription.mentalStatusExam).every(v => !v)) && (
-                <p className="text-gray-500 italic">No mental status exam documented</p>
-              )}
-            </div>
-            
-            {/* Coping & Stressors - Condensed */}
-            <h2 className="text-xl font-semibold text-blue-800 flex items-center">
-              <FaNotesMedical className="mr-2" /> Stressors & Support
-            </h2>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Current Stressors */}
-                <div>
-                  <h3 className="font-medium text-gray-700">Current Stressors:</h3>
-                  {prescription.stressors && prescription.stressors.currentStressors && prescription.stressors.currentStressors.length > 0 ? (
-                    <ul className="list-disc pl-5 mt-2">
-                      {prescription.stressors.currentStressors.map((stressor, index) => (
-                        <li key={index} className="mt-1">{stressor}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500 italic mt-1">None documented</p>
-                  )}
-                </div>
-                
-                {/* Social Support */}
-                <div>
-                  <h3 className="font-medium text-gray-700">Social Support:</h3>
-                  <p className="mt-2">{prescription.socialHistory && prescription.socialHistory.socialSupport || "Not specified"}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      case 3:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-blue-800 flex items-center">
-              <FaFileMedical className="mr-2" /> Medications & Notes
-            </h2>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-medium text-gray-700 mb-3">Prescribed Medications:</h3>
-              {prescription.medications && prescription.medications.length > 0 ? (
-                <div className="space-y-3">
-                  {prescription.medications.map((medication, index) => (
-                    <div key={index} className="p-3 bg-white rounded-md shadow-sm">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <div className="flex flex-col">
-                          <span className="text-gray-600">Medication:</span>
-                          <span className="font-medium text-blue-800">{medication.name}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-gray-600">Dosage:</span>
-                          <span className="font-medium">{medication.dosage}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-gray-600">Frequency:</span>
-                          <span className="font-medium">{medication.frequency}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-gray-600">Duration:</span>
-                          <span className="font-medium">{medication.duration || "As directed"}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No medications prescribed</p>
-              )}
-              
-              <h3 className="font-medium text-gray-700 mt-6 mb-3">Additional Notes:</h3>
-              <div className="p-3 bg-white rounded-md shadow-sm">
-                <p className="whitespace-pre-line">{prescription.additionalNotes || "No additional notes"}</p>
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  // Combine all pages for printing
-  const renderAllPages = () => {
-    return (
-      <div>
-        {/* Page 1 */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-blue-800">Patient Information</h2>
-          <div className="bg-blue-50 p-4 rounded-lg mb-6 mt-2">
-            <h3 className="font-medium text-gray-700 mb-2">Demographics</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col">
-                <span className="text-gray-600">Age:</span>
-                <span className="font-medium">{prescription.demographicInfo.age} years</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-gray-600">Gender:</span>
-                <span className="font-medium">{prescription.demographicInfo.gender}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-gray-600">Occupation:</span>
-                <span className="font-medium">{prescription.demographicInfo.occupation || "Not specified"}</span>
-              </div>
-            </div>
-          </div>
-          
-          <h2 className="text-xl font-semibold text-blue-800">Presenting Symptoms</h2>
-          <div className="bg-blue-50 p-4 rounded-lg mt-2">
-            {prescription.presentingSymptoms && prescription.presentingSymptoms.length > 0 ? (
-              prescription.presentingSymptoms.map((symptom, index) => (
-                <div key={index} className="mb-3 p-3 bg-white rounded-md shadow-sm">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col">
-                      <span className="text-gray-600">Description:</span>
-                      <span className="font-medium">{symptom.description || "Not specified"}</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-gray-600">Severity:</span>
-                      <span className="font-medium">{symptom.severity || "Not specified"}</span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500 italic">No symptoms documented</p>
-            )}
-          </div>
-          
-          <h2 className="text-xl font-semibold text-blue-800 mt-6">Psychiatric History</h2>
-          <div className="bg-blue-50 p-4 rounded-lg mt-2">
-            <div className="mb-4">
-              <h3 className="font-medium text-gray-700">Past Diagnoses:</h3>
-              {prescription.psychiatricHistory && prescription.psychiatricHistory.pastDiagnoses && prescription.psychiatricHistory.pastDiagnoses.length > 0 ? (
-                <ul className="list-disc pl-5 mt-2">
-                  {prescription.psychiatricHistory.pastDiagnoses.map((diagnosis, index) => (
-                    <li key={index} className="mt-1">{diagnosis}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 italic mt-1">No past diagnoses documented</p>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* Page 2 */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-blue-800">Mental Status Exam</h2>
-          <div className="bg-blue-50 p-4 rounded-lg mt-2 mb-6">
-            <div className="grid grid-cols-2 gap-3">
-              {prescription.mentalStatusExam && Object.entries(prescription.mentalStatusExam)
-                .filter(([_, value]) => value)
-                .map(([key, value]) => (
-                  <div key={key} className="flex flex-col">
-                    <span className="text-gray-600">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}:</span>
-                    <span className="font-medium">{value}</span>
-                  </div>
-                ))}
-            </div>
-            {(!prescription.mentalStatusExam || Object.values(prescription.mentalStatusExam).every(v => !v)) && (
-              <p className="text-gray-500 italic">No mental status exam documented</p>
-            )}
-          </div>
-        </div>
-        
-        {/* Page 3 */}
-        <div>
-          <h2 className="text-xl font-semibold text-blue-800">Medications & Notes</h2>
-          <div className="bg-blue-50 p-4 rounded-lg mt-2">
-            <h3 className="font-medium text-gray-700 mb-3">Prescribed Medications:</h3>
-            {prescription.medications && prescription.medications.length > 0 ? (
-              <div className="space-y-3">
-                {prescription.medications.map((medication, index) => (
-                  <div key={index} className="p-3 bg-white rounded-md shadow-sm">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="flex flex-col">
-                        <span className="text-gray-600">Medication:</span>
-                        <span className="font-medium text-blue-800">{medication.name}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-gray-600">Dosage:</span>
-                        <span className="font-medium">{medication.dosage}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-gray-600">Frequency:</span>
-                        <span className="font-medium">{medication.frequency}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-gray-600">Duration:</span>
-                        <span className="font-medium">{medication.duration || "As directed"}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 italic">No medications prescribed</p>
-            )}
-            
-            <h3 className="font-medium text-gray-700 mt-6 mb-3">Additional Notes:</h3>
-            <div className="p-3 bg-white rounded-md shadow-sm">
-              <p>{prescription.additionalNotes || "No additional notes"}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    window.location.reload(); // Reload to restore the original content
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Hidden printable version with all data */}
-      <div id="printable-prescription" className="hidden">
-        <div className="p-4">
-          <div className="text-center">
-            <div className="flex items-center justify-center">
-              <img src={CompanyLogo} alt="Logo" className="w-20 mb-2 " />
-            </div>
-            <h1 className="text-2xl font-bold">Psychiatric Evaluation & Prescription abc</h1>
-            <p className="mt-1">Date: {new Date(prescription.createdAt).toLocaleDateString()}</p>
+    <div className="max-w-7xl mx-auto bg-white p-8 shadow-md print:shadow-none">
+      {/* Print Content */}
+      <div id="print-content">
+        {/* Header */}
+        <div className="border-b-2 border-blue-700 pb-4 mb-6 flex justify-between items-center">
+          <div>
+            <img
+              src={companyLogo}
+              alt="Sukoonsphere Logo"
+              width={120}
+              height={100}
+              className="inline-block"
+            />
+            <h1 className="text-2xl font-bold text-blue-800">
+              SukoonSphere Health
+            </h1>
+            <p className="text-gray-600">
+              Mental Health Prescription & Evaluation
+            </p>
           </div>
-          
-          {renderAllPages()}
+          <div className="text-right">
+            <p className="text-sm text-gray-600 mt-2">
+              <h4 className="text-md font-bold text-[var(--grey--900)]">
+                Dr. Chandana Barat
+              </h4>
+              <span className="font-semibold"></span> Ph.D. Biochemistry and
+              Molecular Biology, IISc
+            </p>
+            <p className="text-sm text-gray-600">
+              <FaPhone className="inline mr-1" />
+              8825063816
+            </p>
+          </div>
+        </div>
+
+        {/* Patient Information */}
+        <section className="mb-6">
+          <div className="bg-blue-50 p-4 rounded-md">
+            <h2 className="text-xl font-semibold text-blue-800 mb-3 flex items-center">
+              <FaUser className="mr-2" /> Patient Information
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p>
+                  <span className="font-semibold">Name:</span>{" "}
+                  {prescription?.demographicInfo?.name || "Not specified"}
+                </p>
+                <p>
+                  <span className="font-semibold">Age:</span>{" "}
+                  {prescription?.demographicInfo?.age}
+                </p>
+                <p>
+                  <span className="font-semibold">Gender:</span>{" "}
+                  {prescription?.demographicInfo?.gender}
+                </p>
+              </div>
+              <div>
+                <p>
+                  <span className="font-semibold">Ethnicity:</span>{" "}
+                  {prescription?.demographicInfo?.raceEthnicity ||
+                    "Not specified"}
+                </p>
+                <p>
+                  <span className="font-semibold">Marital Status:</span>{" "}
+                  {prescription?.demographicInfo?.maritalStatus ||
+                    "Not specified"}
+                </p>
+                <p>
+                  <span className="font-semibold">Occupation:</span>{" "}
+                  {prescription?.demographicInfo?.occupation || "Not specified"}
+                </p>
+                <p>
+                  <span className="font-semibold">Education Level:</span>{" "}
+                  {prescription?.demographicInfo?.educationLevel ||
+                    "Not specified"}
+                </p>
+                <p>
+                  <span className="font-semibold">Socioeconomic Status:</span>{" "}
+                  {prescription?.demographicInfo?.socioeconomicStatus ||
+                    "Not specified"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Presenting Symptoms */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <MdPsychology className="mr-2" /> Presenting Symptoms
+            </h2>
+            {prescription?.presentingSymptoms &&
+            prescription.presentingSymptoms.length > 0 ? (
+              <ul className="list-disc pl-6">
+                {prescription.presentingSymptoms.map((symptom, index) => (
+                  <li key={index} className="mb-2">
+                    <div className="font-medium">
+                      {symptom.description || "Unspecified symptom"}
+                    </div>
+                    {symptom.severity && (
+                      <div>Severity: {symptom.severity}</div>
+                    )}
+                    {symptom.duration && (
+                      <div>Duration: {symptom.duration}</div>
+                    )}
+                    {symptom.impactOnFunctioning && (
+                      <div>Impact: {symptom.impactOnFunctioning}</div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No symptoms recorded</p>
+            )}
+          </section>
+
+          {/* Mental Status Exam */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <MdMood className="mr-2" /> Mental Status Examination
+            </h2>
+            <div className="grid grid-cols-1 gap-2">
+              <p>
+                <span className="font-semibold">Appearance:</span>{" "}
+                {prescription?.mentalStatusExam?.appearance || "Not assessed"}
+              </p>
+              <p>
+                <span className="font-semibold">Behavior:</span>{" "}
+                {prescription?.mentalStatusExam?.behavior || "Not assessed"}
+              </p>
+              <p>
+                <span className="font-semibold">Speech:</span>{" "}
+                {prescription?.mentalStatusExam?.speech || "Not assessed"}
+              </p>
+              <p>
+                <span className="font-semibold">Mood:</span>{" "}
+                {prescription?.mentalStatusExam?.mood || "Not assessed"}
+              </p>
+              <p>
+                <span className="font-semibold">Affect:</span>{" "}
+                {prescription?.mentalStatusExam?.affect || "Not assessed"}
+              </p>
+              <p>
+                <span className="font-semibold">Thought Process:</span>{" "}
+                {prescription?.mentalStatusExam?.thoughtProcess ||
+                  "Not assessed"}
+              </p>
+              <p>
+                <span className="font-semibold">Thought Content:</span>{" "}
+                {prescription?.mentalStatusExam?.thoughtContent ||
+                  "Not assessed"}
+              </p>
+              <p>
+                <span className="font-semibold">Perceptions:</span>{" "}
+                {prescription?.mentalStatusExam?.perceptions || "Not assessed"}
+              </p>
+              <p>
+                <span className="font-semibold">Cognition:</span>{" "}
+                {prescription?.mentalStatusExam?.cognition || "Not assessed"}
+              </p>
+              <p>
+                <span className="font-semibold">Insight/Judgment:</span>{" "}
+                {prescription?.mentalStatusExam?.insightJudgment ||
+                  "Not assessed"}
+              </p>
+            </div>
+          </section>
+
+          {/* Psychiatric History */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <MdHistoryEdu className="mr-2" /> Psychiatric History
+            </h2>
+            <div>
+              <h4 className="font-bold mt-2">Past Diagnoses:</h4>
+              {prescription?.psychiatricHistory?.pastDiagnoses &&
+              prescription.psychiatricHistory.pastDiagnoses.length > 0 ? (
+                <ul className="list-disc pl-6 mb-2">
+                  {prescription.psychiatricHistory.pastDiagnoses.map(
+                    (diagnosis, index) => (
+                      <li key={index}>
+                        <div>
+                          {diagnosis.diagnosis || "Unspecified diagnosis"}
+                        </div>
+                        {diagnosis.dateDiagnosed && (
+                          <div className="text-sm">
+                            Date: {formatDate(diagnosis.dateDiagnosed)}
+                          </div>
+                        )}
+                        {diagnosis.diagnosedBy && (
+                          <div className="text-sm">
+                            Diagnosed by: {diagnosis.diagnosedBy}
+                          </div>
+                        )}
+                        {diagnosis.symptoms &&
+                          diagnosis.symptoms.length > 0 && (
+                            <div className="text-sm">
+                              Symptoms: {diagnosis.symptoms.join(", ")}
+                            </div>
+                          )}
+                      </li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p className="pl-2 mb-2">No past diagnoses recorded</p>
+              )}
+
+              <h4 className="font-bold">Previous Treatments:</h4>
+              {prescription?.psychiatricHistory?.previousTreatments &&
+              prescription.psychiatricHistory.previousTreatments.length > 0 ? (
+                <ul className="list-disc pl-6 mb-2">
+                  {prescription.psychiatricHistory.previousTreatments.map(
+                    (treatment, index) => (
+                      <li key={index}>{treatment}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p className="pl-2 mb-2">No previous treatments recorded</p>
+              )}
+
+              <p>
+                <span className="font-semibold">Treatment Adherence:</span>{" "}
+                {prescription?.psychiatricHistory?.treatmentAdherence ||
+                  "Not specified"}
+              </p>
+
+              <h4 className="font-bold">Hospitalizations:</h4>
+              {prescription?.psychiatricHistory?.hospitalizations &&
+              prescription.psychiatricHistory.hospitalizations.length > 0 ? (
+                <ul className="list-disc pl-6">
+                  {prescription.psychiatricHistory.hospitalizations.map(
+                    (hospitalization, index) => (
+                      <li key={index}>{hospitalization}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p className="pl-2">No hospitalizations recorded</p>
+              )}
+            </div>
+          </section>
+
+          {/* Medications */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <FaPills className="mr-2" /> Medications
+            </h2>
+            {prescription?.medications &&
+            prescription.medications.length > 0 ? (
+              <ul className="list-disc pl-6">
+                {prescription.medications.map((med, index) => (
+                  <li key={index} className="mb-2">
+                    <div className="font-medium">
+                      {med.name || "Unspecified medication"}
+                    </div>
+                    {med.dosage && <div>Dosage: {med.dosage}</div>}
+                    {med.frequency && <div>Frequency: {med.frequency}</div>}
+                    {med.duration && <div>Duration: {med.duration}</div>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No current medications</p>
+            )}
+          </section>
+
+          {/* Family History */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <MdFamilyRestroom className="mr-2" /> Family History
+            </h2>
+            <div>
+              <h4 className="font-bold">Mental Health Diagnoses:</h4>
+              {prescription?.familyHistory?.mentalHealthDiagnoses &&
+              prescription.familyHistory.mentalHealthDiagnoses.length > 0 ? (
+                <ul className="list-disc pl-6 mb-2">
+                  {prescription.familyHistory.mentalHealthDiagnoses.map(
+                    (diagnosis, index) => (
+                      <li key={index}>{diagnosis}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p className="pl-2 mb-2">
+                  No family mental health diagnoses reported
+                </p>
+              )}
+
+              <p>
+                <span className="font-semibold">Significant Events:</span>{" "}
+                {prescription?.familyHistory?.significantEvents ||
+                  "None reported"}
+              </p>
+            </div>
+          </section>
+
+          {/* Comorbidities */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <FaHeartbeat className="mr-2" /> Comorbidities
+            </h2>
+            {prescription?.comorbidities &&
+            prescription.comorbidities.length > 0 ? (
+              <ul className="list-disc pl-6">
+                {prescription.comorbidities.map((condition, index) => (
+                  <li key={index}>{condition}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No comorbidities reported</p>
+            )}
+          </section>
+
+          {/* Social History */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <BsPeople className="mr-2" /> Social History
+            </h2>
+            <div>
+              <p>
+                <span className="font-semibold">Living Situation:</span>{" "}
+                {prescription?.socialHistory?.livingSituation ||
+                  "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Social Support:</span>{" "}
+                {prescription?.socialHistory?.socialSupport || "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Relationship Dynamics:</span>{" "}
+                {prescription?.socialHistory?.relationshipDynamics ||
+                  "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Employment Status:</span>{" "}
+                {prescription?.socialHistory?.employmentStatus ||
+                  "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Substance Use:</span>{" "}
+                {prescription?.socialHistory?.substanceUse || "Not specified"}
+              </p>
+            </div>
+          </section>
+
+          {/* Stressors */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <FaBriefcase className="mr-2" /> Stressors
+            </h2>
+            <div>
+              <h4 className="font-bold">Current Stressors:</h4>
+              {prescription?.stressors?.currentStressors &&
+              prescription.stressors.currentStressors.length > 0 ? (
+                <ul className="list-disc pl-6 mb-2">
+                  {prescription.stressors.currentStressors.map(
+                    (stressor, index) => (
+                      <li key={index}>{stressor}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p className="pl-2 mb-2">No current stressors reported</p>
+              )}
+
+              <h4 className="font-bold">Major Life Events:</h4>
+              {prescription?.stressors?.majorLifeEvents &&
+              prescription.stressors.majorLifeEvents.length > 0 ? (
+                <ul className="list-disc pl-6">
+                  {prescription.stressors.majorLifeEvents.map(
+                    (event, index) => (
+                      <li key={index}>{event}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p className="pl-2">No major life events reported</p>
+              )}
+            </div>
+          </section>
+
+          {/* Coping Mechanisms */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              {/* <BsBrain className="mr-2" /> Coping Mechanisms */}
+            </h2>
+            <div>
+              <h4 className="font-bold text-[var(--grey--900)]">
+                Healthy Mechanisms:
+              </h4>
+              {prescription?.copingMechanisms?.healthy &&
+              prescription.copingMechanisms.healthy.length > 0 ? (
+                <ul className="list-disc pl-6 mb-2">
+                  {prescription.copingMechanisms.healthy.map(
+                    (mechanism, index) => (
+                      <li key={index}>{mechanism}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p className="pl-2 mb-2">
+                  No healthy coping mechanisms reported
+                </p>
+              )}
+
+              <h4 className="font-bold text-[var(--grey--900)]">
+                Maladaptive Mechanisms:
+              </h4>
+              {prescription?.copingMechanisms?.maladaptive &&
+              prescription.copingMechanisms.maladaptive.length > 0 ? (
+                <ul className="list-disc pl-6">
+                  {prescription.copingMechanisms.maladaptive.map(
+                    (mechanism, index) => (
+                      <li key={index}>{mechanism}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p className="pl-2">
+                  No maladaptive coping mechanisms reported
+                </p>
+              )}
+            </div>
+          </section>
+
+          {/* Cultural Considerations */}
+          <section className="mb-6">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <FaGraduationCap className="mr-2" /> Cultural Considerations
+            </h2>
+            <p>{prescription?.culturalConsiderations || "None specified"}</p>
+          </section>
+
+          {/* Additional Notes */}
+          <section className="mb-6 md:col-span-2">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 flex items-center border-b pb-1">
+              <MdNotes className="mr-2" /> Additional Notes
+            </h2>
+            <p className="whitespace-pre-line">
+              {prescription?.additionalNotes || "No additional notes"}
+            </p>
+          </section>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 pt-4 border-t-2 border-gray-300">
+          <div className="flex justify-between">
+            <div>
+              <p className="font-semibold">SukoonSphere Health</p>
+              <p className="text-sm text-gray-600">Mental Health Services</p>
+              <p className="text-sm text-gray-600">
+                Document ID: {prescription?._id}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-900 font-bold">
+                Issue Date: {formattedDate}
+              </p>
+              <p className="text-sm text-gray-600">
+                Provider ID: {prescription?.doctorId}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center bg-blue-600 p-4 text-white">
-          <div>
-            <h1 className="text-2xl font-bold">Psychiatric Evaluation & Prescription</h1>
-            <p className="text-sm md:text-base">Created: {new Date(prescription.createdAt).toLocaleDateString()}</p>
-          </div>
-          <div className="flex items-center space-x-2 mt-2 md:mt-0">
-            <button
-              onClick={handlePrint}
-              className="px-4 py-2 bg-white text-blue-600 rounded font-medium flex items-center"
-            >
-              <FaPrint className="mr-2" /> Print Prescription
-            </button>
-          </div>
-        </div>
-        
-        {/* Reference IDs */}
-        <div className="bg-gray-100 p-3 border-b grid grid-cols-1 md:grid-cols-2 gap-2">
-          <div>
-            <span className="text-gray-600 font-medium">Patient ID:</span> 
-            <span className="ml-2">{prescription.patientId}</span>
-          </div>
-          <div>
-            <span className="text-gray-600 font-medium">Doctor ID:</span> 
-            <span className="ml-2">{prescription.doctorId}</span>
-          </div>
-        </div>
-        
-        {/* Page Navigation */}
-        <div className="flex justify-between items-center bg-gray-100 p-3 border-b">
-          <button 
-            onClick={prevPage}
-            disabled={currentPage === 1}
-            className={`px-3 py-1 rounded flex items-center ${currentPage === 1 ? 'text-gray-400' : 'text-blue-600 hover:bg-blue-50'}`}
-          >
-            <FaChevronLeft className="mr-1" /> Previous
-          </button>
-          
-          <div className="font-medium">
-            Page {currentPage} of 3
-          </div>
-          
-          <button 
-            onClick={nextPage}
-            disabled={currentPage === 3}
-            className={`px-3 py-1 rounded flex items-center ${currentPage === 3 ? 'text-gray-400' : 'text-blue-600 hover:bg-blue-50'}`}
-          >
-            Next <FaChevronRight className="ml-1" />
-          </button>
-        </div>
-        
-        {/* Page Content */}
-        <div className="p-6" ref={printRef}>
-          {renderPageContent()}
-        </div>
+
+      {/* Print button - only visible on screen, not in print */}
+      <div className="mt-6 text-center print:hidden">
+        <button
+          onClick={handlePrint}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+        >
+          Print Prescription
+        </button>
       </div>
     </div>
   );
