@@ -171,7 +171,7 @@ function AboutUs() {
         {/* Mission Details Section */}
         <div className="mt-12 space-y-6">
           <h2 className="text-xl md:text-5xl font-bold text-[var(--white-color)] mb-6">
-            Our mission is to help you prioritize your mental health and find balance.
+            Our mission is to help you prioritize your mental health and find balance
           </h2>
 
           <ol className="space-y-4 text-[var(--grey--600)]">

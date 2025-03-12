@@ -142,7 +142,7 @@ const ChatSidebar = ({ onClose }) => {
 
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
-        {chats.length === 0 ? (
+        {chats?.length === 0 ? (
           <p className="text-center text-gray-500 p-4">No chats found</p>
         ) : (
           chats?.map((chat) => {

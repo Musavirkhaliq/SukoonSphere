@@ -12,7 +12,7 @@ import {
   MdOutlineNotificationsActive,
   MdOutlinePassword,
 } from "react-icons/md";
-import {  BiLogIn, BiUserPlus } from "react-icons/bi";
+import { BiLogIn, BiUserPlus } from "react-icons/bi";
 import { FiUserPlus } from "react-icons/fi";
 import { BiMessageSquareAdd } from "react-icons/bi";
 import { CiMedal } from "react-icons/ci";
@@ -20,12 +20,12 @@ import NotificationDropdown from "../NotificationDropdown";
 import socket from "@/utils/socket/socket";
 import customFetch from "@/utils/customFetch";
 
-function NavMenu({showMobile = true}) {
+function NavMenu({ showMobile = true }) {
   const [activeSublink, setActiveSublink] = useState(null);
   const [miniMenu, setMiniMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
- const [unseenMessages, setUnseenMessages] = useState(0);
+  const [unseenMessages, setUnseenMessages] = useState(0);
 
   const navigate = useNavigate();
   const { user, logout } = useUser();
@@ -35,7 +35,6 @@ function NavMenu({showMobile = true}) {
   };
   const { user: loggedInUser } = useUser();
 
- 
   const handleLogout = async () => {
     try {
       await logout();
@@ -110,7 +109,6 @@ function NavMenu({showMobile = true}) {
   useEffect(() => {
     socket.emit("join", loggedInUser?._id);
 
-
     socket.on("newNotification", () => {
       setNotificationCount((prevCount) => prevCount + 1); // Update the notification count
     });
@@ -120,14 +118,18 @@ function NavMenu({showMobile = true}) {
     };
   }, [loggedInUser]);
   useEffect(() => {
-   const fetchTotalNotificationsAndUnseenMessages = async () => {
-    const {data: {count: notificationCount}} = await customFetch.get(`/notifications/total/${loggedInUser?._id}`);
-    const {data: {count: unseenMessages}} = await customFetch.get(`/messages/total-unseen/${loggedInUser?._id}`);
-    setNotificationCount(notificationCount);
-    setUnseenMessages(unseenMessages);}
-   fetchTotalNotificationsAndUnseenMessages();
+    const fetchTotalNotificationsAndUnseenMessages = async () => {
+      const {
+        data: { count: notificationCount },
+      } = await customFetch.get(`/notifications/total/${loggedInUser?._id}`);
+      const {
+        data: { count: unseenMessages },
+      } = await customFetch.get(`/messages/total-unseen/${loggedInUser?._id}`);
+      setNotificationCount(notificationCount);
+      setUnseenMessages(unseenMessages);
+    };
+    fetchTotalNotificationsAndUnseenMessages();
   }, [loggedInUser]);
-  console.log({notificationCount, unseenMessages})
   return (
     <>
       {/* Desktop Nav */}
@@ -141,7 +143,7 @@ function NavMenu({showMobile = true}) {
             />
           </Link>
 
-          <DesktopNav  />
+          <DesktopNav />
           {user ? (
             <div className="flex items-center justify-center gap-2">
               <div className="relative">
@@ -190,19 +192,18 @@ function NavMenu({showMobile = true}) {
           </div>
           <div className="flex items-center gap-4">
             {user && (
-             <>
-              <Link className="relative" to="/chats">
-                <BsChatDots className="text-2xl" />
-                {unseenMessages > 0 && (
+              <>
+                <Link className="relative" to="/chats">
+                  <BsChatDots className="text-2xl" />
+                  {unseenMessages > 0 && (
                     <span className="absolute -top-3 right-0 bg-blue-600 text-white text-xs rounded-full p-1 w-4 h-fit">
                       {unseenMessages > 99 ? "99+" : unseenMessages}
                     </span>
                   )}
-              </Link>
-              <Link to="/Posts">
-                <BiMessageSquareAdd className="text-2xl" />
-              </Link>
-             
+                </Link>
+                <Link to="/Posts">
+                  <BiMessageSquareAdd className="text-2xl" />
+                </Link>
               </>
             )}
             {user ? (
@@ -250,126 +251,128 @@ function NavMenu({showMobile = true}) {
         </div>
       </header>
       {/* Mobile Bottom Nav */}
-     {showMobile &&  <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--white-color)] shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-50">
-        <div className="flex justify-around items-center h-16">
-          {links.map((link, index) => (
-            <div key={link.name} className="relative group">
-              {link.sublinks ? (
-                <div
-                  className="p-2 text-2xl text-[var(--grey--800)] hover:text-[var(--ternery)] transform transition-all duration-150 hover:scale-110 active:scale-95"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleSublink(index);
-                  }}
-                >
-                  {link.icon}
+      {showMobile && (
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--white-color)] shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-50">
+          <div className="flex justify-around items-center h-16">
+            {links.map((link, index) => (
+              <div key={link.name} className="relative group">
+                {link.sublinks ? (
                   <div
-                    className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${
-                      activeSublink === index
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-4 pointer-events-none"
-                    }`}
+                    className="p-2 text-2xl text-[var(--grey--800)] hover:text-[var(--ternery)] transform transition-all duration-150 hover:scale-110 active:scale-95"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleSublink(index);
+                    }}
                   >
-                    <div className="flex flex-col space-y-3">
-                      {link.sublinks.map((sublink) => {
-                        // Check if the sublink is for videos or podcasts
-
-                        return (
-                          <NavLink
-                            key={sublink.name}
-                            to={sublink.address}
-                            className={({ isActive }) =>
-                              `flex items-center gap-3 p-2 rounded-xl whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95 ${
-                                isActive
-                                  ? "bg-[var(--blue--100)] text-[var(--ternery)] shadow-sm"
-                                  : "hover:bg-[var(--grey--200)] text-[var(--grey--800)]"
-                              }`
-                            }
-                            onClick={() => setActiveSublink(null)}
-                          >
-                            <div className="text-xl">{sublink.icon}</div>
-                            <span className="text-sm">{sublink.name}</span>
-                          </NavLink>
-                        );
-                      })}
-                    </div>
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[var(--white-color)] transform rotate-45 border-r border-b border-[var(--grey--400)] z-[-1]"></div>
-                  </div>
-                </div>
-              ) : (
-                <NavLink
-                  to={link.address}
-                  className={({ isActive }) =>
-                    `p-2 text-2xl transform transition-all duration-150 hover:scale-110 active:scale-95 ${
-                      isActive
-                        ? "text-[var(--ternery)]"
-                        : "text-[var(--grey--800)] hover:text-[var(--ternery)]"
-                    }`
-                  }
-                >
-                  {link.icon}
-                </NavLink>
-              )}
-            </div>
-          ))}
-
-          <div className="relative">
-            <div
-              className="p-2 text-2xl text-[var(--grey--800)] hover:text-[var(--ternery)] transform transition-all duration-150 hover:scale-110 active:scale-95"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleSublink("settings");
-              }}
-            >
-              <BsThreeDotsVertical />
-            </div>
-            <div
-              className={`absolute bottom-full right-2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${
-                activeSublink === "settings"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4 pointer-events-none"
-              }`}
-            >
-              <div className="flex flex-col space-y-3">
-                {settingsLinks.map((link) =>
-                  link.onClick ? (
+                    {link.icon}
                     <div
-                      key={link.name}
-                      className="flex items-center gap-3 p-2 hover:bg-[var(--grey--200)] rounded-xl cursor-pointer whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95"
-                      onClick={() => {
-                        link.onClick();
-                        setActiveSublink(null);
-                      }}
+                      className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${
+                        activeSublink === index
+                          ? "opacity-100 translate-y-0"
+                          : "opacity-0 translate-y-4 pointer-events-none"
+                      }`}
                     >
-                      <div className="text-xl text-[var(--grey--800)]">
-                        {link.icon}
+                      <div className="flex flex-col space-y-3">
+                        {link.sublinks.map((sublink) => {
+                          // Check if the sublink is for videos or podcasts
+
+                          return (
+                            <NavLink
+                              key={sublink.name}
+                              to={sublink.address}
+                              className={({ isActive }) =>
+                                `flex items-center gap-3 p-2 rounded-xl whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95 ${
+                                  isActive
+                                    ? "bg-[var(--blue--100)] text-[var(--ternery)] shadow-sm"
+                                    : "hover:bg-[var(--grey--200)] text-[var(--grey--800)]"
+                                }`
+                              }
+                              onClick={() => setActiveSublink(null)}
+                            >
+                              <div className="text-xl">{sublink.icon}</div>
+                              <span className="text-sm">{sublink.name}</span>
+                            </NavLink>
+                          );
+                        })}
                       </div>
-                      <span className="text-sm text-[var(--grey--800)]">
-                        {link.name}
-                      </span>
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[var(--white-color)] transform rotate-45 border-r border-b border-[var(--grey--400)] z-[-1]"></div>
                     </div>
-                  ) : (
-                    <Link
-                      key={link.name}
-                      to={link.address}
-                      className="flex items-center gap-3 p-2 hover:bg-[var(--grey--200)] rounded-xl whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95"
-                      onClick={() => setActiveSublink(null)}
-                    >
-                      <div className="text-xl text-[var(--grey--800)]">
-                        {link.icon}
-                      </div>
-                      <span className="text-sm text-[var(--grey--800)]">
-                        {link.name}
-                      </span>
-                    </Link>
-                  )
+                  </div>
+                ) : (
+                  <NavLink
+                    to={link.address}
+                    className={({ isActive }) =>
+                      `p-2 text-2xl transform transition-all duration-150 hover:scale-110 active:scale-95 ${
+                        isActive
+                          ? "text-[var(--ternery)]"
+                          : "text-[var(--grey--800)] hover:text-[var(--ternery)]"
+                      }`
+                    }
+                  >
+                    {link.icon}
+                  </NavLink>
                 )}
               </div>
-              <div className="absolute -bottom-2 right-4 w-4 h-4 bg-[var(--white-color)] transform rotate-45 border-r border-b border-[var(--grey--400)] z-[-1]"></div>
+            ))}
+
+            <div className="relative">
+              <div
+                className="p-2 text-2xl text-[var(--grey--800)] hover:text-[var(--ternery)] transform transition-all duration-150 hover:scale-110 active:scale-95"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleSublink("settings");
+                }}
+              >
+                <BsThreeDotsVertical />
+              </div>
+              <div
+                className={`absolute bottom-full right-2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${
+                  activeSublink === "settings"
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4 pointer-events-none"
+                }`}
+              >
+                <div className="flex flex-col space-y-3">
+                  {settingsLinks.map((link) =>
+                    link.onClick ? (
+                      <div
+                        key={link.name}
+                        className="flex items-center gap-3 p-2 hover:bg-[var(--grey--200)] rounded-xl cursor-pointer whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95"
+                        onClick={() => {
+                          link.onClick();
+                          setActiveSublink(null);
+                        }}
+                      >
+                        <div className="text-xl text-[var(--grey--800)]">
+                          {link.icon}
+                        </div>
+                        <span className="text-sm text-[var(--grey--800)]">
+                          {link.name}
+                        </span>
+                      </div>
+                    ) : (
+                      <Link
+                        key={link.name}
+                        to={link.address}
+                        className="flex items-center gap-3 p-2 hover:bg-[var(--grey--200)] rounded-xl whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95"
+                        onClick={() => setActiveSublink(null)}
+                      >
+                        <div className="text-xl text-[var(--grey--800)]">
+                          {link.icon}
+                        </div>
+                        <span className="text-sm text-[var(--grey--800)]">
+                          {link.name}
+                        </span>
+                      </Link>
+                    )
+                  )}
+                </div>
+                <div className="absolute -bottom-2 right-4 w-4 h-4 bg-[var(--white-color)] transform rotate-45 border-r border-b border-[var(--grey--400)] z-[-1]"></div>
+              </div>
             </div>
           </div>
-        </div>
-      </nav>}
+        </nav>
+      )}
     </>
   );
 }

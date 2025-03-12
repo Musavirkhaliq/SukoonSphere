@@ -68,12 +68,14 @@ const NotificationItem = ({ item, type }) => {
 
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center space-x-2">
+          <span className="text-[var(--grey--900)]">
           <Link to={`/about/user/${item.createdBy._id}`}>
             <span className="text-sm font-medium text-[var(--ternery)] line-clamp-2 capitalize hover:underline block">
               {item.createdBy?.name}{" "}
             </span>
           </Link>
-          <span className="text-[var(--grey--900)]">{config.message}</span>
+            {config.message}
+            </span>
         </div>
 
         <div className="flex items-center space-x-2 text-xs text-[var(--grey--800)]">
