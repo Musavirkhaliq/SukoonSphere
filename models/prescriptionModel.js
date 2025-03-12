@@ -50,21 +50,15 @@ const prescriptionSchema = mongoose.Schema({
   currentStatus: {
     moodAffect: {
       type: String,
-      enum: ["anxious", "calm"],
-      required: true,
     },
     energyLevels: {
       type: String,
-      enum: ["low", "high"],
-      required: true,
     },
     sleepPatterns: {
       type: String,
-      required: true,
     },
     appetiteChanges: {
       type: String,
-      required: true,
     },
     recentEvents: [String], // e.g., ["Job loss", "Family conflict"]
     selfReportedConcerns: String, // e.g., "Struggling with work stress"
