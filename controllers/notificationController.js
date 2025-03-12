@@ -32,7 +32,7 @@ export const getNotifications = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
- 
+
 export const deleteAllNotifications = async (req, res) => {
   try {
     await Notification.deleteMany({});
@@ -43,7 +43,10 @@ export const deleteAllNotifications = async (req, res) => {
 };
 
 export const totalNotificationCount = async (req, res) => {
+  if (!req.user) {
+    return res.status(200).json({ count: 0 });
+  }
   const { userId } = req.user;
-    const count = await Notification.countDocuments({ userId , seen: false});
-    res.status(200).json({count});
-  } 
+  const count = await Notification.countDocuments({ userId, seen: false });
+  res.status(200).json({ count });
+};
