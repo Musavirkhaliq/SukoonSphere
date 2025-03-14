@@ -21,11 +21,9 @@ const prescriptionSchema = mongoose.Schema({
   },
   therapistDetails: {
     name: String,
-    age: Number,
-    gender: String,
     contactNumber: String,
-    specialties: [String], // e.g., ["CBT", "Trauma"]
-    credentials: String, // e.g., "PhD, LMFT"
+    specialties: [String],
+    credentials: String,
   },
 
   basicDetails: {
@@ -60,77 +58,75 @@ const prescriptionSchema = mongoose.Schema({
     appetiteChanges: {
       type: String,
     },
-    recentEvents: [String], // e.g., ["Job loss", "Family conflict"]
-    selfReportedConcerns: String, // e.g., "Struggling with work stress"
+    recentEvents: [String],
+    selfReportedConcerns: String,
     medication: [
       {
-        name: String, // e.g., "Sertraline"
-        dosage: String, // e.g., "50mg"
-        adherence: String, // e.g., "Consistent", "Missed doses"
+        name: String,
+        dosage: String,
+        frequency: String,
+        duration: String,
+        adherence: String,
       },
     ],
-    physicalHealth: String, // e.g., "Chronic back pain"
-    substanceUse: String, // Optional, e.g., "Occasional alcohol"
+    physicalHealth: String,
+    substanceUse: String,
   },
   sessionSummary: {
-    topicsDiscussed: [String], // e.g., ["Work stress", "Relationships"]
-    insightsBreakthroughs: String, // e.g., "Realized avoidance pattern"
-    emotionalResponses: [String], // e.g., ["Frustration", "Relief"]
-    techniquesUsed: [String], // e.g., ["CBT", "Mindfulness"]
-    engagementLevel: String, // e.g., "Highly engaged"
-    notableQuotes: [String], // e.g., ["I can’t keep going like this"]
+    topicsDiscussed: [String],
+    insightsBreakthroughs: String,
+    emotionalResponses: [String],
+    techniquesUsed: [String],
+    engagementLevel: String,
+    notableQuotes: [String],
   },
   therapistObservations: {
-    behavior: String, // e.g., "Poor eye contact"
-    cognitivePatterns: String, // e.g., "Distorted thinking"
-    emotionalReactions: String, // e.g., "Avoidance"
-    progress: String, // e.g., "Improved since last session"
-    concerns: String, // e.g., "Mild suicidal ideation"
+    behavior: String,
+    cognitivePatterns: String,
+    emotionalReactions: String,
+    progress: String,
+    concerns: String,
   },
   actionPlan: {
-    goals: [String], // e.g., ["Reduce anxiety"]
-    homework: [String], // e.g., ["Journal daily"]
-    copingStrategies: [String], // e.g., ["Deep breathing"]
-    lifestyleAdjustments: [String], // e.g., ["Improve sleep hygiene"]
-    resourcesShared: [String], // e.g., ["Mindfulness app"]
+    goals: [String],
+    homework: [String],
+    copingStrategies: [String],
+    lifestyleAdjustments: [String],
+    resourcesShared: [String],
   },
   therapistNotes: {
-    keyTakeaways: String, // e.g., "Patient needs family support"
-    risksConcerns: String, // e.g., "Monitor for self-harm"
-    additionalSupport: String, // e.g., "Refer to psychiatrist"
-    readiness: String, // e.g., "Stable"
-    ethicalConsiderations: String, // e.g., "Confidentiality discussed"
+    keyTakeaways: String,
+    risksConcerns: String,
+    additionalSupport: String,
+    readiness: String,
+    ethicalConsiderations: String,
   },
   prescriptions: [
     {
-      medication: String, // e.g., "Zoloft"
-      dosage: String, // e.g., "50mg daily"
-      sideEffects: [String], // e.g., ["Nausea"]
-      changes: String, // e.g., "Increased from 25mg"
-      monitoring: String, // e.g., "Check in 2 weeks"
+      medication: String,
+      dosage: String,
+      frequency: String,
+      duration: String,
+      changes: String,
     },
   ],
   referrals: [
     {
-      specialist: String, // e.g., "Psychiatrist"
-      reason: String, // e.g., "Medication review"
+      specialist: String,
+      reason: String,
     },
   ],
-  labTests: [String], // e.g., ["Bloodwork for thyroid"]
+  labTests: [String],
   followUp: {
-    nextSession: Date, // Next session date & time
-    preparations: String, // e.g., "Bring journal"
-    emergencyPlan: String, // e.g., "Call crisis line if needed"
-    crisisManagement: String, // e.g., "Safety plan created"
-    availability: String, // e.g., "Prefers mornings"
+    nextSession: Date,
   },
   patientFeedback: {
-    selfReflection: String, // e.g., "Felt lighter after talking"
-    rating: Number, // e.g., 4 (out of 5)
-    progressPerception: String, // e.g., "Slow but steady"
-    openFeedback: String, // e.g., "Liked the homework"
-    emotionalStatePost: String, // e.g., "Calmer"
-    suggestions: String, // e.g., "Focus on work stress next"
+    selfReflection: String,
+    rating: Number,
+    progressPerception: String,
+    openFeedback: String,
+    emotionalStatePost: String,
+    suggestions: String,
   },
   createdAt: Date,
   updatedAt: Date,
