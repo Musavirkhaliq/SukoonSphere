@@ -16,7 +16,6 @@ import {
   FiList,
   FiSave,
 } from "react-icons/fi";
-import { format } from "date-fns";
 import customFetch from "@/utils/customFetch";
 import { useParams } from "react-router-dom";
 
@@ -103,22 +102,22 @@ const TagInput = ({
         />
         <button
           type="button"
-          className="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600"
+          className="px-4 py-2 bg-[var(--primary)] text-white rounded-r hover:bg-[var(--primary-dark)]"
           onClick={handleAdd}
         >
-          Add
+          +
         </button>
       </div>
       <div className="flex flex-wrap mt-2">
         {tags.map((item, index) => (
           <div
             key={index}
-            className="flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm mr-2 mb-2"
+            className="flex items-center bg-[var(--primary)] text-white px-3 py-1 text-sm mr-2 mb-2"
           >
             {item}
             <button
               type="button"
-              className="ml-2 text-blue-500 hover:text-blue-700 focus:outline-none"
+              className="ml-2 text-white hover:text-gray-200 focus:outline-none"
               onClick={() => handleRemove(index)}
             >
               ×
@@ -168,22 +167,22 @@ const ArrayTagInput = ({ section, placeholder, formData, setFormData }) => {
         />
         <button
           type="button"
-          className="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600"
+          className="px-4 py-2 bg-[var(--primary)] text-white rounded-r hover:bg-[var(--primary-dark)]"
           onClick={handleAdd}
         >
-          Add
+          +
         </button>
       </div>
       <div className="flex flex-wrap mt-2">
         {formData[section].map((item, index) => (
           <div
             key={index}
-            className="flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm mr-2 mb-2"
+            className="flex items-center bg-[var(--primary)] text-white px-3 py-1 text-sm mr-2 mb-2"
           >
             {item}
             <button
               type="button"
-              className="ml-2 text-blue-500 hover:text-blue-700 focus:outline-none"
+              className="ml-2 text-white hover:text-gray-200 focus:outline-none"
               onClick={() => handleRemove(index)}
             >
               ×
@@ -208,8 +207,6 @@ const GivePrescription = () => {
     patientDetails: { name: "", age: "", gender: "", contactNumber: "" },
     therapistDetails: {
       name: "",
-      age: "",
-      gender: "",
       contactNumber: "",
       specialties: [],
       credentials: "",
@@ -227,7 +224,9 @@ const GivePrescription = () => {
       appetiteChanges: "",
       recentEvents: [],
       selfReportedConcerns: "",
-      medication: [{ name: "", dosage: "", adherence: "" }],
+      medication: [
+        { name: "", dosage: "", frequency: "", duration: "", adherence: "" },
+      ],
       physicalHealth: "",
       substanceUse: "",
     },
@@ -264,9 +263,9 @@ const GivePrescription = () => {
       {
         medication: "",
         dosage: "",
-        sideEffects: [],
+        frequency: "",
+        duration: "",
         changes: "",
-        monitoring: "",
       },
     ],
     referrals: [{ specialist: "", reason: "" }],
@@ -275,23 +274,17 @@ const GivePrescription = () => {
       nextSession: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         .toISOString()
         .slice(0, 16),
-      preparations: "",
-      emergencyPlan: "",
-      crisisManagement: "",
-      availability: "",
     },
     patientFeedback: {
       selfReflection: "",
       rating: 3,
       progressPerception: "",
-      openFeedback: "", // Added from schema
+      openFeedback: "",
       emotionalStatePost: "",
-      suggestions: "", // Added from schema
-      therapyExperience: "", // Added from schema (was missing in UI)
-      additionalComments: "",
+      suggestions: "",
     },
-    createdAt: new Date().toISOString(), // Added from schema
-    updatedAt: new Date().toISOString(), // Added from schema
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   });
 
   useEffect(() => {
@@ -381,14 +374,20 @@ const GivePrescription = () => {
       newItem = {
         medication: "",
         dosage: "",
-        sideEffects: [],
+        frequency: "",
+        duration: "",
         changes: "",
-        monitoring: "",
       };
     } else if (section === "referrals") {
       newItem = { specialist: "", reason: "" };
     } else if (nestedSection === "medication") {
-      newItem = { name: "", dosage: "", adherence: "" };
+      newItem = {
+        name: "",
+        dosage: "",
+        frequency: "",
+        duration: "",
+        adherence: "",
+      };
     }
     setFormData((prev) => {
       if (nestedSection) {
@@ -425,16 +424,6 @@ const GivePrescription = () => {
         [section]: prev[section].filter((_, i) => i !== index),
       };
     });
-  };
-
-  const handleSideEffectChange = (prescriptionIndex, value) => {
-    if (value.trim() === "") return;
-    const newPrescriptions = [...formData.prescriptions];
-    newPrescriptions[prescriptionIndex].sideEffects = [
-      ...newPrescriptions[prescriptionIndex].sideEffects,
-      value,
-    ];
-    setFormData((prev) => ({ ...prev, prescriptions: newPrescriptions }));
   };
 
   const handleSubmit = async (e) => {
@@ -517,19 +506,7 @@ const GivePrescription = () => {
                 className="p-4 hover:bg-gray-100 cursor-pointer"
                 onClick={() => handleViewPreviousSession(session)}
               >
-                <div className="font-medium">
-                  {/* {format(
-                    new Date(session.basicDetails.dateTime),
-                    "MMM d, yyyy"
-                  )} */}
-                </div>
-                {/* <div className="text-sm text-gray-500">
-                  Session #{session.basicDetails.sessionNumber}
-                </div> */}
-                {/* <div className="text-sm text-gray-500">
-                  {session.basicDetails.type} - {session.basicDetails.duration}{" "}
-                  min
-                </div> */}
+                <div className="font-medium">{/* Session date display */}</div>
               </div>
             ))}
           </div>
@@ -543,7 +520,7 @@ const GivePrescription = () => {
               Therapy Session Record
             </h1>
             <button
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
+              className="btn-2 !py-2 !px-4 flex gap-2"
               onClick={() => setShowPreviousSessions(!showPreviousSessions)}
             >
               <FiClipboard />
@@ -560,7 +537,7 @@ const GivePrescription = () => {
                   key={index}
                   className={`flex items-center space-x-1 px-3 py-2 rounded-md mx-1 whitespace-nowrap text-sm font-medium ${
                     activeStep === index
-                      ? "bg-blue-100 text-blue-700"
+                      ? "bg-[var(--primary)] text-white"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                   onClick={() => setActiveStep(index)}
@@ -585,7 +562,6 @@ const GivePrescription = () => {
                     <h3 className="text-lg font-medium border-b pb-2">
                       Patient Details
                     </h3>
-
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Name
@@ -594,6 +570,7 @@ const GivePrescription = () => {
                         type="text"
                         className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                         value={formData.patientDetails.name}
+                        placeholder="Enter Patient Name"
                         onChange={(e) =>
                           handleInputChange(
                             "patientDetails",
@@ -619,6 +596,7 @@ const GivePrescription = () => {
                             e.target.value
                           )
                         }
+                        placeholder="Enter Patient Age"
                       />
                     </div>
                     <div className="mb-4">
@@ -660,6 +638,7 @@ const GivePrescription = () => {
                             e.target.value
                           )
                         }
+                        placeholder="Enter Patient Contact Number"
                       />
                     </div>
                   </div>
@@ -687,47 +666,6 @@ const GivePrescription = () => {
                     </div>
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Age
-                      </label>
-                      <input
-                        type="number"
-                        className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                        value={formData.therapistDetails.age}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "therapistDetails",
-                            "age",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Gender
-                      </label>
-                      <select
-                        className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                        value={formData.therapistDetails.gender}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "therapistDetails",
-                            "gender",
-                            e.target.value
-                          )
-                        }
-                      >
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Non-binary">Non-binary</option>
-                        <option value="Prefer not to say">
-                          Prefer not to say
-                        </option>
-                      </select>
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Contact Number
                       </label>
                       <input
@@ -741,6 +679,7 @@ const GivePrescription = () => {
                             e.target.value
                           )
                         }
+                        placeholder="Enter Therapist Contact Number"
                       />
                     </div>
                     <div className="mb-4">
@@ -907,6 +846,7 @@ const GivePrescription = () => {
                         }
                       >
                         <option value="low">Low</option>
+                        <option value="medium">Medium</option>
                         <option value="high">High</option>
                       </select>
                     </div>
@@ -1045,6 +985,46 @@ const GivePrescription = () => {
                                   "currentStatus",
                                   index,
                                   "dosage",
+                                  e.target.value,
+                                  "medication"
+                                )
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Frequency
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                              placeholder="e.g., Once daily"
+                              value={med.frequency}
+                              onChange={(e) =>
+                                handleObjectArrayChange(
+                                  "currentStatus",
+                                  index,
+                                  "frequency",
+                                  e.target.value,
+                                  "medication"
+                                )
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Duration
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                              placeholder="e.g., 30 days"
+                              value={med.duration}
+                              onChange={(e) =>
+                                handleObjectArrayChange(
+                                  "currentStatus",
+                                  index,
+                                  "duration",
                                   e.target.value,
                                   "medication"
                                 )
@@ -1479,13 +1459,51 @@ const GivePrescription = () => {
                           <input
                             type="text"
                             className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                            placeholder="e.g., 50mg daily"
+                            placeholder="e.g., 50mg"
                             value={prescription.dosage}
                             onChange={(e) =>
                               handleObjectArrayChange(
                                 "prescriptions",
                                 index,
                                 "dosage",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Frequency
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                            placeholder="e.g., Once daily"
+                            value={prescription.frequency}
+                            onChange={(e) =>
+                              handleObjectArrayChange(
+                                "prescriptions",
+                                index,
+                                "frequency",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Duration
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                            placeholder="e.g., 30 days"
+                            value={prescription.duration}
+                            onChange={(e) =>
+                              handleObjectArrayChange(
+                                "prescriptions",
+                                index,
+                                "duration",
                                 e.target.value
                               )
                             }
@@ -1506,46 +1524,6 @@ const GivePrescription = () => {
                                 index,
                                 "changes",
                                 e.target.value
-                              )
-                            }
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Monitoring
-                          </label>
-                          <input
-                            type="text"
-                            className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                            placeholder="e.g., Check in 2 weeks"
-                            value={prescription.monitoring}
-                            onChange={(e) =>
-                              handleObjectArrayChange(
-                                "prescriptions",
-                                index,
-                                "monitoring",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Side Effects
-                          </label>
-                          <TagInput
-                            section="prescriptions"
-                            field="sideEffects"
-                            placeholder="e.g., Nausea (press Enter to add)"
-                            formData={{
-                              prescriptions: {
-                                sideEffects: prescription.sideEffects,
-                              },
-                            }}
-                            setFormData={(newData) =>
-                              handleSideEffectChange(
-                                index,
-                                newData.prescriptions.sideEffects.slice(-1)[0]
                               )
                             }
                           />
@@ -1633,7 +1611,7 @@ const GivePrescription = () => {
                     <FiPlusCircle className="mr-1" /> Add Referral
                   </button>
 
-                  <h3 className="text-lg font-medium mb-3 border-t pt Plants vs Zombies6">
+                  <h3 className="text-lg font-medium mb-3 border-t pt-6">
                     Lab Tests
                   </h3>
                   <ArrayTagInput
@@ -1766,82 +1744,6 @@ const GivePrescription = () => {
                         }
                       />
                     </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Preparations
-                      </label>
-                      <textarea
-                        className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                        placeholder="e.g., Bring journal"
-                        value={formData.followUp.preparations}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "followUp",
-                            "preparations",
-                            e.target.value
-                          )
-                        }
-                        rows="3"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Emergency Plan
-                      </label>
-                      <textarea
-                        className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                        placeholder="e.g., Call crisis line"
-                        value={formData.followUp.emergencyPlan}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "followUp",
-                            "emergencyPlan",
-                            e.target.value
-                          )
-                        }
-                        rows="3"
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Crisis Management
-                      </label>
-                      <textarea
-                        className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                        placeholder="e.g., Safety plan created"
-                        value={formData.followUp.crisisManagement}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "followUp",
-                            "crisisManagement",
-                            e.target.value
-                          )
-                        }
-                        rows="3"
-                      />
-                    </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Availability
-                      </label>
-                      <textarea
-                        className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                        placeholder="e.g., Prefers mornings"
-                        value={formData.followUp.availability}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "followUp",
-                            "availability",
-                            e.target.value
-                          )
-                        }
-                        rows="3"
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1959,44 +1861,6 @@ const GivePrescription = () => {
                           handleInputChange(
                             "patientFeedback",
                             "suggestions",
-                            e.target.value
-                          )
-                        }
-                        rows="3"
-                      />
-                    </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Therapy Experience
-                      </label>
-                      <textarea
-                        className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                        placeholder="e.g., Finding sessions helpful"
-                        value={formData.patientFeedback.therapyExperience}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "patientFeedback",
-                            "therapyExperience",
-                            e.target.value
-                          )
-                        }
-                        rows="3"
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Additional Comments
-                      </label>
-                      <textarea
-                        className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                        placeholder="e.g., Any other feedback"
-                        value={formData.patientFeedback.additionalComments}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "patientFeedback",
-                            "additionalComments",
                             e.target.value
                           )
                         }

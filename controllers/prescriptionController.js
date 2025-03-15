@@ -55,3 +55,8 @@ export const SinglePrescription = async (req, res) => {
   }
   res.status(StatusCodes.OK).json({ prescription });
 };
+
+export const deleteAllPrescriptions = async (req, res) => {
+  await Prescription.deleteMany();
+  res.status(StatusCodes.OK).json({ message: "All prescriptions deleted" });
+};
