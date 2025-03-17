@@ -142,7 +142,9 @@ const ProfileCard = ({ user, fetchUserById }) => {
            </button></>
             )}
             {
-              (user?.role === "user" && user?._id !== currentUser?._id && currentUser?.role === "contributor") &&(
+              // (user?.role === "user" && user?._id !== currentUser?._id && currentUser?.role === "contributor") 
+              (currentUser?.role === "contributor" || user?.role==="contributor") 
+              &&(
                 <Link to={`/prescription/${user?._id}`} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                   Give Prescription
                 </Link>
