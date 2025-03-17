@@ -19,6 +19,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import customFetch from "@/utils/customFetch";
 import companyLogo from "../../assets/images/SukoonSphere_Logo.png";
+import { BiRightArrow } from "react-icons/bi";
 
 const SinglePrescription = () => {
   const { id: prescriptionId } = useParams();
@@ -48,24 +49,13 @@ const SinglePrescription = () => {
       day: "numeric",
     });
   };
+  console.log({ prescription });
 
   const formattedDate = formatDate(prescription?.createdAt);
 
-  // Handle print functionality
-  // const handlePrint = () => {
-  //   const printContents = document.getElementById("print-content").innerHTML;
-  //   const originalContents = document.body.innerHTML;
-  //   document.body.innerHTML = printContents;
-  //   window.print();
-  //   document.body.innerHTML = originalContents;
-  //   window.location.reload(); // Reload to restore the original content
-  // };
-
   const handlePrint = () => {
-    // Create a new print window with book-style layout
     const printWindow = window.open("", "_blank");
 
-    // Add CSS for book styling
     printWindow.document.write(`
     <html>
       <head>
@@ -77,32 +67,25 @@ const SinglePrescription = () => {
             font-family: 'Merriweather', serif;
             background-color: #f5f2e9;
             color: #333;
-            padding: 20px;
+            padding: 0;
+            margin: 0;
             line-height: 1.5;
             font-size: 11pt;
           }
           
           .book-container {
-            max-width: 800px;
+            width: 100%;
             margin: 0 auto;
-            padding: 30px 40px;
+            padding: 10mm 5mm; /* Reduced to 5mm for tighter margins */
             background-color: #fff;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.05) inset;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
             border-radius: 2px;
-            position: relative;
+            box-sizing: border-box;
           }
-          
-          .book-pages {
-            position: relative;
-            padding: 15px 30px;
-            background-color: #fff;
-            z-index: 1;
-            border-left: 1px solid #e5e5e5;
-            min-height: 1100px;
-            background-image: 
-              radial-gradient(rgba(0,0,0,0.02) 2px, transparent 2px);
-            background-size: 28px 28px;
-            background-position: -14px -14px;
+               .book-pages {
+            background-color: #f0f7ff;
+            border-radius: 4px;
+            min-height: 100vh;
           }
           
           .book-binding {
@@ -112,33 +95,16 @@ const SinglePrescription = () => {
             bottom: 0;
             width: 35px;
             background: linear-gradient(to right, #d3c4a9, #f5f2e9);
-            box-shadow: inset -7px 0 10px -5px rgba(0,0,0,0.1);
-            border-right: 1px solid rgba(0,0,0,0.1);
+          }
+       .section-title {
+            font-size: 16px;
+            color: #1e40af;
+            margin-bottom: 8px; 
+            font-weight: 600;
+            display: flex;
+            align-items: center;
           }
           
-          .book-title {
-            text-align: center;
-            font-size: 18px;
-            color: #44546A;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #44546A;
-            padding-bottom: 8px;
-          }
-          
-          .section {
-            margin-bottom: 18px;
-            padding: 10px 15px;
-            border-bottom: 1px dashed #d3c4a9;
-          }
-          
-          .section-title {
-            font-size: 14px;
-            color: #44546A;
-            margin-bottom: 8px;
-            font-weight: bold;
-          }
-          
-          /* Two-column grid for specific sections only */
           .info-grid {
             display: block;
           }
@@ -146,108 +112,109 @@ const SinglePrescription = () => {
           .info-grid.two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 5px 15px;
+            gap: 8px 16px; /* Reduced gaps */
           }
           
           .info-item {
-            margin-bottom: 4px;
-            font-size: 11pt;
+            margin-bottom: 6px; /* Reduced from 8px */
           }
           
           .info-label {
-            font-weight: bold;
-            color: #555;
-            font-size: 10.5pt;
+            font-weight: 700;
+            color: #1f2937;
+            margin-right: 4px;
           }
           
-          .footer {
-            margin-top: 25px;
-            text-align: center;
-            font-size: 9pt;
-            color: #777;
-            padding-top: 15px;
-            border-top: 1px solid #d3c4a9;
+          .bullet {
+            display: inline-block;
+            margin-right: 6px; /* Reduced from 8px */
+            color: #2563eb;
           }
           
           .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #44546A;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            border-bottom: 2px solid #1e40af;
+
           }
-          
+
           .clinic-info {
-            text-align: center;
+            text-align: left;
+            padding-bottom: 0px !important;
+             margin-bottom: 0px !important;
           }
-          
-          .clinic-info h1 {
-            margin-bottom: 5px;
-          }
-          
           .clinic-info p {
-            margin: 2px 0;
-            font-size: 8pt;
+            font-size: 11px;
+            color: #4b5563;
+            padding-bottom: 0px !important;
+            margin-bottom: 0px !important;
           }
-          
           .doctor-info {
-            font-size: 10pt;
+           margin-bottom: 0px !important;
+            padding-bottom: 0px !important;
             text-align: right;
+            color: #4b5563;
           }
           
-          .doctor-info p {
-            margin: 2px 0;
+          .doctor-info h4 {
+           margin-bottom: 0px !important;
+            padding-bottom: 0px !important;
+            font-weight: 700;
+            color: #1f2937;
+          }
+
+          .section{
+            margin: 20px 0px; 
           }
           
-          /* Book edge styling */
-          .page-edge {
-            position: absolute;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(to left, #d3c4a9, #fff);
+      
+          .footer {
+            margin-top: 10mm; /* Reduced from 16px */
+            padding-top: 5mm;
+            border-top: 2px solid #d1d5db;
+            display: flex;
+            justify-content: space-between;
           }
           
-          /* Prescription styling */
-          .prescription-item {
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px dotted #eee;
+          .footer p {
+            color: #4b5563;
           }
           
-          .prescription-item:last-child {
-            border-bottom: none;
-          }
-          
-          /* Full-width sections where applicable */
-          .full-width {
-            width: 100%;
+          .footer .date {
+            font-weight: 700;
+            color: #1f2937;
           }
           
           @media print {
             body {
               background: none;
+              padding: 0;
+              margin: 0;
             }
-            
             .book-container {
               box-shadow: none;
-              padding: 10px;
+              padding: 5mm; /* Consistent small margin */
+              width: 100%;
+              box-sizing: border-box;
             }
-            
             .book-pages {
-              padding: 0 20px;
+              padding: 5mm;
+              min-height: 0;
             }
-            
-            .no-print {
+            .book-binding {
               display: none;
             }
-            
-            /* Remove date/time headers from print */
             @page {
-              margin: 0;
-              size: auto;
+              size: A4;
+              margin: 4px; /* Reduced from 10mm for tighter margins */
+            }
+            /* Forcefully remove all browser headers and footers */
+            @page {
+              @bottom-left { content: " "; }
+              @bottom-center { content: " "; }
+              @bottom-right { content: " "; }
+              margin-header: 0;
+              margin-footer: 0;
             }
           }
         </style>
@@ -255,200 +222,151 @@ const SinglePrescription = () => {
       <body>
         <div class="book-container">
           <div class="book-binding"></div>
-          <div class="page-edge"></div>
           <div class="book-pages">
             <div class="header">
               <div class="clinic-info">
-                <img src="${CompanyLogo}" alt="SukoonSphere Health Logo" class="logo" width="220" />
+                <img src="${CompanyLogo}" alt="SukoonSphere Health Logo" width="220" />
                 <p>Mental Health Prescription & Evaluation</p>
               </div>
               <div class="doctor-info">
-                <p>Dr. Chandana Barat</p>
+                <h4>Dr. Chandana Barat</h4>
                 <p>Ph.D. Biochemistry and Molecular Biology, IISc</p>
                 <p>Phone: 8825063816</p>
               </div>
             </div>
-            
-  `);
-
-    // Write content sections - two columns for basic information sections
-    printWindow.document.write(`
-    <div class="section">
-      <h2 class="section-title">Patient Information</h2>
-      <div class="info-grid two-column">
-        <div class="info-item">
-          <span class="info-label">Name:</span> ${prescription?.patientDetails?.name || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Age:</span> ${prescription?.patientDetails?.age || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Gender:</span> ${prescription?.patientDetails?.gender || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Contact Number:</span> ${prescription?.patientDetails?.contactNumber || "Not specified"}
-        </div>
-      </div>
-    </div>
-
-  `);
-
-    // Current Status section - longer text items better as single column
-    printWindow.document.write(`
-    <div class="section">
-      <h2 class="section-title">Current Status</h2>
-      <div class="info-grid two-column">
-        <div class="info-item">
-          <span class="info-label">Mood/Affect:</span> ${prescription?.currentStatus?.moodAffect || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Energy Levels:</span> ${prescription?.currentStatus?.energyLevels || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Sleep Patterns:</span> ${prescription?.currentStatus?.sleepPatterns || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Appetite Changes:</span> ${prescription?.currentStatus?.appetiteChanges || "Not specified"}
-        </div>
-      </div>
-      <div class="info-grid">  <!-- Single column for potentially longer content -->
-        <div class="info-item">
-          <span class="info-label">Recent Events:</span> ${prescription?.currentStatus?.recentEvents?.join(", ") || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Self-Reported Concerns:</span> ${prescription?.currentStatus?.selfReportedConcerns || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Physical Health:</span> ${prescription?.currentStatus?.physicalHealth || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Substance Use:</span> ${prescription?.currentStatus?.substanceUse || "Not specified"}
-        </div>
-      </div>
-    </div>
-  `);
-
-    // Session Summary - single column for detailed text
-    printWindow.document.write(`
-    <div class="section">
-      <h2 class="section-title">Session Summary</h2>
-      <div class="info-grid">  <!-- Single column for detailed text -->
-        <div class="info-item">
-          <span class="info-label">Topics Discussed:</span> ${prescription?.sessionSummary?.topicsDiscussed?.join(", ") || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Insights & Breakthroughs:</span> ${prescription?.sessionSummary?.insightsBreakthroughs || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Emotional Responses:</span> ${prescription?.sessionSummary?.emotionalResponses?.join(", ") || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Techniques Used:</span> ${prescription?.sessionSummary?.techniquesUsed?.join(", ") || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Engagement Level:</span> ${prescription?.sessionSummary?.engagementLevel || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Notable Quotes:</span> ${prescription?.sessionSummary?.notableQuotes?.join(", ") || "Not specified"}
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2 class="section-title">Action Plan</h2>
-      <div class="info-grid">  <!-- Single column for detailed text -->
-        <div class="info-item">
-          <span class="info-label">Goals:</span> ${prescription?.actionPlan?.goals?.join(", ") || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Homework:</span> ${prescription?.actionPlan?.homework?.join(", ") || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Coping Strategies:</span> ${prescription?.actionPlan?.copingStrategies?.join(", ") || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Lifestyle Adjustments:</span> ${prescription?.actionPlan?.lifestyleAdjustments?.join(", ") || "Not specified"}
-        </div>
-        <div class="info-item">
-          <span class="info-label">Resources Shared:</span> ${prescription?.actionPlan?.resourcesShared?.join(", ") || "Not specified"}
-        </div>
-      </div>
-    </div>
-  `);
-
-    // Add prescriptions - two columns for medication details
-    printWindow.document.write(`
-    <div class="section">
-      <h2 class="section-title">Prescriptions</h2>
-  `);
-
-    if (prescription?.prescriptions && prescription.prescriptions.length > 0) {
-      prescription.prescriptions.forEach((med, index) => {
-        printWindow.document.write(`
-        <div class="prescription-item">
-          <div class="info-grid two-column">
-            <div class="info-item">
-              <span class="info-label">Medication:</span> ${med.medication || "Not specified"}
+              
+            <div class="section">
+              <h2 class="section-title">Patient Information</h2>
+              <div class="info-grid two-column">
+                <div class="info-item"><span class="info-label">Name:</span> ${prescription?.patientDetails?.name || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Age:</span> ${prescription?.patientDetails?.age || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Gender:</span> ${prescription?.patientDetails?.gender || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Contact Number:</span> ${prescription?.patientDetails?.contactNumber || "Not specified"}</div>
+              </div>
             </div>
-            <div class="info-item">
-              <span class="info-label">Dosage:</span> ${med.dosage || "Not specified"}
-            </div>
-            <div class="info-item">
-              <span class="info-label">Side Effects:</span> ${med.sideEffects?.join(", ") || "Not specified"}
-            </div>
-            <div class="info-item">
-              <span class="info-label">Changes:</span> ${med.changes || "Not specified"}
-            </div>
-            <div class="info-item">
-              <span class="info-label">Monitoring:</span> ${med.monitoring || "Not specified"}
-            </div>
-          </div>
-        </div>
-      `);
-      });
-    } else {
-      printWindow.document.write(`<p>No prescriptions specified</p>`);
-    }
 
-    printWindow.document.write(`</div>`);
+            <div class="section">
+              <h2 class="section-title">Current Status</h2>
+              <div class="">
+                <div class="info-item"><span class="info-label">Mood/Affect:</span> ${prescription?.currentStatus?.moodAffect || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Energy Levels:</span> ${prescription?.currentStatus?.energyLevels || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Sleep Patterns:</span> ${
+                  prescription?.currentStatus?.sleepPatterns
+                    ?.split("##")
+                    .map((line) => `<br><span class="bullet">→</span>${line}`)
+                    .join("") || "Not specified"
+                }</div>
+                <div class="info-item"><span class="info-label">Appetite Changes:</span> ${
+                  prescription?.currentStatus?.appetiteChanges
+                    ?.split("##")
+                    .map((line) => `<br><span class="bullet">→</span>${line}`)
+                    .join("") || "Not specified"
+                }</div>
+                <div class="info-item"><span class="info-label">Recent Events:</span> ${prescription?.currentStatus?.recentEvents?.map((event) => `<br><span class="bullet">→</span>${event}`).join("") || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Self-Reported Concerns:</span> ${
+                  prescription?.currentStatus?.selfReportedConcerns
+                    ?.split("##")
+                    .map(
+                      (concern) => `<br><span class="bullet">→</span>${concern}`
+                    )
+                    .join("") || "Not specified"
+                }</div>
+                <div class="info-item"><span class="info-label">Physical Health:</span> ${prescription?.currentStatus?.physicalHealth || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Substance Use:</span> ${prescription?.currentStatus?.substanceUse || "Not specified"}</div>
+              </div>
+              <div class="">
+                <h2 class="section-title" style="margin-top: 8px">Current Medication</h2>
+                ${
+                  prescription?.currentStatus?.medication?.length > 0
+                    ? prescription.currentStatus.medication
+                        .map(
+                          (med) => `
+                    <div class="info-item">
+                      <div><span class="info-label">Name:</span> ${med.name || "Not specified"}</div>
+                      <div><span class="info-label">Dosage:</span> ${med.dosage || "Not specified"}</div>
+                      <div><span class="info-label">Frequency:</span> ${med.frequency || "Not specified"}</div>
+                      <div><span class="info-label">Adherence:</span> ${med.adherence || "Not specified"}</div>
+                      <div><span class="info-label">Duration:</span> ${med.duration || "Not specified"}</div>
+                    </div>
+                  `
+                        )
+                        .join("")
+                    : `<p>No current medications specified</p>`
+                }
+              </div>
+            </div>
 
-    // Complete the document with remaining sections and footer
-    printWindow.document.write(`
+            <div class="section">
+              <h2 class="section-title">Session Summary</h2>
+              <div class="">
+                <div class="info-item"><span class="info-label">Topics Discussed:</span> ${prescription?.sessionSummary?.topicsDiscussed?.map((event) => `<br><span class="bullet">→</span>${event}`).join("") || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Insights & Breakthroughs:</span> ${prescription?.sessionSummary?.insightsBreakthroughs || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Emotional Responses:</span> ${prescription?.sessionSummary?.emotionalResponses?.map((event) => `<br><span class="bullet">→</span>${event}`).join("") || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Techniques Used:</span> ${prescription?.sessionSummary?.techniquesUsed?.map((event) => `<br><span class="bullet">→</span>${event}`).join("") || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Engagement Level:</span> ${prescription?.sessionSummary?.engagementLevel || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Notable Quotes:</span> ${prescription?.sessionSummary?.notableQuotes?.map((quote) => `<br><span class="bullet">→</span>${quote}`).join("") || "Not specified"}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Action Plan</h2>
+              <div class="">
+                <div class="info-item"><span class="info-label">Goals:</span> ${prescription?.actionPlan?.goals?.map((goal) => `<br><span class="bullet">→</span>${goal}`).join("") || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Homework:</span> ${prescription?.actionPlan?.homework?.map((homework) => `<br><span class="bullet">→</span>${homework}`).join("") || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Coping Strategies:</span> ${prescription?.actionPlan?.copingStrategies?.map((strategy) => `<br><span class="bullet">→</span>${strategy}`).join("") || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Lifestyle Adjustments:</span> ${prescription?.actionPlan?.lifestyleAdjustments?.map((adj) => `<br><span class="bullet">→</span>${adj}`).join("") || "Not specified"}</div>
+                <div class="info-item"><span class="info-label">Resources Shared:</span> ${prescription?.actionPlan?.resourcesShared?.join(", ") || "Not specified"}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Prescriptions</h2>
+              <div class="info-grid ${prescription?.prescriptions?.length > 1 ? "two-column" : ""}">
+                ${
+                  prescription?.prescriptions &&
+                  prescription.prescriptions.length > 0
+                    ? prescription.prescriptions
+                        .map(
+                          (med) => `
+                    <div class="info-item">
+                      <div><span class="info-label">Medication:</span> ${med.medication || "Not specified"}</div>
+                      <div><span class="info-label">Dosage:</span> ${med.dosage || "Not specified"}</div>
+                      <div><span class="info-label">Frequency:</span> ${med.frequency || "Not specified"}</div>
+                      <div><span class="info-label">Duration:</span> ${med.duration || "Not specified"}</div>
+                      <div><span class="info-label">Changes:</span> ${med.changes || "Not specified"}</div>
+                    </div>
+                  `
+                        )
+                        .join("")
+                    : `<p>No prescriptions specified</p>`
+                }
+              </div>
+            </div>
+
             <div class="section">
               <h2 class="section-title">Follow-Up</h2>
               <div class="info-grid two-column">
-                <div class="info-item">
-                  <span class="info-label">Next Session:</span> ${formatDate(prescription?.followUp?.nextSession) || "Not specified"}
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Preparations:</span> ${prescription?.followUp?.preparations || "Not specified"}
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Emergency Plan:</span> ${prescription?.followUp?.emergencyPlan || "Not specified"}
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Crisis Management:</span> ${prescription?.followUp?.crisisManagement || "Not specified"}
-                </div>
+                <div class="info-item"><span class="info-label">Next Session:</span> ${formatDate(prescription?.followUp?.nextSession) || "Not specified"}</div>
               </div>
             </div>
             
             <div class="footer">
-              <p>SukoonSphere Health - Mental Health Services</p>
-              <p>Issue Date: ${formattedDate}</p>
+              <div>
+                <p><span class="info-label">SukoonSphere Health</span></p>
+                <p>Mental Health Services</p>
+              </div>
+              <div class="date">
+                <p>Issue Date: ${formattedDate}</p>
+              </div>
             </div>
           </div>
         </div>
         
         <script>
           window.onload = function() {
-            // Remove browser-generated headers and footers
-            const style = document.createElement('style');
-            style.innerHTML = '@page { size: auto; margin: 0mm; }';
-            document.head.appendChild(style);
-            
-            // Print after a short delay to ensure styles are applied
             setTimeout(function() {
               window.print();
+              window.close();
             }, 500);
           }
         </script>
@@ -469,100 +387,83 @@ const SinglePrescription = () => {
             <img
               src={companyLogo}
               alt="Sukoonsphere Logo"
-              width={120}
+              width={260}
               height={100}
               className="inline-block"
             />
-            <h1 className="text-2xl font-bold text-blue-800">
-              SukoonSphere Health
-            </h1>
-            <p className="text-gray-600">
+            <p className="text-[var(--grey--800)] text-md">
               Mental Health Prescription & Evaluation
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-[var(--grey--800)] mt-2">
               <h4 className="text-md font-bold text-[var(--grey--900)]">
                 Dr. Chandana Barat
               </h4>
               <span className="font-semibold"></span> Ph.D. Biochemistry and
               Molecular Biology, IISc
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-[var(--grey--800)]">
               <FaPhone className="inline mr-1" />
               8825063816
             </p>
           </div>
         </div>
 
-        {/* Patient Information */}
-        <section className="mb-6">
+        {/* Patient & Therapist Information */}
+        <section className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-blue-50 p-4 rounded-md">
             <h2 className="text-xl font-semibold text-blue-800 mb-3 flex items-center">
               <FaUser className="mr-2" /> Patient Information
             </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p>
-                  <span className="font-semibold">Name:</span>{" "}
-                  {prescription?.patientDetails?.name || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Age:</span>{" "}
-                  {prescription?.patientDetails?.age || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Gender:</span>{" "}
-                  {prescription?.patientDetails?.gender || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Contact Number:</span>{" "}
-                  {prescription?.patientDetails?.contactNumber ||
-                    "Not specified"}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 gap-1">
+              <p>
+                <span className="font-bold text-[var(--grey--900)] ">
+                  Name:
+                </span>{" "}
+                {prescription?.patientDetails?.name || "Not specified"}
+              </p>
+              <p>
+                <span className="font-bold text-[var(--grey--900)]">Age:</span>{" "}
+                {prescription?.patientDetails?.age || "Not specified"}
+              </p>
+              <p>
+                <span className="font-bold text-[var(--grey--900)]">
+                  Gender:
+                </span>{" "}
+                {prescription?.patientDetails?.gender || "Not specified"}
+              </p>
+              <p>
+                <span className="font-bold text-[var(--grey--900)]">
+                  Contact Number:
+                </span>{" "}
+                {prescription?.patientDetails?.contactNumber || "Not specified"}
+              </p>
             </div>
           </div>
-        </section>
-
-        {/* Therapist Information */}
-        <section className="mb-6">
           <div className="bg-blue-50 p-4 rounded-md">
             <h2 className="text-xl font-semibold text-blue-800 mb-3 flex items-center">
               <FaUserMd className="mr-2" /> Therapist Information
             </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p>
-                  <span className="font-semibold">Name:</span>{" "}
-                  {prescription?.therapistDetails?.name || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Age:</span>{" "}
-                  {prescription?.therapistDetails?.age || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Gender:</span>{" "}
-                  {prescription?.therapistDetails?.gender || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Contact Number:</span>{" "}
-                  {prescription?.therapistDetails?.contactNumber ||
-                    "Not specified"}
-                </p>
-              </div>
-              <div>
-                <p>
-                  <span className="font-semibold">Credentials:</span>{" "}
-                  {prescription?.therapistDetails?.credentials ||
-                    "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Specialties:</span>{" "}
-                  {prescription?.therapistDetails?.specialties?.join(", ") ||
-                    "Not specified"}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 gap-1">
+              <p>
+                <span className="font-semibold">Name:</span>{" "}
+                {prescription?.therapistDetails?.name || "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Credentials:</span>{" "}
+                {prescription?.therapistDetails?.credentials || "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Specialties:</span>{" "}
+                {prescription?.therapistDetails?.specialties?.join(", ") ||
+                  "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Contact Number:</span>{" "}
+                {prescription?.therapistDetails?.contactNumber ||
+                  "Not specified"}
+              </p>
             </div>
           </div>
         </section>
@@ -609,45 +510,170 @@ const SinglePrescription = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p>
-                  <span className="font-semibold">Mood/Affect:</span>{" "}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Mood/Affect:
+                  </span>{" "}
                   {prescription?.currentStatus?.moodAffect || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Energy Levels:</span>{" "}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Energy Levels:
+                  </span>{" "}
                   {prescription?.currentStatus?.energyLevels || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Sleep Patterns:</span>{" "}
-                  {prescription?.currentStatus?.sleepPatterns ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Sleep Patterns:
+                  </span>{" "}
+                  {prescription?.currentStatus?.sleepPatterns
+                    ?.split("##")
+                    .map((line, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {line}
+                      </React.Fragment>
+                    )) || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Appetite Changes:</span>{" "}
-                  {prescription?.currentStatus?.appetiteChanges ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Appetite Changes:
+                  </span>{" "}
+                  {prescription?.currentStatus?.appetiteChanges
+                    ?.split("##")
+                    .map((line, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {line}
+                      </React.Fragment>
+                    )) || "Not specified"}
                 </p>
               </div>
               <div>
                 <p>
-                  <span className="font-semibold">Recent Events:</span>{" "}
-                  {prescription?.currentStatus?.recentEvents?.join(", ") ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Recent Events:
+                  </span>
+                  {prescription?.currentStatus?.recentEvents?.map(
+                    (event, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {event}
+                      </React.Fragment>
+                    )
+                  ) || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Self-Reported Concerns:</span>{" "}
-                  {prescription?.currentStatus?.selfReportedConcerns ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Self-Reported Concerns:
+                  </span>{" "}
+                  {prescription?.currentStatus?.selfReportedConcerns
+                    ?.split("##")
+                    .map((concern, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {concern}
+                      </React.Fragment>
+                    )) || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Physical Health:</span>{" "}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Physical Health:
+                  </span>{" "}
                   {prescription?.currentStatus?.physicalHealth ||
                     "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Substance Use:</span>{" "}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Substance Use:
+                  </span>{" "}
                   {prescription?.currentStatus?.substanceUse || "Not specified"}
                 </p>
               </div>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-blue-800 mb-3 flex items-center">
+                <FaClipboardList className="mr-2" /> Current Medication
+              </h2>
+              <ul className="list-disc pl-4 grid grid-cols-2 gap-4 border-l-4 border-[var(--primary)]">
+                {prescription?.currentStatus?.medication?.map(
+                  (medication, index) => (
+                    <div
+                      className="grid grid-cols-2 gap-4"
+                      key={medication._id}
+                    >
+                      <li>
+                        <p>
+                          <span className="font-bold text-base text-[var(--grey--900)]">
+                            Name:
+                          </span>{" "}
+                          {medication?.name || "Not specified"}
+                        </p>
+                        <p>
+                          <span className="font-bold text-base text-[var(--grey--900)]">
+                            Dosage:
+                          </span>{" "}
+                          {medication?.dosage || "Not specified"}
+                        </p>
+                        <p>
+                          <span className="font-bold text-base text-[var(--grey--900)]">
+                            Frequency:
+                          </span>{" "}
+                          {medication?.frequency || "Not specified"}
+                        </p>
+                        <p>
+                          <span className="font-bold text-base text-[var(--grey--900)]">
+                            Adherence:
+                          </span>{" "}
+                          {medication?.adherence || "Not specified"}
+                        </p>
+                        <p>
+                          <span className="font-bold text-base text-[var(--grey--900)]">
+                            Duration:
+                          </span>{" "}
+                          {medication?.duration || "Not specified"}
+                        </p>
+                      </li>
+                      {prescription?.currentStatus?.medication?.length > 1 &&
+                        index !==
+                          prescription?.currentStatus?.medication?.length -
+                            1 && (
+                          <li key={medication._id}>
+                            <p>
+                              <span className="font-semibold">Name:</span>{" "}
+                              {prescription?.currentStatus?.medication[
+                                index + 1
+                              ]?.name || "Not specified"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Dosage:</span>{" "}
+                              {prescription?.currentStatus?.medication[
+                                index + 1
+                              ]?.dosage || "Not specified"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Frequency:</span>{" "}
+                              {prescription?.currentStatus?.medication[
+                                index + 1
+                              ]?.frequency || "Not specified"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Adherence:</span>{" "}
+                              {prescription?.currentStatus?.medication[
+                                index + 1
+                              ]?.adherence || "Not specified"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Duration:</span>{" "}
+                              {prescription?.currentStatus?.medication[
+                                index + 1
+                              ]?.duration || "Not specified"}
+                            </p>
+                          </li>
+                        )}
+                    </div>
+                  )
+                )}
+              </ul>
             </div>
           </div>
         </section>
@@ -661,39 +687,72 @@ const SinglePrescription = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p>
-                  <span className="font-semibold">Topics Discussed:</span>{" "}
-                  {prescription?.sessionSummary?.topicsDiscussed?.join(", ") ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Recent Events:
+                  </span>
+                  {prescription?.sessionSummary?.topicsDiscussed?.map(
+                    (event, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {event}
+                      </React.Fragment>
+                    )
+                  ) || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">
+                  <span className="font-bold text-base text-[var(--grey--900)]">
                     Insights & Breakthroughs:
                   </span>{" "}
                   {prescription?.sessionSummary?.insightsBreakthroughs ||
                     "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Emotional Responses:</span>{" "}
-                  {prescription?.sessionSummary?.emotionalResponses?.join(
-                    ", "
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Emotional Responses:
+                  </span>
+                  {prescription?.sessionSummary?.emotionalResponses?.map(
+                    (event, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {event}
+                      </React.Fragment>
+                    )
                   ) || "Not specified"}
                 </p>
               </div>
               <div>
                 <p>
-                  <span className="font-semibold">Techniques Used:</span>{" "}
-                  {prescription?.sessionSummary?.techniquesUsed?.join(", ") ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Techniques Used:
+                  </span>{" "}
+                  {prescription?.sessionSummary?.techniquesUsed?.map(
+                    (event, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {event}
+                      </React.Fragment>
+                    )
+                  ) || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Engagement Level:</span>{" "}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Engagement Level:
+                  </span>{" "}
                   {prescription?.sessionSummary?.engagementLevel ||
                     "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Notable Quotes:</span>{" "}
-                  {prescription?.sessionSummary?.notableQuotes?.join(", ") ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Notable Quotes:
+                  </span>{" "}
+                  {prescription?.sessionSummary?.notableQuotes?.map(
+                    (quote, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {quote}
+                      </React.Fragment>
+                    )
+                  ) || "Not specified"}
                 </p>
               </div>
             </div>
@@ -709,32 +768,67 @@ const SinglePrescription = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p>
-                  <span className="font-semibold">Goals:</span>{" "}
-                  {prescription?.actionPlan?.goals?.join(", ") ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Goals:
+                  </span>{" "}
+                  {prescription?.actionPlan?.goals?.map((goal, index) => (
+                    <React.Fragment key={index}>
+                      <br />
+                      <BiRightArrow className="inline" /> {goal}
+                    </React.Fragment>
+                  )) || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Homework:</span>{" "}
-                  {prescription?.actionPlan?.homework?.join(", ") ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Homework:
+                  </span>{" "}
+                  {prescription?.actionPlan?.homework?.map(
+                    (homework, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {homework}
+                      </React.Fragment>
+                    )
+                  ) || "Not specified"}
                 </p>
               </div>
               <div>
                 <p>
-                  <span className="font-semibold">Coping Strategies:</span>{" "}
-                  {prescription?.actionPlan?.copingStrategies?.join(", ") ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Coping Strategies:
+                  </span>{" "}
+                  {prescription?.actionPlan?.copingStrategies?.map(
+                    (copingStrategy, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {copingStrategy}
+                      </React.Fragment>
+                    )
+                  ) || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Lifestyle Adjustments:</span>{" "}
-                  {prescription?.actionPlan?.lifestyleAdjustments?.join(", ") ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Lifestyle Adjustments:
+                  </span>{" "}
+                  {prescription?.actionPlan?.lifestyleAdjustments?.map(
+                    (lifestyleAdjustment, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" />{" "}
+                        {lifestyleAdjustment}
+                      </React.Fragment>
+                    )
+                  ) || "Not specified"}
                 </p>
-                <p>
-                  <span className="font-semibold">Resources Shared:</span>{" "}
-                  {prescription?.actionPlan?.resourcesShared?.join(", ") ||
-                    "Not specified"}
-                </p>
+                {prescription?.actionPlan?.resourcesShared && (
+                  <p>
+                    <span className="font-bold text-base text-[var(--grey--900)]">
+                      Resources Shared:
+                    </span>{" "}
+                    {prescription?.actionPlan?.resourcesShared?.join(", ") ||
+                      "Not specified"}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -746,30 +840,75 @@ const SinglePrescription = () => {
             <h2 className="text-xl font-semibold text-blue-800 mb-3 flex items-center">
               <FaPills className="mr-2" /> Prescriptions
             </h2>
-            {prescription?.prescriptions?.map((prescription, index) => (
-              <div key={index} className="mb-4">
-                <p>
-                  <span className="font-semibold">Medication:</span>{" "}
-                  {prescription.medication || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Dosage:</span>{" "}
-                  {prescription.dosage || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Side Effects:</span>{" "}
-                  {prescription.sideEffects?.join(", ") || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Changes:</span>{" "}
-                  {prescription.changes || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Monitoring:</span>{" "}
-                  {prescription.monitoring || "Not specified"}
-                </p>
+            {prescription?.prescriptions?.length > 1 ? (
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {prescription.prescriptions.map((prescription, index) => (
+                  <div key={index} className="mb-4">
+                    <p>
+                      <span className="font-bold text-base text-[var(--grey--900)]">
+                        Medication:
+                      </span>{" "}
+                      {prescription.medication || "Not specified"}
+                    </p>
+                    <p>
+                      <span className="font-bold text-base text-[var(--grey--900)]">
+                        Dosage:
+                      </span>{" "}
+                      {prescription.dosage || "Not specified"}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Side Effects:</span>{" "}
+                      {prescription.sideEffects?.join(", ") || "Not specified"}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Changes:</span>{" "}
+                      {prescription.changes || "Not specified"}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Monitoring:</span>{" "}
+                      {prescription.monitoring || "Not specified"}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div>
+                {prescription?.prescriptions?.map((prescription, index) => (
+                  <div key={index} className="mb-4">
+                    <p>
+                      <span className="font-bold text-base text-[var(--grey--900)]">
+                        Medication:
+                      </span>{" "}
+                      {prescription.medication || "Not specified"}
+                    </p>
+                    <p>
+                      <span className="font-bold text-base text-[var(--grey--900)]">
+                        Dosage:
+                      </span>{" "}
+                      {prescription.dosage || "Not specified"}
+                    </p>
+                    <p>
+                      <span className="font-bold text-base text-[var(--grey--900)]">
+                        Side Effects:
+                      </span>{" "}
+                      {prescription.sideEffects?.join(", ") || "Not specified"}
+                    </p>
+                    <p>
+                      <span className="font-bold text-base text-[var(--grey--900)]">
+                        Changes:
+                      </span>{" "}
+                      {prescription.changes || "Not specified"}
+                    </p>
+                    <p>
+                      <span className="font-bold text-base text-[var(--grey--900)]">
+                        Monitoring:
+                      </span>{" "}
+                      {prescription.monitoring || "Not specified"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -782,11 +921,15 @@ const SinglePrescription = () => {
             {prescription?.referrals?.map((referral, index) => (
               <div key={index} className="mb-4">
                 <p>
-                  <span className="font-semibold">Specialist:</span>{" "}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Specialist:
+                  </span>{" "}
                   {referral.specialist || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Reason:</span>{" "}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Reason:
+                  </span>{" "}
                   {referral.reason || "Not specified"}
                 </p>
               </div>
@@ -815,27 +958,11 @@ const SinglePrescription = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p>
-                  <span className="font-semibold">Next Session:</span>{" "}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Next Session:
+                  </span>{" "}
                   {formatDate(prescription?.followUp?.nextSession) ||
                     "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Preparations:</span>{" "}
-                  {prescription?.followUp?.preparations || "Not specified"}
-                </p>
-              </div>
-              <div>
-                <p>
-                  <span className="font-semibold">Emergency Plan:</span>{" "}
-                  {prescription?.followUp?.emergencyPlan || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Crisis Management:</span>{" "}
-                  {prescription?.followUp?.crisisManagement || "Not specified"}
-                </p>
-                <p>
-                  <span className="font-semibold">Availability:</span>{" "}
-                  {prescription?.followUp?.availability || "Not specified"}
                 </p>
               </div>
             </div>
@@ -851,32 +978,64 @@ const SinglePrescription = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p>
-                  <span className="font-semibold">Self-Reflection:</span>{" "}
-                  {prescription?.patientFeedback?.selfReflection ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Self-Reflection:
+                  </span>{" "}
+                  {prescription?.patientFeedback?.selfReflection
+                    ?.split("##")
+                    .map((line, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {line}
+                      </React.Fragment>
+                    )) || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Rating:</span>{" "}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Rating:
+                  </span>{" "}
                   {prescription?.patientFeedback?.rating || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Progress Perception:</span>{" "}
-                  {prescription?.patientFeedback?.progressPerception ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Progress Perception:
+                  </span>{" "}
+                  {prescription?.patientFeedback?.progressPerception
+                    ?.split("##")
+                    .map((line, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {line}
+                      </React.Fragment>
+                    )) || "Not specified"}
                 </p>
               </div>
               <div>
                 <p>
-                  <span className="font-semibold">
+                  <span className="font-bold text-base text-[var(--grey--900)]">
                     Emotional State Post-Session:
                   </span>{" "}
-                  {prescription?.patientFeedback?.emotionalStatePost ||
-                    "Not specified"}
+                  {prescription?.patientFeedback?.emotionalStatePost
+                    ?.split("##")
+                    .map((line, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {line}
+                      </React.Fragment>
+                    )) || "Not specified"}
                 </p>
                 <p>
-                  <span className="font-semibold">Suggestions:</span>{" "}
-                  {prescription?.patientFeedback?.suggestions ||
-                    "Not specified"}
+                  <span className="font-bold text-base text-[var(--grey--900)]">
+                    Suggestions:
+                  </span>{" "}
+                  {prescription?.patientFeedback?.suggestions
+                    ?.split("##")
+                    .map((line, index) => (
+                      <React.Fragment key={index}>
+                        <br />
+                        <BiRightArrow className="inline" /> {line}
+                      </React.Fragment>
+                    )) || "Not specified"}
                 </p>
               </div>
             </div>
