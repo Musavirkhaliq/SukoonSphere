@@ -13,80 +13,123 @@ const prescriptionSchema = mongoose.Schema({
     ref: "User",
     required: true,
   },
-  demographicInfo: {
-    age: { type: Number, required: true },
-    gender: { type: String, required: true },
-    raceEthnicity: { type: String },
-    maritalStatus: { type: String },
-    occupation: { type: String },
-    educationLevel: { type: String },
-    socioeconomicStatus: { type: String },
-    name: { type: String, required: true },
+  patientDetails: {
+    name: String,
+    age: Number,
+    gender: String,
+    contactNumber: String,
   },
-  presentingSymptoms: [
-    {
-      description: { type: String },
-      severity: { type: String, enum: ["Mild", "Moderate", "Severe"] },
-      duration: { type: String },
-      impactOnFunctioning: { type: String },
+  therapistDetails: {
+    name: String,
+    contactNumber: String,
+    specialties: [String],
+    credentials: String,
+  },
+
+  basicDetails: {
+    dateTime: {
+      type: Date,
+      required: true,
     },
-  ],
-  psychiatricHistory: {
-    pastDiagnoses: [
+    duration: {
+      type: Number,
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ["In-person", "Video", "Phone"],
+      required: true,
+    },
+    sessionNumber: {
+      type: String,
+      required: true,
+    },
+  },
+  currentStatus: {
+    moodAffect: {
+      type: String,
+    },
+    energyLevels: {
+      type: String,
+    },
+    sleepPatterns: {
+      type: String,
+    },
+    appetiteChanges: {
+      type: String,
+    },
+    recentEvents: [String],
+    selfReportedConcerns: String,
+    medication: [
       {
-        diagnosis: { type: String },
-        dateDiagnosed: { type: Date },
-        diagnosedBy: { type: String },
-        symptoms: [{ type: String }],
+        name: String,
+        dosage: String,
+        frequency: String,
+        duration: String,
+        adherence: String,
       },
     ],
-    previousTreatments: [{ type: String }],
-    treatmentAdherence: { type: String },
-    hospitalizations: [{ type: String }],
+    physicalHealth: String,
+    substanceUse: String,
   },
-  familyHistory: {
-    mentalHealthDiagnoses: [{ type: String }],
-    significantEvents: { type: String },
+  sessionSummary: {
+    topicsDiscussed: [String],
+    insightsBreakthroughs: String,
+    emotionalResponses: [String],
+    techniquesUsed: [String],
+    engagementLevel: String,
+    notableQuotes: [String],
   },
-  socialHistory: {
-    livingSituation: { type: String },
-    socialSupport: { type: String },
-    relationshipDynamics: { type: String },
-    employmentStatus: { type: String },
-    substanceUse: { type: String },
+  therapistObservations: {
+    behavior: String,
+    cognitivePatterns: String,
+    emotionalReactions: String,
+    progress: String,
+    concerns: String,
   },
-  stressors: {
-    currentStressors: [{ type: String }],
-    majorLifeEvents: [{ type: String }],
+  actionPlan: {
+    goals: [String],
+    homework: [String],
+    copingStrategies: [String],
+    lifestyleAdjustments: [String],
+    resourcesShared: [String],
   },
-  copingMechanisms: {
-    healthy: [{ type: String }],
-    maladaptive: [{ type: String }],
+  therapistNotes: {
+    keyTakeaways: String,
+    risksConcerns: String,
+    additionalSupport: String,
+    readiness: String,
+    ethicalConsiderations: String,
   },
-  mentalStatusExam: {
-    appearance: { type: String },
-    behavior: { type: String },
-    speech: { type: String },
-    mood: { type: String },
-    affect: { type: String },
-    thoughtProcess: { type: String },
-    thoughtContent: { type: String },
-    perceptions: { type: String },
-    cognition: { type: String },
-    insightJudgment: { type: String },
-  },
-  culturalConsiderations: { type: String },
-  comorbidities: [{ type: String }],
-  medications: [
+  prescriptions: [
     {
-      name: { type: String },
-      dosage: { type: String },
-      frequency: { type: String },
-      duration: { type: String },
+      medication: String,
+      dosage: String,
+      frequency: String,
+      duration: String,
+      changes: String,
     },
   ],
-  additionalNotes: { type: String },
-  createdAt: { type: Date, default: Date.now },
+  referrals: [
+    {
+      specialist: String,
+      reason: String,
+    },
+  ],
+  labTests: [String],
+  followUp: {
+    nextSession: Date,
+  },
+  patientFeedback: {
+    selfReflection: String,
+    rating: Number,
+    progressPerception: String,
+    openFeedback: String,
+    emotionalStatePost: String,
+    suggestions: String,
+  },
+  createdAt: Date,
+  updatedAt: Date,
 });
 
 export default mongoose.model("Prescription", prescriptionSchema);

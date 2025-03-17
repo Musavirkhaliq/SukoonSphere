@@ -11,12 +11,12 @@ export const sendMessage = async (req, res) => {
     const sender = req.user.userId;
     const files = req.files || [];
 
-    const attachments = files.map(file => ({
+    const attachments = files.map((file) => ({
       fileType: checkFileType(file),
       filePath: `/public/chats/${file.filename}`,
       fileName: file.originalname,
       fileSize: file.size,
-      mimeType: file.mimetype
+      mimeType: file.mimetype,
     }));
 
     const message = new Message({
@@ -25,7 +25,7 @@ export const sendMessage = async (req, res) => {
       content,
       seen: false,
       hasAttachment: files.length > 0,
-      attachments: attachments
+      attachments: attachments,
     });
 
     await message.save();
@@ -59,64 +59,66 @@ export const sendMessage = async (req, res) => {
 
 // Other controller methods remain the same...
 export const getMessages = async (req, res) => {
-    const { chatId } = req.params;
-    const { userId } = req.user;
-    const chat = await Chat.findById(chatId);
-    
-    if (!chat) {
-      return res.status(404).json({ message: "Chat not found" });
-    }
-    const messages = await Message.find({ chatId ,deletedBy:{$ne:userId}}).populate(
-      "sender",
-      "name avatar"
-    );
-    const receiverId = chat.participants.find(
-      (id) => id.toString() !== userId.toString()
-    );
-    const receiver = await userModel
+  const { chatId } = req.params;
+  const { userId } = req.user;
+  const chat = await Chat.findById(chatId);
+
+  if (!chat) {
+    return res.status(404).json({ message: "Chat not found" });
+  }
+  const messages = await Message.find({
+    chatId,
+    deletedBy: { $ne: userId },
+  }).populate("sender", "name avatar");
+  const receiverId = chat.participants.find(
+    (id) => id.toString() !== userId.toString()
+  );
+  const receiver = await userModel
     .findById(receiverId)
     .select("name avatar _id");
-    
-    res.status(200).json({ messages, receiver,chat });
+
+  res.status(200).json({ messages, receiver, chat });
+};
+export const totalUnseenMessages = async (req, res) => {
+  if (!req.user) {
+    return res.status(200).json({ count: 0 });
   }
-  export const totalUnseenMessages = async (req, res) => {  
-      const { userId } = req.user;
-  
-      const unseenMessages = await Message.aggregate([
-        {
-          $lookup: {
-            from: "chat", // Joining with the Chat collection
-            localField: "chatId",
-            foreignField: "_id",
-            as: "chatDetails"
-          }
-        },
-        { $unwind: "$chatDetails" },
-        {
-          $match: {
-            "chatDetails.participants": userId, // Ensuring user is a participant
-            seen: false, // Only unseen messages
-            sender: { $ne: userId } // Excluding user's own messages
-          }
-        },
-        {
-          $count: "total"
-        }
-      ]);
-  
-      res.status(200).json({ count: unseenMessages[0]?.total || 0 });
-    } 
-  
-  
-  export const markMessagesAsSeen = async (req, res) => {
-    try {
-      const { chatId } = req.params;
-      const { userId } = req.user;
-      
-      const updatedMessages = await Message.updateMany(
-        { chatId, seen: false, sender: { $ne: userId } },
-        { $set: { seen: true } }
-      );
+  const { userId } = req.user;
+
+  const unseenMessages = await Message.aggregate([
+    {
+      $lookup: {
+        from: "chat", // Joining with the Chat collection
+        localField: "chatId",
+        foreignField: "_id",
+        as: "chatDetails",
+      },
+    },
+    { $unwind: "$chatDetails" },
+    {
+      $match: {
+        "chatDetails.participants": userId, // Ensuring user is a participant
+        seen: false, // Only unseen messages
+        sender: { $ne: userId }, // Excluding user's own messages
+      },
+    },
+    {
+      $count: "total",
+    },
+  ]);
+
+  res.status(200).json({ count: unseenMessages[0]?.total || 0 });
+};
+
+export const markMessagesAsSeen = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const { userId } = req.user;
+
+    const updatedMessages = await Message.updateMany(
+      { chatId, seen: false, sender: { $ne: userId } },
+      { $set: { seen: true } }
+    );
 
     if (updatedMessages.modifiedCount > 0) {
       const chat = await Chat.findById(chatId);
@@ -133,72 +135,69 @@ export const getMessages = async (req, res) => {
 };
 
 export const deleteAllMessages = async (req, res) => {
-    const messages = await Message.find({});
-    
-    // Delete associated files
-    for (const message of messages) {
-      if (message.hasAttachment) {
-        for (const attachment of message.attachments) {
-          const filePath = path.join('public', attachment.filePath);
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
+  const messages = await Message.find({});
+
+  // Delete associated files
+  for (const message of messages) {
+    if (message.hasAttachment) {
+      for (const attachment of message.attachments) {
+        const filePath = path.join("public", attachment.filePath);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
         }
       }
     }
-    
-    await Message.deleteMany({});
-    res.status(200).json({ message: "All messages deleted successfully" });
-  
+  }
+
+  await Message.deleteMany({});
+  res.status(200).json({ message: "All messages deleted successfully" });
 };
 export const deleteMessageById = async (req, res) => {
-    const { messageId, chatId } = req.params;
-    const { userId } = req.user;
-    const message = await Message.findById(messageId);
-    if (!message) {
-      return res.status(404).json({ message: "Message not found" });
+  const { messageId, chatId } = req.params;
+  const { userId } = req.user;
+  const message = await Message.findById(messageId);
+  if (!message) {
+    return res.status(404).json({ message: "Message not found" });
+  }
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    return res.status(404).json({ message: "Chat not found" });
+  }
+  if (!chat.participants.includes(userId)) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
+  message.deletedBy.push(userId);
+  await message.save();
+  res.status(200).json({ message: "Message deleted successfully" });
+};
+
+export const deleteAllMessagesByChatId = async (req, res) => {
+  const { chatId } = req.params;
+  const { userId } = req.user;
+
+  // Check if chat exists and user has access
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    return res.status(404).json({ message: "Chat not found" });
+  }
+
+  // Verify user is a participant
+  if (!chat.participants.includes(userId)) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
+
+  // Update all messages in a single operation
+  const result = await Message.updateMany(
+    {
+      chatId,
+      deletedBy: { $ne: userId }, // Only update messages not already deleted by this user
+    },
+    {
+      $addToSet: { deletedBy: userId },
     }
-    const chat = await Chat.findById(chatId);
-    if (!chat) {
-      return res.status(404).json({ message: "Chat not found" });
-    }
-    if (!chat.participants.includes(userId)) {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-    message.deletedBy.push(userId);
-    await message.save();
-    res.status(200).json({ message: "Message deleted successfully" });
-  };
-  
-  export const deleteAllMessagesByChatId = async (req, res) => {
-      const { chatId } = req.params;
-      const { userId } = req.user;
-      
-      // Check if chat exists and user has access
-      const chat = await Chat.findById(chatId);
-      if (!chat) {
-        return res.status(404).json({ message: "Chat not found" });
-      }
-  
-      // Verify user is a participant
-      if (!chat.participants.includes(userId)) {
-        return res.status(403).json({ message: "Unauthorized" });
-      }
-  
-      // Update all messages in a single operation
-      const result = await Message.updateMany(
-        { 
-          chatId,
-          deletedBy: { $ne: userId } // Only update messages not already deleted by this user
-        },
-        { 
-          $addToSet: { deletedBy: userId } 
-        }
-      );
-      res.status(200).json({ 
-        message: "All messages deleted successfully",
-        modifiedCount: result.modifiedCount
-      });
-  
-    } 
-  
+  );
+  res.status(200).json({
+    message: "All messages deleted successfully",
+    modifiedCount: result.modifiedCount,
+  });
+};
