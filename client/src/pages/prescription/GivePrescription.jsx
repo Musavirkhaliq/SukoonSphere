@@ -17,7 +17,8 @@ import {
   FiSave,
 } from "react-icons/fi";
 import customFetch from "@/utils/customFetch";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 // TagInput Component for nested arrays
 const TagInput = ({
@@ -287,16 +288,13 @@ const GivePrescription = () => {
     updatedAt: new Date().toISOString(),
   });
 
-  useEffect(() => {
-    fetchPreviousSessions();
-  }, [patientId]);
-
   const fetchPreviousSessions = async () => {
     setIsLoading(true);
     try {
       const response = await customFetch.get(
         `/prescriptions/patient/${patientId}`
       );
+
       setPreviousSessions(response.data.prescriptions || []);
     } catch (error) {
       console.error("Error fetching previous sessions:", error);
@@ -304,6 +302,10 @@ const GivePrescription = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchPreviousSessions();
+  }, [patientId]);
 
   const handleViewPreviousSession = (session) => {
     setSelectedSession(session);
@@ -429,8 +431,6 @@ const GivePrescription = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log({ formData });
-
     if (!formData.patientDetails.name || !formData.therapistDetails.name) {
       alert("Please fill in required fields: Patient Name, Therapist Name.");
       setIsLoading(false);
@@ -439,10 +439,10 @@ const GivePrescription = () => {
 
     try {
       await customFetch.post(`/prescriptions/${patientId}`, formData);
-      alert("Prescription saved successfully!");
+      toast.success("Prescription saved successfully!");
     } catch (error) {
       console.error("Error submitting prescription:", error);
-      alert("Failed to save prescription. Please try again.");
+      toast.error("Failed to save prescription. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -473,45 +473,93 @@ const GivePrescription = () => {
       window.scrollTo(0, 0);
     }
   };
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <div
-        className={`fixed inset-y-0 left-0 transform ${
-          showPreviousSessions ? "translate-x-0" : "-translate-x-full"
-        } w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out z-20 overflow-y-auto`}
-      >
-        <div className="p-4 border-b">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Previous Sessions</h3>
-            <button
-              className="text-gray-500 hover:text-gray-700"
-              onClick={() => setShowPreviousSessions(false)}
-            >
-              ×
-            </button>
-          </div>
-        </div>
-        {isLoading ? (
-          <div className="p-4 text-center">Loading sessions...</div>
-        ) : previousSessions.length === 0 ? (
-          <div className="p-4 text-center text-gray-500">
-            No previous sessions found
-          </div>
-        ) : (
-          <div className="divide-y">
-            {previousSessions.map((session) => (
-              <div
-                key={session._id}
-                className="p-4 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleViewPreviousSession(session)}
+    <div className="flex min-h-screen bg-gray-50 ">
+      <>
+        {/* Backdrop overlay that dims and blurs the background when sidebar is open */}
+        <div
+          className={`fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity z-10 ${
+            showPreviousSessions
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
+          }`}
+          onClick={() => setShowPreviousSessions(false)}
+        />
+
+        {/* Previous Sessions Sidebar */}
+        <div
+          className={`fixed top-0 left-0 sm:w-[450px] w-64 h-full transform ${
+            showPreviousSessions ? "translate-x-0" : "-translate-x-full"
+          } bg-white shadow-lg transition-transform duration-300 ease-in-out z-20 overflow-y-auto`}
+        >
+          <div className="p-4 mt-16 border-b">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Previous Sessions</h3>
+              <button
+                className="text-black hover:text-gray-700 text-2xl"
+                onClick={() => setShowPreviousSessions(false)}
               >
-                <div className="font-medium">{/* Session date display */}</div>
-              </div>
-            ))}
+                ×
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+          {isLoading ? (
+            <div className="p-4 text-center">Loading sessions...</div>
+          ) : previousSessions.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              No previous sessions found
+            </div>
+          ) : (
+            <div className="divide-y py-4 px-2">
+              {previousSessions.map((session) => (
+                <Link
+                  key={session._id}
+                  to={`/view-prescription/${session._id}`}
+                >
+                  <div
+                    key={session.createdAt}
+                    onClick={() => handleViewPreviousSession(session)}
+                    className="border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer hover:scale-105 transition-all bg-white shadow-sm hover:shadow duration-200"
+                  >
+                    <div className="flex justify-between items-center">
+                      <h3 className="m-0 text-base font-semibold text-gray-800">
+                        Session #{session.basicDetails.sessionNumber}
+                      </h3>
+                      <span className="text-sm text-gray-500">
+                        {formatDate(session.basicDetails.dateTime)}
+                      </span>
+                    </div>
+
+                    <div className="mt-2 pt-2 border-t border-gray-100 text-sm text-gray-600">
+                      <span className="font-medium">Type: </span>
+                      <span className="text-blue-600">
+                        {session.basicDetails.type}
+                      </span>
+                      <span className="mx-3 text-gray-300">|</span>
+                      <span className="font-medium">Duration: </span>
+                      <span className="text-blue-600">
+                        {session.basicDetails.duration} min
+                      </span>
+                    </div>
+
+                    <div className="mt-2 text-sm text-gray-600">
+                      <span className="font-medium">Next session: </span>
+                      <span className="text-red-600">
+                        {formatDate(session.followUp.nextSession)}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </>
 
       <div className="flex-1 flex flex-col">
         <div className="bg-white shadow-sm border-b">
@@ -519,13 +567,24 @@ const GivePrescription = () => {
             <h1 className="text-2xl font-bold text-gray-800">
               Therapy Session Record
             </h1>
-            <button
-              className="btn-2 !py-2 !px-4 flex gap-2"
-              onClick={() => setShowPreviousSessions(!showPreviousSessions)}
-            >
-              <FiClipboard />
-              <span>Previous Sessions</span>
-            </button>
+            {previousSessions.length > 0 ? (
+              <div className="flex gap-2">
+                <button
+                  className="text-blue-600 !py-2 !px-4 flex gap-2"
+                  onClick={() => setShowPreviousSessions(!showPreviousSessions)}
+                >
+                  <FiClipboard />
+                  <span>Previous Sessions</span>
+                </button>
+                <Link
+                  to={`/view-consolidated-prescription/${patientId}`}
+                  className="text-blue-600 !py-2 !px-4 flex gap-2"
+                >
+                  <FiClipboard />
+                  <span>Consolidate all previous sessions</span>
+                </Link>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -1873,42 +1932,48 @@ const GivePrescription = () => {
             )}
 
             {activeStep === 8 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold mb-6 flex items-center">
-                  <FiSend className="mr-2" /> Review & Submit
-                </h2>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Created At
-                  </label>
-                  <input
-                    type="datetime-local"
-                    className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                    value={formData.createdAt.slice(0, 16)}
-                    onChange={(e) =>
-                      handleTopLevelChange("createdAt", e.target.value)
-                    }
-                    disabled
-                  />
+              <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-sm border border-blue-100 p-8">
+                <div className="flex items-start space-x-4 mb-6">
+                  <div className="bg-blue-100 rounded-full p-3 flex-shrink-0">
+                    <FiSend className="text-blue-600 text-xl" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      Final Review
+                    </h2>
+                    <p className="text-gray-600 mt-1">
+                      Please review the information below carefully before
+                      submitting the session report to your patient.
+                    </p>
+                  </div>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Updated At
-                  </label>
-                  <input
-                    type="datetime-local"
-                    className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                    value={formData.updatedAt.slice(0, 16)}
-                    onChange={(e) =>
-                      handleTopLevelChange("updatedAt", e.target.value)
-                    }
-                    disabled
-                  />
+
+                <div className="bg-white rounded-lg p-5 border border-gray-100 mb-6 text-center">
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <div className="bg-amber-50 rounded-full p-1 mr-3 mt-0.5">
+                        <div className="h-2 w-2 rounded-full bg-amber-500"></div>
+                      </div>
+                      <span className="text-gray-700">
+                        Please make sure to proofread your responses for
+                        spelling and grammar errors.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="bg-blue-50 rounded-full p-1 mr-3 mt-0.5">
+                        <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                      </div>
+                      <span className="text-gray-700">
+                        Once submitted, the session report cannot be edited or
+                        deleted.
+                      </span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             )}
 
-            <div className="flex justify-between mt-6">
+            {/* <div className="flex justify-between mt-6">
               <button
                 type="button"
                 onClick={prevStep}
@@ -1943,8 +2008,46 @@ const GivePrescription = () => {
                   <FiSave className="inline ml-2" />
                 </button>
               )}
-            </div>
+            </div> */}
           </form>
+          <div className="flex justify-center mt-6">
+            <button
+              type="button"
+              onClick={prevStep}
+              disabled={activeStep === 0}
+              className={`px-4 py-2 rounded ${
+                activeStep === 0
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-gray-500 text-white hover:bg-gray-600"
+              }`}
+            >
+              <FiArrowLeft className="inline mr-2" /> Previous
+            </button>
+
+            {activeStep < steps.length - 1 ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 ml-4"
+              >
+                Next <FiArrowRight className="inline ml-2" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className={`btn-1 rounded text-center ${
+                  isLoading
+                    ? " cursor-not-allowed"
+                    : "bg-green-500 text-white hover:bg-green-600"
+                } ml-4`}
+              >
+                {isLoading ? "Saving..." : "Save"}{" "}
+                <FiSave className="inline ml-2" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
