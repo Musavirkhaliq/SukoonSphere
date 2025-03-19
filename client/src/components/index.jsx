@@ -48,7 +48,22 @@ export const TodaysQuote = createOptimizedComponent(
 export const CampusPartners = createOptimizedComponent(
   () => import("./homeComponents/CampusPartners")
 );
-
+// -----------------------------------------------//
+export const HeroSection = createOptimizedComponent(
+  () => import("./homeComponents/HeroSection")
+);
+export const UserPostsHome = createOptimizedComponent(
+  () => import("./homeComponents/UserPosts")
+);
+export const GraphSection = createOptimizedComponent(
+  () => import("./homeComponents/GraphSection")
+);
+export const ArticlesSections = createOptimizedComponent(
+  () => import("./homeComponents/ArticlesSections")
+);
+export const VideoSection = createOptimizedComponent(
+  () => import("./homeComponents/VideoSection")
+);
 // Article Components
 
 export const Search = createOptimizedComponent(
