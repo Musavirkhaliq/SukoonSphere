@@ -6,12 +6,8 @@ import customFetch from "@/utils/customFetch";
 import { Link } from "react-router-dom";
 import {
   FaBookOpen,
-  FaCalendarAlt,
-  FaUser,
   FaSpinner,
-  FaSearch,
-  FaRegHeart,
-  FaRegCommentAlt,
+
 } from "react-icons/fa";
 import { IoCloseOutline } from "react-icons/io5";
 import { ArticleCard, PageIntro, SearchAndFilterBar } from "@/components";
