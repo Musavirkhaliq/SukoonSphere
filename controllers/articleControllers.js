@@ -4,7 +4,10 @@ import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import Notification from "../models/notifications/postNotificationModel.js";
 
-import { UnauthenticatedError, BadRequestError } from "../errors/customErors.js";
+import {
+  UnauthenticatedError,
+  BadRequestError,
+} from "../errors/customErors.js";
 import { io } from "../server.js";
 
 // Get all articles with pagination, search, and filters
@@ -13,8 +16,8 @@ export const getAllArticles = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const sortBy = req.query.sortBy || 'newest';
-    const search = req.query.search || '';
+    const sortBy = req.query.sortBy || "newest";
+    const search = req.query.search || "";
 
     // Base pipeline stages
     const pipeline = [
@@ -24,11 +27,11 @@ export const getAllArticles = async (req, res) => {
           deleted: { $ne: true },
           ...(search && {
             $or: [
-              { title: { $regex: search, $options: 'i' } },
-              { content: { $regex: search, $options: 'i' } }
-            ]
-          })
-        }
+              { title: { $regex: search, $options: "i" } },
+              { content: { $regex: search, $options: "i" } },
+            ],
+          }),
+        },
       },
       // Lookup user details
       {
@@ -36,8 +39,8 @@ export const getAllArticles = async (req, res) => {
           from: "users",
           localField: "author",
           foreignField: "_id",
-          as: "authorDetails"
-        }
+          as: "authorDetails",
+        },
       },
       // Add computed fields
       {
@@ -45,24 +48,24 @@ export const getAllArticles = async (req, res) => {
           authorName: { $arrayElemAt: ["$authorDetails.name", 0] },
           authorAvatar: { $arrayElemAt: ["$authorDetails.avatar", 0] },
           authorId: { $arrayElemAt: ["$authorDetails._id", 0] },
-        }
+        },
       },
       // Project out unnecessary fields
       {
         $project: {
           authorDetails: 0,
           deleted: 0,
-          __v: 0
-        }
-      }
+          __v: 0,
+        },
+      },
     ];
 
     // Add sort stage based on sortBy
     switch (sortBy) {
-      case 'oldest':
+      case "oldest":
         pipeline.push({ $sort: { createdAt: 1 } });
         break;
-      case 'title':
+      case "title":
         pipeline.push({ $sort: { title: 1, createdAt: -1 } });
         break;
       default: // 'newest'
@@ -72,14 +75,11 @@ export const getAllArticles = async (req, res) => {
     // Get total count for pagination
     const totalCount = await Article.aggregate([
       pipeline[0], // Only use the match stage for count
-      { $count: 'total' }
+      { $count: "total" },
     ]);
 
     // Add pagination stages
-    pipeline.push(
-      { $skip: skip },
-      { $limit: limit }
-    );
+    pipeline.push({ $skip: skip }, { $limit: limit });
 
     // Execute the main query
     const articles = await Article.aggregate(pipeline);
@@ -95,11 +95,13 @@ export const getAllArticles = async (req, res) => {
         totalPages,
         totalItems: total,
         hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
+        hasPrevPage: page > 1,
+      },
     });
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
   }
 };
 
@@ -107,22 +109,22 @@ export const getAllArticles = async (req, res) => {
 export const getSingleArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Get the main article
     const article = await Article.aggregate([
       {
         $match: {
           _id: new mongoose.Types.ObjectId(id),
-          deleted: { $ne: true }
-        }
+          deleted: { $ne: true },
+        },
       },
       {
         $lookup: {
           from: "users",
           localField: "author",
           foreignField: "_id",
-          as: "authorDetails"
-        }
+          as: "authorDetails",
+        },
       },
       {
         $lookup: {
@@ -132,15 +134,15 @@ export const getSingleArticle = async (req, res) => {
             {
               $match: {
                 $expr: { $eq: ["$articleId", "$$articleId"] },
-                deleted: { $ne: true }
-              }
+                deleted: { $ne: true },
+              },
             },
             {
-              $count: "total"
-            }
+              $count: "total",
+            },
           ],
-          as: "commentCount"
-        }
+          as: "commentCount",
+        },
       },
       {
         $addFields: {
@@ -148,21 +150,25 @@ export const getSingleArticle = async (req, res) => {
           authorAvatar: { $arrayElemAt: ["$authorDetails.avatar", 0] },
           authorId: { $arrayElemAt: ["$authorDetails._id", 0] },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
-          totalComments: { $ifNull: [{ $arrayElemAt: ["$commentCount.total", 0] }, 0] }
-        }
+          totalComments: {
+            $ifNull: [{ $arrayElemAt: ["$commentCount.total", 0] }, 0],
+          },
+        },
       },
       {
         $project: {
           authorDetails: 0,
           commentCount: 0,
           deleted: 0,
-          __v: 0
-        }
-      }
+          __v: 0,
+        },
+      },
     ]);
 
     if (!article.length) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Article not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Article not found" });
     }
 
     // Get similar articles based on title
@@ -171,31 +177,36 @@ export const getSingleArticle = async (req, res) => {
       {
         $match: {
           _id: { $ne: new mongoose.Types.ObjectId(id) },
-          deleted: { $ne: true }
-        }
+          deleted: { $ne: true },
+        },
       },
       {
         $addFields: {
           titleSimilarity: {
             $regexMatch: {
               input: { $toLower: "$title" },
-              regex: { $toLower: mainArticle.title.split(' ').filter(word => word.length > 3).join('|') }
-            }
-          }
-        }
+              regex: {
+                $toLower: mainArticle.title
+                  .split(" ")
+                  .filter((word) => word.length > 3)
+                  .join("|"),
+              },
+            },
+          },
+        },
       },
       {
         $match: {
-          titleSimilarity: true
-        }
+          titleSimilarity: true,
+        },
       },
       {
         $lookup: {
           from: "users",
           localField: "author",
           foreignField: "_id",
-          as: "authorDetails"
-        }
+          as: "authorDetails",
+        },
       },
       {
         $lookup: {
@@ -205,15 +216,15 @@ export const getSingleArticle = async (req, res) => {
             {
               $match: {
                 $expr: { $eq: ["$articleId", "$$articleId"] },
-                deleted: { $ne: true }
-              }
+                deleted: { $ne: true },
+              },
             },
             {
-              $count: "total"
-            }
+              $count: "total",
+            },
           ],
-          as: "commentCount"
-        }
+          as: "commentCount",
+        },
       },
       {
         $addFields: {
@@ -221,8 +232,10 @@ export const getSingleArticle = async (req, res) => {
           authorAvatar: { $arrayElemAt: ["$authorDetails.avatar", 0] },
           authorId: { $arrayElemAt: ["$authorDetails._id", 0] },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
-          totalComments: { $ifNull: [{ $arrayElemAt: ["$commentCount.total", 0] }, 0] }
-        }
+          totalComments: {
+            $ifNull: [{ $arrayElemAt: ["$commentCount.total", 0] }, 0],
+          },
+        },
       },
       {
         $project: {
@@ -231,20 +244,22 @@ export const getSingleArticle = async (req, res) => {
           commentCount: 0,
           deleted: 0,
           __v: 0,
-          titleSimilarity: 0
-        }
+          titleSimilarity: 0,
+        },
       },
       {
-        $limit: 3
-      }
+        $limit: 3,
+      },
     ]);
-    
+
     res.status(StatusCodes.OK).json({
       article: mainArticle,
-      similarArticles
+      similarArticles,
     });
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
   }
 };
 
@@ -266,7 +281,7 @@ export const createArticle = async (req, res) => {
     content,
     author: req.user.userId,
     imageUrl,
-    imagePublicId
+    imagePublicId,
   });
 
   res.status(StatusCodes.CREATED).json({ article });
@@ -280,11 +295,11 @@ export const updateArticle = async (req, res) => {
 
   const article = await Article.findById(articleId);
   if (!article) {
-    throw new Error('Article not found');
+    throw new Error("Article not found");
   }
 
   if (article.author.toString() !== userId) {
-    throw new Error('Not authorized to update this article');
+    throw new Error("Not authorized to update this article");
   }
 
   // Handle image update if present
@@ -296,7 +311,7 @@ export const updateArticle = async (req, res) => {
     }
     imageUpdate = {
       imageUrl: `${process.env.BACKEND_URL}/articles/${req.file.filename}`,
-      imagePublicId: req.file.filename
+      imagePublicId: req.file.filename,
     };
   }
 
@@ -316,11 +331,11 @@ export const deleteArticle = async (req, res) => {
 
   const article = await Article.findById(articleId);
   if (!article) {
-    throw new Error('Article not found');
+    throw new Error("Article not found");
   }
 
   if (article.author.toString() !== userId) {
-    throw new Error('Not authorized to delete this article');
+    throw new Error("Not authorized to delete this article");
   }
 
   // Delete image if exists
@@ -331,7 +346,7 @@ export const deleteArticle = async (req, res) => {
   article.deleted = true;
   await article.save();
 
-  res.status(StatusCodes.OK).json({ msg: 'Article deleted successfully' });
+  res.status(StatusCodes.OK).json({ msg: "Article deleted successfully" });
 };
 
 // Get articles by user ID with pagination
@@ -341,43 +356,43 @@ export const getArticlesByUserId = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const sortBy = req.query.sortBy || 'newest';
+    const sortBy = req.query.sortBy || "newest";
 
     // Base pipeline stages
     const pipeline = [
       {
         $match: {
           author: new mongoose.Types.ObjectId(userId),
-          deleted: { $ne: true }
-        }
+          deleted: { $ne: true },
+        },
       },
       {
         $lookup: {
           from: "users",
           localField: "author",
           foreignField: "_id",
-          as: "authorDetails"
-        }
+          as: "authorDetails",
+        },
       },
       {
         $addFields: {
           authorName: { $arrayElemAt: ["$authorDetails.name", 0] },
           authorAvatar: { $arrayElemAt: ["$authorDetails.avatar", 0] },
           authorId: { $arrayElemAt: ["$authorDetails._id", 0] },
-        }
+        },
       },
       {
         $project: {
           authorDetails: 0,
           deleted: 0,
-          __v: 0
-        }
-      }
+          __v: 0,
+        },
+      },
     ];
 
     // Add sort stage
     switch (sortBy) {
-      case 'oldest':
+      case "oldest":
         pipeline.push({ $sort: { createdAt: 1 } });
         break;
       default: // 'newest'
@@ -387,14 +402,11 @@ export const getArticlesByUserId = async (req, res) => {
     // Get total count
     const totalCount = await Article.aggregate([
       pipeline[0],
-      { $count: 'total' }
+      { $count: "total" },
     ]);
 
     // Add pagination
-    pipeline.push(
-      { $skip: skip },
-      { $limit: limit }
-    );
+    pipeline.push({ $skip: skip }, { $limit: limit });
 
     const articles = await Article.aggregate(pipeline);
     const total = totalCount[0]?.total || 0;
@@ -407,11 +419,13 @@ export const getArticlesByUserId = async (req, res) => {
         totalPages,
         totalItems: total,
         hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
+        hasPrevPage: page > 1,
+      },
     });
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
   }
 };
 
@@ -426,18 +440,26 @@ export const likeArticle = async (req, res) => {
   }
 
   if (article?.likes?.includes(userId)) {
-    article.likes = article.likes.filter((id) => id.toString() !== userId.toString());
+    article.likes = article.likes.filter(
+      (id) => id.toString() !== userId.toString()
+    );
     await article.save();
-    const notification = await Notification.findOne({ userId: article.author,
+    const notification = await Notification.findOne({
+      userId: article.author,
       createdBy: userId,
       articleId: articleId,
-      type: 'articleLiked',
-       });
+      type: "articleLiked",
+    });
     if (notification) {
       notification.deleteOne();
     }
-    const totalNotifications = await Notification.find({userId: article.author}).countDocuments();
-    io.to(article.author.toString()).emit('notificationCount', totalNotifications)
+    const totalNotifications = await Notification.find({
+      userId: article.author,
+    }).countDocuments();
+    io.to(article.author.toString()).emit(
+      "notificationCount",
+      totalNotifications
+    );
     return res
       .status(StatusCodes.OK)
       .json({ message: "Article unliked successfully", article });
@@ -445,28 +467,53 @@ export const likeArticle = async (req, res) => {
     article.likes.push(userId);
     await article.save();
 
-    const notificationAlreadyExists = await Notification.findOne({ userId: article.author,
+    const notificationAlreadyExists = await Notification.findOne({
+      userId: article.author,
       createdBy: userId,
       articleId: articleId,
-      type: 'articleLiked',
-       });
+      type: "articleLiked",
+    });
     if (!notificationAlreadyExists) {
       const notification = new Notification({
         userId: article.author, // The user who created the post
         createdBy: userId,
         articleId: articleId,
-        type: 'articleLiked',
+        type: "articleLiked",
         message: `${req.user.name} liked your article`,
       });
       await notification.save();
-      const populatedNotification = await Notification.findById(notification._id)
-        .populate('createdBy', 'name avatar')
-        io.to(article.author.toString()).emit('notification', populatedNotification)
-        const totalNotifications = await Notification.find({userId: article.author}).countDocuments();
-        io.to(article.author.toString()).emit('notificationCount', totalNotifications)
+      const populatedNotification = await Notification.findById(
+        notification._id
+      ).populate("createdBy", "name avatar");
+      io.to(article.author.toString()).emit(
+        "notification",
+        populatedNotification
+      );
+      const totalNotifications = await Notification.find({
+        userId: article.author,
+      }).countDocuments();
+      io.to(article.author.toString()).emit(
+        "notificationCount",
+        totalNotifications
+      );
     }
     return res
       .status(StatusCodes.OK)
       .json({ message: "Article liked successfully", article });
+  }
+};
+
+export const GetMostLikedArticles = async (req, res) => {
+  try {
+    const articles = await Article.find({ deleted: { $ne: true } })
+      .sort({ likes: -1 })
+      .limit(5)
+      .populate("author", "name avatar");
+
+    res.status(StatusCodes.OK).json({ articles });
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
   }
 };

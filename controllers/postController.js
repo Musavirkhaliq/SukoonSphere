@@ -6,12 +6,12 @@ import PostReplies from "../models/postReplyModel.js";
 import Notification from "../models/notifications/postNotificationModel.js";
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
-import { deleteFile } from '../utils/fileUtils.js';
+import { deleteFile } from "../utils/fileUtils.js";
 import { io } from "../server.js";
 
 export const createPost = async (req, res) => {
   const newPost = {
-    createdBy: req.user.userId,  // Only store user ID
+    createdBy: req.user.userId, // Only store user ID
     ...req.body,
   };
   if (req.file) {
@@ -19,7 +19,11 @@ export const createPost = async (req, res) => {
     newPost.imageUrl = filepaath;
   }
   const post = await Post.create(newPost);
-  await User.findByIdAndUpdate(req.user.userId, { $push: { posts: post._id } }, { new: true });
+  await User.findByIdAndUpdate(
+    req.user.userId,
+    { $push: { posts: post._id } },
+    { new: true }
+  );
   res.status(StatusCodes.CREATED).json({ msg: "Post uploaded successfully" });
 };
 
@@ -28,15 +32,15 @@ export const getAllPosts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const sortBy = req.query.sortBy || 'newest';
+    const sortBy = req.query.sortBy || "newest";
 
     // Base pipeline stages
     const pipeline = [
       // Match non-deleted posts
       {
         $match: {
-          deleted: { $ne: true }
-        }
+          deleted: { $ne: true },
+        },
       },
       // Lookup user details
       {
@@ -44,8 +48,8 @@ export const getAllPosts = async (req, res) => {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "userDetails"
-        }
+          as: "userDetails",
+        },
       },
       // Add computed fields
       {
@@ -54,24 +58,24 @@ export const getAllPosts = async (req, res) => {
           userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
           totalComments: { $size: { $ifNull: ["$comments", []] } },
-        }
+        },
       },
       // Project out unnecessary fields
       {
         $project: {
           userDetails: 0,
           deleted: 0,
-          __v: 0
-        }
-      }
+          __v: 0,
+        },
+      },
     ];
 
     // Add sort stage based on sortBy
     switch (sortBy) {
-      case 'oldest':
+      case "oldest":
         pipeline.push({ $sort: { createdAt: 1 } });
         break;
-      case 'mostLiked':
+      case "mostLiked":
         pipeline.push({ $sort: { totalLikes: -1, createdAt: -1 } });
         break;
       default: // 'newest'
@@ -81,14 +85,11 @@ export const getAllPosts = async (req, res) => {
     // Get total count for pagination
     const totalCount = await Post.aggregate([
       pipeline[0], // Only use the match stage for count
-      { $count: 'total' }
+      { $count: "total" },
     ]);
 
     // Add pagination stages
-    pipeline.push(
-      { $skip: skip },
-      { $limit: limit }
-    );
+    pipeline.push({ $skip: skip }, { $limit: limit });
 
     // Execute the main query
     const posts = await Post.aggregate(pipeline);
@@ -105,69 +106,69 @@ export const getAllPosts = async (req, res) => {
         totalPosts: total,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
-        limit
-      }
+        limit,
+      },
     });
   } catch (error) {
-    console.error('Error in getAllPosts:', error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
-      msg: 'Failed to fetch posts' 
+    console.error("Error in getAllPosts:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: "Failed to fetch posts",
     });
   }
 };
 
 export const getAllPostsByUserId = async (req, res) => {
   const { id: userId } = req.params;
-  
+
   // Get pagination parameters from query with defaults
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
   // Get total count for pagination info
-  const totalCount = await Post.countDocuments({ 
+  const totalCount = await Post.countDocuments({
     createdBy: new mongoose.Types.ObjectId(userId),
-    deleted: { $ne: true }
+    deleted: { $ne: true },
   });
 
   const posts = await Post.aggregate([
     {
-      $match: { 
+      $match: {
         createdBy: new mongoose.Types.ObjectId(userId),
-        deleted: { $ne: true }
-      }
+        deleted: { $ne: true },
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $addFields: {
         username: { $arrayElemAt: ["$userDetails.name", 0] },
         userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
-        totalComments: { $size: { $ifNull: ["$comments", []] } }
-      }
+        totalComments: { $size: { $ifNull: ["$comments", []] } },
+      },
     },
     {
       $project: {
         userDetails: 0,
-        __v: 0
-      }
+        __v: 0,
+      },
     },
     {
-      $sort: { createdAt: -1 }
+      $sort: { createdAt: -1 },
     },
     {
-      $skip: skip
+      $skip: skip,
     },
     {
-      $limit: limit
-    }
+      $limit: limit,
+    },
   ]);
 
   // Calculate pagination metadata
@@ -183,8 +184,8 @@ export const getAllPostsByUserId = async (req, res) => {
       totalPosts: totalCount,
       hasNextPage,
       hasPrevPage,
-      limit
-    }
+      limit,
+    },
   });
 };
 
@@ -192,15 +193,15 @@ export const getPostById = async (req, res) => {
   const { id: postId } = req.params;
   const post = await Post.aggregate([
     {
-      $match: { _id: new mongoose.Types.ObjectId(postId) }
+      $match: { _id: new mongoose.Types.ObjectId(postId) },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $addFields: {
@@ -208,17 +209,16 @@ export const getPostById = async (req, res) => {
         userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
         totalComments: { $size: { $ifNull: ["$comments", []] } },
-      }
+      },
     },
     {
       $project: {
-        userDetails: 0
-      }
-    }
+        userDetails: 0,
+      },
+    },
   ]);
   res.status(StatusCodes.OK).json({ post: post[0] });
 };
-
 
 export const likePosts = async (req, res) => {
   const { id: postId } = req.params;
@@ -236,33 +236,46 @@ export const likePosts = async (req, res) => {
       // User is unliking the post
       post.likes = post.likes.filter((user) => user.toString() !== userId);
       await post.save();
-      return res.status(StatusCodes.OK).json({ msg: "Post unliked successfully", likes: post.likes });
+      return res
+        .status(StatusCodes.OK)
+        .json({ msg: "Post unliked successfully", likes: post.likes });
     } else {
       // User is liking the post
       post.likes.push(userId);
-      
+
       // Create a notification only if the user is not liking their own post and notification doesn't already exist
       if (post.createdBy.toString() !== userId) {
-        const notificationAlreadyExists = await Notification.findOne({ userId: post.createdBy, postId: postId, type: 'like' });
+        const notificationAlreadyExists = await Notification.findOne({
+          userId: post.createdBy,
+          postId: postId,
+          type: "like",
+        });
         if (!notificationAlreadyExists) {
           const notification = new Notification({
             userId: post.createdBy, // The user who created the post
             createdBy: userId,
             postId: postId,
-            type: 'like',
+            type: "like",
             message: `${req.user.username} liked your post`, // Assuming you have the username available
           });
           await notification.save();
-          io.to(post.createdBy.toString()).emit('newNotification', notification); // Emit to the specific user's room
+          io.to(post.createdBy.toString()).emit(
+            "newNotification",
+            notification
+          ); // Emit to the specific user's room
         }
       }
     }
 
     await post.save();
-    res.status(StatusCodes.OK).json({ msg: "Post liked successfully", likes: post.likes });
+    res
+      .status(StatusCodes.OK)
+      .json({ msg: "Post liked successfully", likes: post.likes });
   } catch (error) {
-    console.error('Error in likePosts:', error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ msg: 'Failed to like the post' });
+    console.error("Error in likePosts:", error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ msg: "Failed to like the post" });
   }
 };
 export const createPostComment = async (req, res) => {
@@ -272,7 +285,7 @@ export const createPostComment = async (req, res) => {
   try {
     const comment = await PostComments.create({
       postId,
-      createdBy: req.user.userId,  // Only store user ID
+      createdBy: req.user.userId, // Only store user ID
       content,
     });
 
@@ -283,27 +296,27 @@ export const createPostComment = async (req, res) => {
     // Fetch comment with current user details for response
     const commentWithUser = await PostComments.aggregate([
       {
-        $match: { _id: comment._id }
+        $match: { _id: comment._id },
       },
       {
         $lookup: {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "userDetails"
-        }
+          as: "userDetails",
+        },
       },
       {
         $addFields: {
           username: { $arrayElemAt: ["$userDetails.username", 0] },
-          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
-        }
+          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+        },
       },
       {
         $project: {
-          userDetails: 0
-        }
-      }
+          userDetails: 0,
+        },
+      },
     ]);
 
     // Create a notification only if the user is not commenting on their own post
@@ -312,13 +325,13 @@ export const createPostComment = async (req, res) => {
         userId: post.createdBy, // The user who created the post
         createdBy: req.user.userId,
         postId: postId,
-        type: 'comment',
+        type: "comment",
         message: `${req.user.username} commented on your post`, // Assuming you have the username available
       });
 
       await notification.save();
 
-      io.to(post.createdBy.toString()).emit('newNotification', notification); // Emit to the specific user's room
+      io.to(post.createdBy.toString()).emit("newNotification", notification); // Emit to the specific user's room
     }
 
     res.status(StatusCodes.CREATED).json({
@@ -326,8 +339,10 @@ export const createPostComment = async (req, res) => {
       comment: commentWithUser[0],
     });
   } catch (error) {
-    console.error('Error creating comment:', error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Failed to create comment' });
+    console.error("Error creating comment:", error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Failed to create comment" });
   }
 };
 
@@ -335,33 +350,33 @@ export const getAllCommentsByPostId = async (req, res) => {
   const { id: postId } = req.params;
   const postComments = await PostComments.aggregate([
     {
-      $match: { postId: new mongoose.Types.ObjectId(postId) }
+      $match: { postId: new mongoose.Types.ObjectId(postId) },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $addFields: {
         username: { $arrayElemAt: ["$userDetails.name", 0] },
         userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
         totalReplies: { $size: { $ifNull: ["$replies", []] } },
-        totalLikes: { $size: { $ifNull: ["$likes", []] } }
-      }
+        totalLikes: { $size: { $ifNull: ["$likes", []] } },
+      },
     },
     {
       $project: {
         userDetails: 0,
-        __v: 0
-      }
+        __v: 0,
+      },
     },
     {
-      $sort: { createdAt: -1 }
-    }
+      $sort: { createdAt: -1 },
+    },
   ]);
 
   res.status(StatusCodes.OK).json({ comments: postComments });
@@ -380,12 +395,19 @@ export const createReply = async (req, res) => {
     }
 
     const reply = await PostReplies.create({
-      
       content,
       createdBy: req.user.userId,
       parentId,
-      commentId: comment ? comment._id : (parentReply ? parentReply.commentId : null), // Ensure commentId is set correctly
-      replyTo: comment ? comment.createdBy : (parentReply ? parentReply.createdBy : null)
+      commentId: comment
+        ? comment._id
+        : parentReply
+        ? parentReply.commentId
+        : null, // Ensure commentId is set correctly
+      replyTo: comment
+        ? comment.createdBy
+        : parentReply
+        ? parentReply.createdBy
+        : null,
     });
 
     if (comment) {
@@ -399,23 +421,23 @@ export const createReply = async (req, res) => {
     // Fetch reply with current user details for response
     const replyWithUser = await PostReplies.aggregate([
       {
-        $match: { _id: reply._id }  
+        $match: { _id: reply._id },
       },
       {
         $lookup: {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "authorDetails"
-        }
+          as: "authorDetails",
+        },
       },
       {
         $lookup: {
           from: "users",
           localField: "replyTo",
           foreignField: "_id",
-          as: "replyToDetails"
-        }
+          as: "replyToDetails",
+        },
       },
       {
         $addFields: {
@@ -425,15 +447,15 @@ export const createReply = async (req, res) => {
           commentUserAvatar: { $arrayElemAt: ["$replyToDetails.avatar", 0] },
           commentUserId: "$replyTo",
           totalReplies: { $size: { $ifNull: ["$replies", []] } },
-          totalLikes: { $size: { $ifNull: ["$likes", []] } }
-        }
+          totalLikes: { $size: { $ifNull: ["$likes", []] } },
+        },
       },
       {
         $project: {
           authorDetails: 0,
-          replyToDetails: 0
-        }
-      }
+          replyToDetails: 0,
+        },
+      },
     ]);
 
     // Send notification to the user who was replied to
@@ -441,15 +463,19 @@ export const createReply = async (req, res) => {
       const notification = new Notification({
         userId: reply.replyTo.toString(), // The user who was replied to
         createdBy: req.user.userId,
-        postId:postId,
-        commentId: comment ? comment._id : (parentReply ? parentReply.commentId : null),
-        type: 'reply',
+        postId: postId,
+        commentId: comment
+          ? comment._id
+          : parentReply
+          ? parentReply.commentId
+          : null,
+        type: "reply",
         message: `${req.user.username} replied to your comment`, // Assuming you have the username available
       });
 
       await notification.save();
 
-      io.to(reply.replyTo.toString()).emit('newNotification', notification); // Emit to the specific user's room
+      io.to(reply.replyTo.toString()).emit("newNotification", notification); // Emit to the specific user's room
     }
 
     res.status(StatusCodes.CREATED).json({
@@ -457,40 +483,39 @@ export const createReply = async (req, res) => {
       reply: replyWithUser[0],
     });
   } catch (error) {
-    console.error('Error creating reply:', error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Failed to create reply' });
+    console.error("Error creating reply:", error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Failed to create reply" });
   }
 };
 export const getAllRepliesByCommentId = async (req, res) => {
   const { id: commentId } = req.params;
-  
+
   // Convert string ID to ObjectId
   const objectId = new mongoose.Types.ObjectId(commentId);
-  
+
   const replies = await PostReplies.aggregate([
     {
-      $match: { 
-        $or: [
-          { commentId: objectId },
-          { parentId: objectId }
-        ]
-      }
+      $match: {
+        $or: [{ commentId: objectId }, { parentId: objectId }],
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "authorDetails"
-      }
+        as: "authorDetails",
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "replyTo",
         foreignField: "_id",
-        as: "replyToDetails"
-      }
+        as: "replyToDetails",
+      },
     },
     {
       $addFields: {
@@ -500,19 +525,19 @@ export const getAllRepliesByCommentId = async (req, res) => {
         commentUserAvatar: { $arrayElemAt: ["$replyToDetails.avatar", 0] },
         commentUserId: "$replyTo",
         totalReplies: { $size: { $ifNull: ["$replies", []] } },
-        totalLikes: { $size: { $ifNull: ["$likes", []] } }
-      }
+        totalLikes: { $size: { $ifNull: ["$likes", []] } },
+      },
     },
     {
       $project: {
         authorDetails: 0,
         replyToDetails: 0,
-        __v: 0
-      }
+        __v: 0,
+      },
     },
     {
-      $sort: { createdAt: 1 }
-    }
+      $sort: { createdAt: 1 },
+    },
   ]);
 
   res.status(StatusCodes.OK).json({ replies });
@@ -535,7 +560,7 @@ export const deletePost = async (req, res) => {
 
     // Delete the image if it exists
     if (post.imageUrl) {
-      console.log('Deleting image:', post.imageUrl);
+      console.log("Deleting image:", post.imageUrl);
       await deleteFile(post.imageUrl);
     }
 
@@ -558,7 +583,7 @@ export const deletePost = async (req, res) => {
     await session.commitTransaction();
     res.status(StatusCodes.OK).json({ message: "Post deleted successfully" });
   } catch (error) {
-    console.error('Error deleting post:', error);
+    console.error("Error deleting post:", error);
     await session.abortTransaction();
     throw error;
   } finally {
@@ -646,24 +671,28 @@ export const likePostComment = async (req, res) => {
   const update = isLiked
     ? { $pull: { likes: userId } }
     : { $push: { likes: userId } };
-    if(!isLiked && comment.createdBy.toString() !== userId) {
-      const notificationAlreadyExists = await Notification.findOne({ userId: comment.createdBy, postId: comment.postId,createdBy: userId, postCommentId: commentId, type: 'commentLiked' });
-      if (!notificationAlreadyExists) {
-        const notification = new Notification({
-          userId: comment.createdBy, // The user who created the post
-          createdBy: userId,
-          postId: comment.postId,
-          postCommentId: commentId,
-          message: `${req.user.username} liked your comment`,
-          type: 'commentLiked',
-        });
-        await notification.save();
+  if (!isLiked && comment.createdBy.toString() !== userId) {
+    const notificationAlreadyExists = await Notification.findOne({
+      userId: comment.createdBy,
+      postId: comment.postId,
+      createdBy: userId,
+      postCommentId: commentId,
+      type: "commentLiked",
+    });
+    if (!notificationAlreadyExists) {
+      const notification = new Notification({
+        userId: comment.createdBy, // The user who created the post
+        createdBy: userId,
+        postId: comment.postId,
+        postCommentId: commentId,
+        message: `${req.user.username} liked your comment`,
+        type: "commentLiked",
+      });
+      await notification.save();
 
-       
-
-        io.to(comment.createdBy.toString()).emit('newNotification', notification);
-      }
+      io.to(comment.createdBy.toString()).emit("newNotification", notification);
     }
+  }
 
   const updatedComment = await PostComments.findByIdAndUpdate(
     commentId,
@@ -693,23 +722,28 @@ export const likePostCommentReply = async (req, res) => {
   const update = isLiked
     ? { $pull: { likes: userId } }
     : { $push: { likes: userId } };
-    if(!isLiked && reply.createdBy.toString() !== userId) {
-      const notificationAlreadyExists = await Notification.findOne({ userId: reply.createdBy, postId:reply.postId,createdBy: userId, postReplyId: reply._id, type: 'replyLiked' });
-      if (!notificationAlreadyExists) {
-        const notification = new Notification({
-          userId: reply.createdBy, // The user who created the post
-          createdBy: userId,
-          postId,
-          postReplyId: replyId,
-          message: `${req.user.username} liked your reply`,
-          type: 'replyLiked',
-        });
-        await notification.save();
+  if (!isLiked && reply.createdBy.toString() !== userId) {
+    const notificationAlreadyExists = await Notification.findOne({
+      userId: reply.createdBy,
+      postId: reply.postId,
+      createdBy: userId,
+      postReplyId: reply._id,
+      type: "replyLiked",
+    });
+    if (!notificationAlreadyExists) {
+      const notification = new Notification({
+        userId: reply.createdBy, // The user who created the post
+        createdBy: userId,
+        postId,
+        postReplyId: replyId,
+        message: `${req.user.username} liked your reply`,
+        type: "replyLiked",
+      });
+      await notification.save();
 
-        
-        io.to(reply.createdBy.toString()).emit('newNotification', notification);
-      }
+      io.to(reply.createdBy.toString()).emit("newNotification", notification);
     }
+  }
 
   const updatedReply = await PostReplies.findByIdAndUpdate(replyId, update, {
     new: true,
@@ -730,11 +764,11 @@ export const updatePost = async (req, res) => {
 
   const post = await Post.findById(postId);
   if (!post) {
-    throw new BadRequestError('Post not found');
+    throw new BadRequestError("Post not found");
   }
 
   if (post.createdBy.toString() !== userId) {
-    throw new UnauthorizedError('Not authorized to edit this post');
+    throw new UnauthorizedError("Not authorized to edit this post");
   }
 
   // Parse tags if they exist
@@ -742,20 +776,26 @@ export const updatePost = async (req, res) => {
     try {
       req.body.tags = JSON.parse(req.body.tags);
     } catch (error) {
-      throw new BadRequestError('Invalid tags format');
+      throw new BadRequestError("Invalid tags format");
     }
   }
 
   // Handle image removal
-  if (req.body.removeImage === 'true' && post.imageUrl) {
-    const oldImagePath = post.imageUrl.replace(`${process.env.BACKEND_URL}/public/uploads/`, '');
+  if (req.body.removeImage === "true" && post.imageUrl) {
+    const oldImagePath = post.imageUrl.replace(
+      `${process.env.BACKEND_URL}/public/uploads/`,
+      ""
+    );
     await deleteFile(oldImagePath);
     req.body.imageUrl = null; // Clear the imageUrl in database
   }
   // Handle new image upload
   else if (req.file) {
     if (post.imageUrl) {
-      const oldImagePath = post.imageUrl.replace(`${process.env.BACKEND_URL}/public/uploads/`, '');
+      const oldImagePath = post.imageUrl.replace(
+        `${process.env.BACKEND_URL}/public/uploads/`,
+        ""
+      );
       await deleteFile(oldImagePath);
     }
     const filepaath = `${process.env.BACKEND_URL}/public/uploads/${req.file.filename}`;
@@ -764,18 +804,18 @@ export const updatePost = async (req, res) => {
 
   const updatedPost = await Post.findByIdAndUpdate(
     postId,
-    { 
-      $set: { 
-        ...req.body, 
-        editedAt: new Date() 
-      } 
+    {
+      $set: {
+        ...req.body,
+        editedAt: new Date(),
+      },
     },
     { new: true }
   );
 
-  res.status(StatusCodes.OK).json({ 
+  res.status(StatusCodes.OK).json({
     msg: "Post updated successfully",
-    post: updatedPost
+    post: updatedPost,
   });
 };
 
@@ -785,7 +825,7 @@ export const updatePostComment = async (req, res) => {
   const { userId } = req.user;
 
   if (!content) {
-    throw new BadRequestError('Comment content is required');
+    throw new BadRequestError("Comment content is required");
   }
 
   const comment = await PostComments.findById(commentId);
@@ -799,13 +839,12 @@ export const updatePostComment = async (req, res) => {
 
   const updatedComment = await PostComments.findByIdAndUpdate(
     commentId,
-    { 
+    {
       content,
-      editedAt: new Date()
+      editedAt: new Date(),
     },
     { new: true }
-  )
-  .populate('createdBy', 'name avatar');
+  ).populate("createdBy", "name avatar");
 
   res.status(StatusCodes.OK).json({
     message: "Comment updated successfully",
@@ -814,8 +853,8 @@ export const updatePostComment = async (req, res) => {
       username: updatedComment.createdBy.name,
       userAvatar: updatedComment.createdBy.avatar,
       totalReplies: updatedComment.replies?.length || 0,
-      totalLikes: updatedComment.likes?.length || 0
-    }
+      totalLikes: updatedComment.likes?.length || 0,
+    },
   });
 };
 
@@ -825,13 +864,13 @@ export const updatePostCommentReply = async (req, res) => {
   const { userId } = req.user;
 
   if (!content) {
-    throw new BadRequestError('Reply content is required');
+    throw new BadRequestError("Reply content is required");
   }
 
   const reply = await PostReplies.findOne({ _id: replyId, deleted: false })
-    .populate('createdBy', 'name avatar')
-    .populate('replyTo', 'name avatar')
-    .populate('parentId');
+    .populate("createdBy", "name avatar")
+    .populate("replyTo", "name avatar")
+    .populate("parentId");
 
   if (!reply) {
     throw new BadRequestError("Reply not found");
@@ -860,7 +899,20 @@ export const updatePostCommentReply = async (req, res) => {
       commentUserAvatar: reply.replyTo.avatar,
       commentUserId: reply.replyTo._id,
       likes: reply.likes || [],
-      totalLikes: reply.likes?.length || 0
-    }
+      totalLikes: reply.likes?.length || 0,
+    },
+  });
+};
+
+export const mostLikedPosts = async (req, res) => {
+  const posts = await Post.find({ deleted: false })
+    .populate("createdBy", "name avatar")
+    .populate("comments", "content likes createdAt updatedAt")
+    .sort({ likes: -1 })
+    .limit(7);
+
+  res.status(StatusCodes.OK).json({
+    message: "Most liked posts",
+    posts,
   });
 };

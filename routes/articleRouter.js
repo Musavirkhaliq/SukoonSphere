@@ -6,7 +6,8 @@ import {
   deleteArticle,
   getSingleArticle,
   getArticlesByUserId,
-  likeArticle 
+  likeArticle, 
+  GetMostLikedArticles
 } from "../controllers/articleControllers.js";
 import {
   createArticleComment,
@@ -27,6 +28,7 @@ const router = express.Router();
 
 // Public routes
 router.get("/", getAllArticles);
+router.get("/most-liked", GetMostLikedArticles);
 router.get("/user/:userId", getArticlesByUserId);
 router.get("/:id", getSingleArticle);
 router.get("/:articleId/comments", getAllCommentsByArticleId);

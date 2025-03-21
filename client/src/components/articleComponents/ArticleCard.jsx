@@ -1,6 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaBookOpen, FaCalendarAlt, FaRegCommentAlt } from "react-icons/fa";
+import {
+  FaBookOpen,
+  FaCalendarAlt,
+  FaRegCommentAlt,
+  FaUser,
+} from "react-icons/fa";
 import { BiUpvote } from "react-icons/bi";
 
 const ArticleCard = ({ article, index }) => {
@@ -33,29 +38,31 @@ const ArticleCard = ({ article, index }) => {
             <div className="flex items-center gap-2">
               <BiUpvote className="w-5 h-5 text-[var(--grey--900)]" />
               <span className="text-[var(--grey--600)]">
-                {article.likes?.length || 0}
+                {article?.likes?.length || 0}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <FaRegCommentAlt className="w-4 h-4 text-[var(--grey--900)]" />
               <span className="text-[var(--grey--600)]">
-                {article.comments?.length || 0}
+                {article?.comments?.length || 0}
               </span>
             </div>
           </div>
 
           <div className="flex items-center justify-between text-sm text-[var(--grey--600)] pt-4 border-t border-gray-100">
             <div className="flex items-center">
-              {article.authorAvatar ? (
+              {article?.author?.avatar ? (
                 <img
-                  src={article.authorAvatar}
-                  alt={article.authorName}
+                  src={article?.author?.avatar}
+                  alt={article?.author?.name}
                   className="w-6 h-6 mr-2 object-cover rounded-full"
                 />
               ) : (
                 <FaUser className="w-4 h-4 mr-2" />
               )}
-              <span>{article.authorName || "Anonymous"}</span>
+              <span className="text-[var(--grey--900)] line-clamp-1">
+                {article?.author?.name || "Anonymous"}
+              </span>
             </div>
             <div className="flex items-center">
               <FaCalendarAlt className="w-4 h-4 mr-2 text-[var(--grey--900)]" />
