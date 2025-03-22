@@ -453,13 +453,6 @@ export const likeArticle = async (req, res) => {
     if (notification) {
       notification.deleteOne();
     }
-    const totalNotifications = await Notification.find({
-      userId: article.author,
-    }).countDocuments();
-    io.to(article.author.toString()).emit(
-      "notificationCount",
-      totalNotifications
-    );
     return res
       .status(StatusCodes.OK)
       .json({ message: "Article unliked successfully", article });
@@ -482,19 +475,9 @@ export const likeArticle = async (req, res) => {
         message: `${req.user.name} liked your article`,
       });
       await notification.save();
-      const populatedNotification = await Notification.findById(
-        notification._id
-      ).populate("createdBy", "name avatar");
       io.to(article.author.toString()).emit(
-        "notification",
-        populatedNotification
-      );
-      const totalNotifications = await Notification.find({
-        userId: article.author,
-      }).countDocuments();
-      io.to(article.author.toString()).emit(
-        "notificationCount",
-        totalNotifications
+        "newNotification",
+        notification
       );
     }
     return res

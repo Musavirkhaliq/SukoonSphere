@@ -26,7 +26,6 @@ function NavMenu({ showMobile = true }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [unseenMessages, setUnseenMessages] = useState(0);
-
   const navigate = useNavigate();
   const { user, logout } = useUser();
   const toggleMiniMenu = () => setMiniMenu(!miniMenu);
@@ -91,8 +90,10 @@ function NavMenu({ showMobile = true }) {
     setShowNotifications(!showNotifications);
   };
 
-  const closeDropdown = () => {
+
+  const closeDropdown = async() => {
     setShowNotifications(false);
+    await customFetch.patch('/notifications/mark-as-seen');
   };
 
   useEffect(() => {
@@ -110,21 +111,25 @@ function NavMenu({ showMobile = true }) {
     socket.emit("join", loggedInUser?._id);
 
     socket.on("newNotification", () => {
-      setNotificationCount((prevCount) => prevCount + 1); // Update the notification count
+      setNotificationCount((prevCount) => prevCount + 1); 
     });
-
+    socket.on("newMessage", () => {
+      setUnseenMessages((prevCount) => prevCount + 1); 
+    });
+    socket.on("notificationCount", (count) => {
+      setNotificationCount(count);
+    });
     return () => {
-      socket.off("newNotification"); // Clean up the listener on unmount
+      socket.off("newNotification"); 
+      socket.off("notificationCount"); 
+      socket.off("newMessage");
     };
-  }, [loggedInUser]);
+  });
   useEffect(() => {
     const fetchTotalNotificationsAndUnseenMessages = async () => {
-      const {
-        data: { count: notificationCount },
-      } = await customFetch.get(`/notifications/total/${loggedInUser?._id}`);
-      const {
-        data: { count: unseenMessages },
-      } = await customFetch.get(`/messages/total-unseen/${loggedInUser?._id}`);
+      const { data: { count: notificationCount } } = await customFetch.get(`/notifications/total/${loggedInUser?._id}`);
+      const { data: { count: unseenMessages } } = await customFetch.get(`/messages/total-unseen/${loggedInUser?._id}`);
+      console.log({ notificationCount, unseenMessages });
       setNotificationCount(notificationCount);
       setUnseenMessages(unseenMessages);
     };

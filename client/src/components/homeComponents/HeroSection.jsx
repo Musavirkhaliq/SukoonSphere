@@ -35,7 +35,7 @@ export default function HeroSection() {
             <div className="flex flex-col justify-center sm:flex-row gap-4">
               <Link to={"/QA-section"}>
                 <button className="btn-1 ">
-                  Ask questions to professionals
+                  Ask questions 
                   <FaLongArrowAltRight className="ml-2" />
                 </button>
               </Link>
