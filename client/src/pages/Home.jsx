@@ -1,7 +1,13 @@
 import React, { Fragment, lazy, Suspense } from "react";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
 import Chatbot from "@/components/Chatbot";
-import { ArticlesSections, HeroSection, UserPostsHome, VideoSection } from "@/components";
+import {
+  ArticlesSections,
+  HeroSection,
+  UserPostsHome,
+  VideoSection,
+} from "@/components";
+import Questions from "@/components/homeComponents/Questions";
 
 // Lazy load components
 const TopIntro = lazy(() => import("../components/homeComponents/TopIntro"));
@@ -22,7 +28,7 @@ const OurTeam = lazy(() => import("../components/homeComponents/OurTeam"));
 
 const Home = () => {
   return (
-    <Fragment >
+    <Fragment>
       <Suspense fallback={<LoadingSpinner />}>
         {/* <TopIntro /> */}
         <HeroSection />
@@ -34,30 +40,30 @@ const Home = () => {
         <UserPostsHome />
       </Suspense>
       <Suspense fallback={<LoadingSpinner />}>
-        {/* <OurStory /> */}
-       <ArticlesSections />
-      </Suspense>
-      <Suspense fallback={<LoadingSpinner />}>
-        <TodaysQuote />
-      </Suspense>
-      <Suspense fallback={<LoadingSpinner />}>
-        <VideoSection />
+        <Questions />
       </Suspense>
       <Suspense fallback={<LoadingSpinner />}>
         <Infography />
       </Suspense>
-      {/* <Suspense fallback={<LoadingSpinner />}>
-        <TrendingArticles />
-      </Suspense> */}
+      <Suspense fallback={<LoadingSpinner />}>
+        <ArticlesSections />
+      </Suspense>
+      <Suspense fallback={<LoadingSpinner />}>
+        <VideoSection />
+      </Suspense>
+
+      <Suspense fallback={<LoadingSpinner />}>
+        <TodaysQuote />
+      </Suspense>
       <Suspense fallback={<LoadingSpinner />}>
         <TodaysQuiz />
       </Suspense>
       {/* <Suspense fallback={<LoadingSpinner />}>
         <CampusPartners />
       </Suspense> */}
-      <Suspense fallback={<LoadingSpinner />}>
+      {/* <Suspense fallback={<LoadingSpinner />}>
         <OurTeam />
-      </Suspense>
+      </Suspense> */}
     </Fragment>
   );
 };
