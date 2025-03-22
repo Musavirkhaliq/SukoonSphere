@@ -60,7 +60,7 @@ export const sendMessage = async (req, res) => {
 // Other controller methods remain the same...
 export const getMessages = async (req, res) => {
   const { chatId } = req.params;
-  const { userId } = req.user;
+  const { userId } = req.user;//logged user
   const chat = await Chat.findById(chatId);
 
   if (!chat) {
@@ -76,7 +76,7 @@ export const getMessages = async (req, res) => {
   const receiver = await userModel
     .findById(receiverId)
     .select("name avatar _id");
-
+   
   res.status(200).json({ messages, receiver, chat });
 };
 export const totalUnseenMessages = async (req, res) => {
@@ -200,4 +200,47 @@ export const deleteAllMessagesByChatId = async (req, res) => {
     message: "All messages deleted successfully",
     modifiedCount: result.modifiedCount,
   });
+};
+export const getTotalUnseenMessages = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    
+    if (!userId) {
+      return res.status(200).json({ count: 0 });
+    }
+
+    // Aggregate to count all unseen messages across all chats for this user
+    const unseenCount = await Message.aggregate([
+      {
+        $lookup: {
+          from: "chats", // Your Chat collection name
+          localField: "chatId",
+          foreignField: "_id",
+          as: "chat"
+        }
+      },
+      { $unwind: "$chat" },
+      {
+        $match: {
+          "chat.participants": { $in: [new mongoose.Types.ObjectId(userId)] },
+          "sender": { $ne: new mongoose.Types.ObjectId(userId) },
+          "seen": false,
+          "deletedBy": { $ne: new mongoose.Types.ObjectId(userId) }
+        }
+      },
+      {
+        $count: "total"
+      }
+    ]);
+
+    const total = unseenCount.length > 0 ? unseenCount[0].total : 0;
+    
+    res.status(200).json({ count: total });
+  } catch (error) {
+    console.error("Error getting total unseen messages:", error);
+    res.status(500).json({ 
+      message: "Failed to get total unseen messages", 
+      error: error.message 
+    });
+  }
 };
