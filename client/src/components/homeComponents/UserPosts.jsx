@@ -63,8 +63,6 @@ export default function UserPosts() {
     type: "loop",
     perPage: 4,
     perMove: 1,
-    autoplay: true,
-    interval: 1000,
     pagination: true,
     arrows: false,
     gap: "1.5rem",
@@ -73,6 +71,18 @@ export default function UserPosts() {
       768: { perPage: 2 },
       640: { perPage: 1 },
     },
+    autoplay: "play",
+    interval: 2000,
+    speed: 1000,
+    easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+    rewind: false,
+    lazyLoad: "nearby",
+    waitForTransition: true,
+    updateOnMove: true,
+    trimSpace: false,
+    wheelMinThreshold: 10,
+    wheelSleep: 400,
+    preloadPages: 2
   };
 
   const PostCard = ({ post }) => {
@@ -119,15 +129,15 @@ export default function UserPosts() {
         <Splide options={splideOptions}>
           {loading
             ? Array.from({ length: 4 }).map((_, index) => (
-                <SplideSlide key={`skeleton-${index}`} className="pb-12">
-                  <SkeletonPostCard />
-                </SplideSlide>
-              ))
+              <SplideSlide key={`skeleton-${index}`} className="pb-12">
+                <SkeletonPostCard />
+              </SplideSlide>
+            ))
             : userPosts.map((post) => (
-                <SplideSlide key={post?._id} className="pb-12">
-                  <PostCard post={post} />
-                </SplideSlide>
-              ))}
+              <SplideSlide key={post?._id} className="pb-12">
+                <PostCard post={post} />
+              </SplideSlide>
+            ))}
         </Splide>
       </div>
     </section>

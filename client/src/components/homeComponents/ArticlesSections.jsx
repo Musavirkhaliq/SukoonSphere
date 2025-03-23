@@ -1,9 +1,9 @@
 import SectionTitle from "../sharedComponents/SectionTitle";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
-import { ArticleCard } from "@/components";
 import { useEffect, useState } from "react";
 import customFetch from "@/utils/customFetch";
+import HomeArticleCard from "../articleComponents/HomeArtcleCard";
 
 // Skeleton Article Card Component
 const SkeletonArticleCard = () => {
@@ -53,17 +53,26 @@ export default function ArticleCards() {
     type: "loop",
     perPage: 4,
     perMove: 1,
-    autoplay: true,
-    interval: 3000,
-    pauseOnHover: true,
-    arrows: false,
     pagination: true,
+    arrows: false,
     gap: "1.5rem",
     breakpoints: {
-      1200: { perPage: 3 },
+      1024: { perPage: 3 },
       768: { perPage: 2 },
       640: { perPage: 1 },
     },
+    autoplay: "play",
+    interval: 2000,
+    speed: 1000,
+    easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+    rewind: false,
+    lazyLoad: "nearby",
+    waitForTransition: true,
+    updateOnMove: true,
+    trimSpace: false,
+    wheelMinThreshold: 10,
+    wheelSleep: 400,
+    preloadPages: 2
   };
 
   return (
@@ -72,18 +81,18 @@ export default function ArticleCards() {
       <div className="mt-6">
         <Splide options={splideOptions}>
           {loading
-            ? // Show skeleton cards while loading
-              Array.from({ length: 4 }).map((_, index) => (
-                <SplideSlide key={`skeleton-${index}`} className="pb-8">
-                  <SkeletonArticleCard />
-                </SplideSlide>
-              ))
-            : // Show real article cards when loaded
-              articles.map((article, index) => (
-                <SplideSlide key={article._id} className="pb-8">
-                  <ArticleCard article={article} index={index} />
-                </SplideSlide>
-              ))}
+            ?
+            Array.from({ length: 4 }).map((_, index) => (
+              <SplideSlide key={`skeleton-${index}`} >
+                <SkeletonArticleCard />
+              </SplideSlide>
+            ))
+            :
+            articles.map((article, index) => (
+              <SplideSlide key={article._id} className="pb-8">
+                <HomeArticleCard article={article} index={index} />
+              </SplideSlide>
+            ))}
         </Splide>
       </div>
     </section>
