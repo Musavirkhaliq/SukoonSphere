@@ -45,53 +45,53 @@ function NavMenu({ showMobile = true }) {
   };
   const settingsLinks = user
     ? [
-        ...(loggedInUser?.role !== "contributor"
-          ? [
-              ...(loggedInUser?.role === "admin"
-                ? [
-                    {
-                      name: "Notifications",
-                      address: "/admin",
-                      icon: <MdOutlineNotificationsActive />,
-                    },
-                  ]
-                : []),
+      ...(loggedInUser?.role !== "contributor"
+        ? [
+          ...(loggedInUser?.role === "admin"
+            ? [
               {
-                name: "Become a contributor",
-                address: "/user/request-contributor",
-                icon: <CiMedal />,
+                name: "Notifications",
+                address: "/admin",
+                icon: <MdOutlineNotificationsActive />,
               },
             ]
-          : []),
-        {
-          name: "Change Password",
-          address: "/user/change-password",
-          icon: <MdOutlinePassword />,
-        },
-        {
-          name: "Logout",
-          icon: <RxCross2 />,
-          onClick: handleLogout,
-        },
-      ]
+            : []),
+          {
+            name: "Become a contributor",
+            address: "/user/request-contributor",
+            icon: <CiMedal />,
+          },
+        ]
+        : []),
+      {
+        name: "Change Password",
+        address: "/user/change-password",
+        icon: <MdOutlinePassword />,
+      },
+      {
+        name: "Logout",
+        icon: <RxCross2 />,
+        onClick: handleLogout,
+      },
+    ]
     : [
-        {
-          name: "Sign Up",
-          address: "/auth/sign-up",
-          icon: <FiUserPlus />,
-        },
-        {
-          name: "Login",
-          address: "/auth/sign-in",
-          icon: <BiLogIn />,
-        },
-      ];
+      {
+        name: "Sign Up",
+        address: "/auth/sign-up",
+        icon: <FiUserPlus />,
+      },
+      {
+        name: "Login",
+        address: "/auth/sign-in",
+        icon: <BiLogIn />,
+      },
+    ];
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
   };
 
 
-  const closeDropdown = async() => {
+  const closeDropdown = async () => {
     setShowNotifications(false);
     await customFetch.patch('/notifications/mark-as-seen');
   };
@@ -111,17 +111,17 @@ function NavMenu({ showMobile = true }) {
     socket.emit("join", loggedInUser?._id);
 
     socket.on("newNotification", () => {
-      setNotificationCount((prevCount) => prevCount + 1); 
+      setNotificationCount((prevCount) => prevCount + 1);
     });
     socket.on("newMessage", () => {
-      setUnseenMessages((prevCount) => prevCount + 1); 
+      setUnseenMessages((prevCount) => prevCount + 1);
     });
     socket.on("notificationCount", (count) => {
       setNotificationCount(count);
     });
     return () => {
-      socket.off("newNotification"); 
-      socket.off("notificationCount"); 
+      socket.off("newNotification");
+      socket.off("notificationCount");
       socket.off("newMessage");
     };
   });
@@ -151,19 +151,26 @@ function NavMenu({ showMobile = true }) {
           <DesktopNav />
           {user ? (
             <div className="flex items-center justify-center gap-2">
-              <div className="relative">
+              <div className="relative flex items-center gap-2">
                 <button
                   onClick={handleNotificationClick}
                   className="text-2xl text-gray-800"
                 >
                   <MdOutlineNotificationsActive className="w-6 h-6 text-gray-600 mt-1 mr-2  " />
-
                   {notificationCount > 0 && (
                     <span className="absolute -top-3 right-0 bg-red-500 text-white text-xs rounded-full p-1 w-4 h-fit">
                       {notificationCount > 99 ? "99+" : notificationCount}
                     </span>
                   )}
                 </button>
+                <Link className="relative" to="/chats">
+                  <BsChatDots className="text-2xl" />
+                  {unseenMessages > 0 && (
+                    <span className="absolute -top-3 right-0 bg-blue-600 text-white text-xs rounded-full p-1 w-4 h-fit">
+                      {unseenMessages > 99 ? "99+" : unseenMessages}
+                    </span>
+                  )}
+                </Link>
                 {showNotifications && (
                   <NotificationDropdown
                     user={loggedInUser}
@@ -271,11 +278,10 @@ function NavMenu({ showMobile = true }) {
                   >
                     {link.icon}
                     <div
-                      className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${
-                        activeSublink === index
-                          ? "opacity-100 translate-y-0"
-                          : "opacity-0 translate-y-4 pointer-events-none"
-                      }`}
+                      className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${activeSublink === index
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 translate-y-4 pointer-events-none"
+                        }`}
                     >
                       <div className="flex flex-col space-y-3">
                         {link.sublinks.map((sublink) => {
@@ -286,10 +292,9 @@ function NavMenu({ showMobile = true }) {
                               key={sublink.name}
                               to={sublink.address}
                               className={({ isActive }) =>
-                                `flex items-center gap-3 p-2 rounded-xl whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95 ${
-                                  isActive
-                                    ? "bg-[var(--blue--100)] text-[var(--ternery)] shadow-sm"
-                                    : "hover:bg-[var(--grey--200)] text-[var(--grey--800)]"
+                                `flex items-center gap-3 p-2 rounded-xl whitespace-nowrap transform transition-all duration-150 hover:scale-105 active:scale-95 ${isActive
+                                  ? "bg-[var(--blue--100)] text-[var(--ternery)] shadow-sm"
+                                  : "hover:bg-[var(--grey--200)] text-[var(--grey--800)]"
                                 }`
                               }
                               onClick={() => setActiveSublink(null)}
@@ -307,10 +312,9 @@ function NavMenu({ showMobile = true }) {
                   <NavLink
                     to={link.address}
                     className={({ isActive }) =>
-                      `p-2 text-2xl transform transition-all duration-150 hover:scale-110 active:scale-95 ${
-                        isActive
-                          ? "text-[var(--ternery)]"
-                          : "text-[var(--grey--800)] hover:text-[var(--ternery)]"
+                      `p-2 text-2xl transform transition-all duration-150 hover:scale-110 active:scale-95 ${isActive
+                        ? "text-[var(--ternery)]"
+                        : "text-[var(--grey--800)] hover:text-[var(--ternery)]"
                       }`
                     }
                   >
@@ -331,11 +335,10 @@ function NavMenu({ showMobile = true }) {
                 <BsThreeDotsVertical />
               </div>
               <div
-                className={`absolute bottom-full right-2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${
-                  activeSublink === "settings"
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4 pointer-events-none"
-                }`}
+                className={`absolute bottom-full right-2 mb-2 bg-[var(--white-color)] rounded-2xl shadow-xl p-2 w-fit border border-[var(--grey--400)] transition-all duration-200 ease-out ${activeSublink === "settings"
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4 pointer-events-none"
+                  }`}
               >
                 <div className="flex flex-col space-y-3">
                   {settingsLinks.map((link) =>

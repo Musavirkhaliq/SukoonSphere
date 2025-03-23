@@ -6,6 +6,7 @@ import "@splidejs/react-splide/css";
 import UserAvatar from "../shared/UserAvatar";
 import { Link } from "react-router-dom";
 import customFetch from "@/utils/customFetch";
+import { AutoScroll } from '@splidejs/splide-extension-auto-scroll';
 
 export default function UserPosts() {
   const [questions, setQuestions] = useState([]);
@@ -29,29 +30,6 @@ export default function UserPosts() {
   useEffect(() => {
     fetchQuestions();
   }, []);
-
-  const splideOptions = {
-    type: "loop",
-    perPage: 3,
-    perMove: 1,
-    autoplay: true,
-    interval: 1000,
-    arrows: false,
-    pagination: true,
-    gap: "1rem",
-    direction: "ltr",
-    breakpoints: {
-      1024: {
-        perPage: 3,
-      },
-      768: {
-        perPage: 2,
-      },
-      640: {
-        perPage: 1,
-      },
-    },
-  };
 
   const QuestionCard = ({ question }) => {
     const { _id, questionText, context, tags, createdAt, author } = question;
@@ -132,6 +110,33 @@ export default function UserPosts() {
     );
   };
 
+  const splideOptions = {
+    type: "loop",
+    perPage: 3,
+    perMove: 1,
+    pagination: true,
+    arrows: false,
+    gap: "1rem",
+
+    breakpoints: {
+      1024: { perPage: 3 },
+      768: { perPage: 2 },
+      640: { perPage: 1 },
+    },
+    autoplay: "play",
+    interval: 3000,
+    speed: 1000,
+    easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+    rewind: false,
+    lazyLoad: "nearby",
+    waitForTransition: true,
+    updateOnMove: true,
+    trimSpace: false,
+    wheelMinThreshold: 10,
+    wheelSleep: 400,
+    preloadPages: 2
+  };
+
   return (
     <section className="max-w-7xl mx-auto p-2">
       <SectionTitle title={"Community questions"} />
@@ -139,15 +144,15 @@ export default function UserPosts() {
         <Splide options={splideOptions}>
           {loading
             ? Array.from({ length: 3 }).map((_, index) => (
-                <SplideSlide key={index} className="pb-8">
-                  <SkeletonCard />
-                </SplideSlide>
-              ))
+              <SplideSlide key={index} className="pb-8">
+                <SkeletonCard />
+              </SplideSlide>
+            ))
             : questions?.map((question, index) => (
-                <SplideSlide key={`${question?._id}-${index}`} className="pb-8">
-                  <QuestionCard key={question?._id} question={question} />
-                </SplideSlide>
-              ))}
+              <SplideSlide key={`${question?._id}-${index}`} className="pb-8">
+                <QuestionCard key={question?._id} question={question} />
+              </SplideSlide>
+            ))}
         </Splide>
       </div>
     </section>

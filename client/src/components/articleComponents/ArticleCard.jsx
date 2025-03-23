@@ -9,6 +9,7 @@ import {
 import { BiUpvote } from "react-icons/bi";
 
 const ArticleCard = ({ article, index }) => {
+  console.log({ article });
   return (
     <Link
       key={`${article._id}-${index}`}
@@ -51,17 +52,17 @@ const ArticleCard = ({ article, index }) => {
 
           <div className="flex items-center justify-between text-sm text-[var(--grey--600)] pt-4 border-t border-gray-100">
             <div className="flex items-center">
-              {article?.author?.avatar ? (
+              {article?.authorAvatar ? (
                 <img
-                  src={article?.author?.avatar}
-                  alt={article?.author?.name}
+                  src={article?.authorAvatar}
+                  alt={article?.authorName}
                   className="w-6 h-6 mr-2 object-cover rounded-full"
                 />
               ) : (
                 <FaUser className="w-4 h-4 mr-2" />
               )}
               <span className="text-[var(--grey--900)] line-clamp-1">
-                {article?.author?.name || "Anonymous"}
+                {article?.authorName || "Anonymous"}
               </span>
             </div>
             <div className="flex items-center">

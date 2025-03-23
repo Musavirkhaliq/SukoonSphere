@@ -65,10 +65,10 @@ const SignUp = () => {
             <InputComponent type="name" name="name" placeholder="Enter your name.." />
             <InputComponent type="email" name="email" placeholder="Enter an email.." />
             <div className="relative">
-              <InputComponent 
-                type={showPassword ? "text" : "password"} 
-                name="password" 
-                placeholder="Enter password.." 
+              <InputComponent
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Enter password.."
               />
               <button
                 type="button"
@@ -84,12 +84,12 @@ const SignUp = () => {
             </button>
             <p className="text-[var(--white-color)] text-center ">
               Already have an account!
-            <Link to="/auth/sign-in" className="text-blue-500 text-center ml-2  hover:underline">
-            Sign in
-            </Link>
+              <Link to="/auth/sign-in" className="text-blue-500 text-center ml-2  hover:underline">
+                Sign in
+              </Link>
             </p>
             <Link to="/user/forget-password" className="text-[var(--white-color)] text-center">
-              Forget Password
+              Forgot Password ?
             </Link>
           </Form>
         </div>
