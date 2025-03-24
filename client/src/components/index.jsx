@@ -48,6 +48,12 @@ export const TodaysQuote = createOptimizedComponent(
 export const CampusPartners = createOptimizedComponent(
   () => import("./homeComponents/CampusPartners")
 );
+export const OurMission = createOptimizedComponent(
+  () => import("./homeComponents/OurMission")
+);
+export const QuizWithPopup = createOptimizedComponent(
+  () => import("./homeComponents/QuizWithPopup")
+);
 // -----------------------------------------------//
 export const HeroSection = createOptimizedComponent(
   () => import("./homeComponents/HeroSection")
