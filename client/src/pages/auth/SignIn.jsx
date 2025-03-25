@@ -100,7 +100,7 @@ const SignIn = () => {
               to="/user/forget-password"
               className="text-[var(--white-color)] text-center hover:text-blue-500"
             >
-              Forget Password
+              Forgot Password?
             </Link>
           </Form>
         </div>

@@ -32,6 +32,20 @@ export const getNotifications = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+export const markNotificationsAsSeen = async (req, res) => {
+  try {
+    await Notification.updateMany({
+      userId: req.user.userId,
+      seen: false,
+    }, {
+      $set: { seen: true },
+    });
+io.to(req.user.userId.toString()).emit('notificationCount', 0);
+    res.status(200).json({ message: "Notifications marked as seen" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const deleteAllNotifications = async (req, res) => {
   try {

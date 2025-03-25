@@ -94,10 +94,8 @@ export const getUserChats = async (req, res) => {
   
       const objectIdUserId = new mongoose.Types.ObjectId(userId);
   
-   
-
       const chats = await Chat.aggregate([
-        { $match: { participants: objectIdUserId } }, // Find chats where user is a participant
+        { $match: { participants: objectIdUserId } }, 
         {
           $lookup: {
             from: "messages",

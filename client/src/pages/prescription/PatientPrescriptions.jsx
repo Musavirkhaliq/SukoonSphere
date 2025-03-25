@@ -9,6 +9,7 @@ import {
   FiFileText,
   FiChevronRight,
   FiTrendingUp,
+  FiClipboard,
 } from "react-icons/fi";
 import customFetch from "@/utils/customFetch";
 import { useUser } from "@/context/UserContext";
@@ -96,10 +97,20 @@ const PatientPrescriptions = () => {
               Review and access your complete therapy journey
             </p>
           </div>
+
+          {prescriptions?.length > 0 && (
+            <Link
+              to={`/view-consolidated-prescription/${patientId}`}
+              className="text-blue-600 !py-2 !px-4 flex gap-2"
+            >
+              <FiClipboard />
+              <span>Consolidate all previous sessions</span>
+            </Link>
+          )}
         </div>
 
         {/* Empty state */}
-        {prescriptions.length === 0 ? (
+        {prescriptions?.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center">
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-50 mb-4">
               <FiFileText className="h-8 w-8 text-blue-500" />
@@ -117,7 +128,7 @@ const PatientPrescriptions = () => {
             {prescriptions.map((prescription) => {
               return (
                 <div
-                  key={prescription._id}
+                  key={prescription?._id}
                   className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100"
                 >
                   {/* Top status bar */}
@@ -128,16 +139,16 @@ const PatientPrescriptions = () => {
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center">
                         <span className="text-2xl mr-2">
-                          {getSessionIcon(prescription.basicDetails?.type)}
+                          {getSessionIcon(prescription?.basicDetails?.type)}
                         </span>
                         <div>
                           <h3 className="font-medium text-gray-900">
                             Session #
-                            {prescription.basicDetails?.sessionNumber || "1"}
+                            {prescription?.basicDetails?.sessionNumber || "1"}
                           </h3>
                           <p className="text-sm text-gray-500">
-                            {prescription.basicDetails?.type || "Session"} •{" "}
-                            {prescription.basicDetails?.duration || "--"} min
+                            {prescription?.basicDetails?.type || "Session"} •{" "}
+                            {prescription?.basicDetails?.duration || "--"} min
                           </p>
                         </div>
                       </div>
@@ -145,31 +156,31 @@ const PatientPrescriptions = () => {
                       {/* Date badge */}
                       <div className="flex items-center text-sm text-gray-500">
                         <FiCalendar className="mr-1" />
-                        {formatDate(prescription.createdAt)}
+                        {formatDate(prescription?.createdAt)}
                       </div>
                     </div>
 
                     {/* Other details */}
                     <div className="space-y-2 mb-6">
-                      {prescription.therapistDetails?.name && (
+                      {prescription?.therapistDetails?.name && (
                         <div className="flex items-center text-sm text-gray-600">
                           <div className="w-5 mr-2 text-gray-400">👩‍⚕️</div>
                           <span>
-                            {prescription.therapistDetails.name
+                            {prescription?.therapistDetails.name
                               .toLowerCase()
                               .includes("dr")
-                              ? prescription.therapistDetails.name
-                              : `Dr. ${prescription.therapistDetails.name}`}
+                              ? prescription?.therapistDetails.name
+                              : `Dr. ${prescription?.therapistDetails.name}`}
                           </span>
                         </div>
                       )}
 
-                      {prescription.followUp?.nextSession && (
+                      {prescription?.followUp?.nextSession && (
                         <div className="flex items-center text-sm text-gray-600">
                           <div className="w-5 mr-2 text-gray-400">📅</div>
                           <span>
                             Next Session :{" "}
-                            {formatDate(prescription.followUp.nextSession)}
+                            {formatDate(prescription?.followUp?.nextSession)}
                           </span>
                         </div>
                       )}
@@ -177,7 +188,7 @@ const PatientPrescriptions = () => {
 
                     {/* Action button */}
                     <Link
-                      to={`/view-prescription/${prescription._id}`}
+                      to={`/view-prescription/${prescription?._id}`}
                       className="w-full btn-1 !py-2 !px-1  text-[9px]"
                     >
                       <FiEye className="mr-2" /> View Full Details
