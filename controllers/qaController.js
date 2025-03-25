@@ -4,7 +4,11 @@ import Comment from "../models/qaSection/answerCommentModel.js";
 import Replies from "../models/qaSection/answerReplyModel.js";
 import Notification from "../models/notifications/postNotificationModel.js";
 import { StatusCodes } from "http-status-codes";
-import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErors.js";
+import {
+  BadRequestError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../errors/customErors.js";
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import { io } from "../server.js";
@@ -22,7 +26,7 @@ export const addQuestion = async (req, res) => {
       {
         questionText,
         context,
-        createdBy: userId,  // Only store user ID
+        createdBy: userId, // Only store user ID
         tags,
       },
     ],
@@ -38,27 +42,27 @@ export const addQuestion = async (req, res) => {
   // Fetch question with user details for response
   const questionWithUser = await Question.aggregate([
     {
-      $match: { _id: newQuestion[0]._id }
+      $match: { _id: newQuestion[0]._id },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $addFields: {
         username: { $arrayElemAt: ["$userDetails.name", 0] },
-        userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
-      }
+        userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+      },
     },
     {
       $project: {
-        userDetails: 0
-      }
-    }
+        userDetails: 0,
+      },
+    },
   ]);
 
   await session.commitTransaction();
@@ -74,8 +78,8 @@ export const getAllQuestions = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const sortBy = req.query.sortBy || 'newest';
-    const search = req.query.search || '';
+    const sortBy = req.query.sortBy || "newest";
+    const search = req.query.search || "";
     const skip = (page - 1) * limit;
 
     // Base pipeline for questions
@@ -85,32 +89,32 @@ export const getAllQuestions = async (req, res) => {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "userDetails"
-        }
+          as: "userDetails",
+        },
       },
       {
         $lookup: {
           from: "answers",
           localField: "answers",
           foreignField: "_id",
-          as: "answers"
-        }
+          as: "answers",
+        },
       },
       {
         $addFields: {
           author: {
             userId: "$createdBy",
             username: { $arrayElemAt: ["$userDetails.name", 0] },
-            userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
+            userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
           },
-          totalAnswers: { $size: "$answers" }
-        }
+          totalAnswers: { $size: "$answers" },
+        },
       },
       {
         $project: {
-          userDetails: 0
-        }
-      }
+          userDetails: 0,
+        },
+      },
     ];
 
     // Add search stage if search query exists
@@ -118,30 +122,27 @@ export const getAllQuestions = async (req, res) => {
       pipeline.unshift({
         $match: {
           $or: [
-            { questionText: { $regex: search, $options: 'i' } },
-            { context: { $regex: search, $options: 'i' } },
-            { tags: { $regex: search, $options: 'i' } }
-          ]
-        }
+            { questionText: { $regex: search, $options: "i" } },
+            { context: { $regex: search, $options: "i" } },
+            { tags: { $regex: search, $options: "i" } },
+          ],
+        },
       });
     }
 
     // Add filter stages based on sortBy
     switch (sortBy) {
-      case 'oldest':
+      case "oldest":
         pipeline.push({ $sort: { createdAt: 1 } });
         break;
-      case 'mostAnswered':
+      case "mostAnswered":
         pipeline.push({ $sort: { totalAnswers: -1, createdAt: -1 } });
         break;
-      case 'unanswered':
+      case "unanswered":
         pipeline.unshift({
           $match: {
-            $or: [
-              { answers: { $size: 0 } },
-              { answers: { $exists: false } }
-            ]
-          }
+            $or: [{ answers: { $size: 0 } }, { answers: { $exists: false } }],
+          },
         });
         pipeline.push({ $sort: { createdAt: -1 } });
         break;
@@ -151,30 +152,35 @@ export const getAllQuestions = async (req, res) => {
 
     // Get total count for pagination info
     const totalCount = await Question.aggregate([
-      ...(search ? [{
-        $match: {
-          $or: [
-            { questionText: { $regex: search, $options: 'i' } },
-            { context: { $regex: search, $options: 'i' } },
-            { tags: { $regex: search, $options: 'i' } }
+      ...(search
+        ? [
+            {
+              $match: {
+                $or: [
+                  { questionText: { $regex: search, $options: "i" } },
+                  { context: { $regex: search, $options: "i" } },
+                  { tags: { $regex: search, $options: "i" } },
+                ],
+              },
+            },
           ]
-        }
-      }] : []),
-      ...(sortBy === 'unanswered' ? [{
-        $match: {
-          $or: [
-            { answers: { $size: 0 } },
-            { answers: { $exists: false } }
+        : []),
+      ...(sortBy === "unanswered"
+        ? [
+            {
+              $match: {
+                $or: [
+                  { answers: { $size: 0 } },
+                  { answers: { $exists: false } },
+                ],
+              },
+            },
           ]
-        }
-      }] : [])
-    ]).count('total');
+        : []),
+    ]).count("total");
 
     // Add pagination stages
-    pipeline.push(
-      { $skip: skip },
-      { $limit: limit }
-    );
+    pipeline.push({ $skip: skip }, { $limit: limit });
 
     const questions = await Question.aggregate(pipeline);
     const total = totalCount[0]?.total || 0;
@@ -185,12 +191,12 @@ export const getAllQuestions = async (req, res) => {
       currentPage: page,
       totalPages,
       totalQuestions: total,
-      hasMore: page < totalPages
+      hasMore: page < totalPages,
     });
   } catch (error) {
-    console.error('Error in getAllQuestions:', error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
-      msg: 'Failed to fetch questions' 
+    console.error("Error in getAllQuestions:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: "Failed to fetch questions",
     });
   }
 };
@@ -207,46 +213,46 @@ export const getUserQuestions = async (req, res) => {
 
     const questions = await Question.aggregate([
       {
-        $match: { createdBy: new mongoose.Types.ObjectId(userId) }
+        $match: { createdBy: new mongoose.Types.ObjectId(userId) },
       },
       {
         $lookup: {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "userDetails"
-        }
+          as: "userDetails",
+        },
       },
       {
         $lookup: {
           from: "answers",
           localField: "_id",
           foreignField: "answeredTo",
-          as: "answers"
-        }
+          as: "answers",
+        },
       },
       {
         $addFields: {
           username: { $arrayElemAt: ["$userDetails.name", 0] },
           userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
-          totalAnswers: { $size: "$answers" }
-        }
+          totalAnswers: { $size: "$answers" },
+        },
       },
       {
         $project: {
           userDetails: 0,
-          answers: 0
-        }
+          answers: 0,
+        },
       },
       {
-        $sort: { createdAt: -1 }
+        $sort: { createdAt: -1 },
       },
       {
-        $skip: parseInt(skip)
+        $skip: parseInt(skip),
       },
       {
-        $limit: parseInt(limit)
-      }
+        $limit: parseInt(limit),
+      },
     ]);
 
     res.status(StatusCodes.OK).json({
@@ -256,13 +262,13 @@ export const getUserQuestions = async (req, res) => {
         totalPages,
         totalQuestions,
         hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
+        hasPrevPage: page > 1,
+      },
     });
   } catch (error) {
-    console.error('Error in getUserQuestions:', error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
-      msg: 'Failed to fetch user questions' 
+    console.error("Error in getUserQuestions:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: "Failed to fetch user questions",
     });
   }
 };
@@ -272,50 +278,50 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
-  const sortBy = req.query.sortBy || 'newest';
+  const sortBy = req.query.sortBy || "newest";
 
   // Get total count for pagination info
   const totalCount = await Question.countDocuments({
-    answers: { $exists: true, $not: { $size: 0 } }
+    answers: { $exists: true, $not: { $size: 0 } },
   });
 
   // Base pipeline for questions with answers
   const pipeline = [
     {
       $match: {
-        answers: { $exists: true, $not: { $size: 0 } }
-      }
+        answers: { $exists: true, $not: { $size: 0 } },
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $lookup: {
         from: "answers",
         localField: "answers",
         foreignField: "_id",
-        as: "answers"
-      }
+        as: "answers",
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "answers.createdBy",
         foreignField: "_id",
-        as: "answerUserDetails"
-      }
+        as: "answerUserDetails",
+      },
     },
     {
       $addFields: {
         author: {
           userId: "$createdBy",
           username: { $arrayElemAt: ["$userDetails.name", 0] },
-          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
+          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
         },
         totalAnswers: { $size: "$answers" },
         answers: {
@@ -340,15 +346,17 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
                           {
                             $filter: {
                               input: "$answerUserDetails",
-                              cond: { $eq: ["$$this._id", "$$answer.createdBy"] }
-                            }
+                              cond: {
+                                $eq: ["$$this._id", "$$answer.createdBy"],
+                              },
+                            },
                           },
-                          0
-                        ]
-                      }
+                          0,
+                        ],
+                      },
                     },
-                    in: "$$user.name"
-                  }
+                    in: "$$user.name",
+                  },
                 },
                 userAvatar: {
                   $let: {
@@ -358,23 +366,25 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
                           {
                             $filter: {
                               input: "$answerUserDetails",
-                              cond: { $eq: ["$$this._id", "$$answer.createdBy"] }
-                            }
+                              cond: {
+                                $eq: ["$$this._id", "$$answer.createdBy"],
+                              },
+                            },
                           },
-                          0
-                        ]
-                      }
+                          0,
+                        ],
+                      },
                     },
-                    in: "$$user.avatar"
-                  }
-                }
+                    in: "$$user.avatar",
+                  },
+                },
               },
               totalLikes: { $size: { $ifNull: ["$$answer.likes", []] } },
-              totalComments: { $size: { $ifNull: ["$$answer.comments", []] } }
-            }
-          }
-        }
-      }
+              totalComments: { $size: { $ifNull: ["$$answer.comments", []] } },
+            },
+          },
+        },
+      },
     },
     {
       $addFields: {
@@ -386,36 +396,36 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
               $cond: [
                 { $gt: ["$$this.totalLikes", "$$value.totalLikes"] },
                 "$$this",
-                "$$value"
-              ]
-            }
-          }
+                "$$value",
+              ],
+            },
+          },
         },
         totalAnswerLikes: {
           $sum: {
             $map: {
               input: "$answers",
               as: "answer",
-              in: { $size: { $ifNull: ["$$answer.likes", []] } }
-            }
-          }
-        }
-      }
+              in: { $size: { $ifNull: ["$$answer.likes", []] } },
+            },
+          },
+        },
+      },
     },
     {
       $project: {
         userDetails: 0,
-        answerUserDetails: 0
-      }
-    }
+        answerUserDetails: 0,
+      },
+    },
   ];
 
   // Add sort stage based on filter
   switch (sortBy) {
-    case 'oldest':
+    case "oldest":
       pipeline.push({ $sort: { createdAt: 1 } });
       break;
-    case 'mostAnswered':
+    case "mostAnswered":
       pipeline.push({ $sort: { totalAnswers: -1, createdAt: -1 } });
       break;
     default: // 'newest'
@@ -423,10 +433,7 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
   }
 
   // Add pagination stages
-  pipeline.push(
-    { $skip: skip },
-    { $limit: limit }
-  );
+  pipeline.push({ $skip: skip }, { $limit: limit });
 
   const questions = await Question.aggregate(pipeline);
   const totalPages = Math.ceil(totalCount / limit);
@@ -436,7 +443,7 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
     currentPage: page,
     totalPages,
     totalQuestions: totalCount,
-    hasMore: page < totalPages
+    hasMore: page < totalPages,
   });
 };
 
@@ -481,44 +488,46 @@ export const createAnswer = async (req, res) => {
     // Fetch answer with user details
     const answerWithUser = await Answer.aggregate([
       {
-        $match: { _id: newAnswer[0]._id }
+        $match: { _id: newAnswer[0]._id },
       },
       {
         $lookup: {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "userDetails"
-        }
+          as: "userDetails",
+        },
       },
       {
         $addFields: {
           username: { $arrayElemAt: ["$userDetails.name", 0] },
           userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
-          totalComments: { $size: { $ifNull: ["$comments", []] } }
-        }
+          totalComments: { $size: { $ifNull: ["$comments", []] } },
+        },
       },
       {
         $project: {
-          userDetails: 0
-        }
-      }
+          userDetails: 0,
+        },
+      },
     ]);
     // Send notification to user who asked the question
-     if (question.createdBy.toString() !== req.user.userId) {
-    const notification = await Notification.create({
-      userId: question.createdBy,
-      createdBy: userId,
-      type: "answered",
-      message: `${req.user.username} Answered your question`,
-      answerId: newAnswer[0]._id,
-      questionId: question._id,
-    });
-    // Emit to socket
-    io.to(question.createdBy.toString()).emit('newNotification', notification);
-
-     }
+    if (question.createdBy.toString() !== req.user.userId) {
+      const notification = await Notification.create({
+        userId: question.createdBy,
+        createdBy: userId,
+        type: "answered",
+        message: `${req.user.username} Answered your question`,
+        answerId: newAnswer[0]._id,
+        questionId: question._id,
+      });
+      // Emit to socket
+      io.to(question.createdBy.toString()).emit(
+        "newNotification",
+        notification
+      );
+    }
     await session.commitTransaction();
     session.endSession();
 
@@ -532,48 +541,48 @@ export const createAnswer = async (req, res) => {
     throw error;
   }
 };
-    
+
 export const getAnswerById = async (req, res) => {
   const { id: answerId } = req.params;
 
   // First get the answer with user details and comment count
   const answer = await Answer.aggregate([
     {
-      $match: { _id: new mongoose.Types.ObjectId(answerId) }
+      $match: { _id: new mongoose.Types.ObjectId(answerId) },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $lookup: {
         from: "qacomments",
         localField: "comments",
         foreignField: "_id",
-        as: "commentDetails"
-      }
+        as: "commentDetails",
+      },
     },
     {
       $addFields: {
         author: {
           userId: "$createdBy",
           username: { $arrayElemAt: ["$userDetails.name", 0] },
-          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
+          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
         },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
-        totalComments: { $size: "$commentDetails" }
-      }
+        totalComments: { $size: "$commentDetails" },
+      },
     },
     {
       $project: {
         userDetails: 0,
-        commentDetails: 0
-      }
-    }
+        commentDetails: 0,
+      },
+    },
   ]);
 
   if (!answer.length) {
@@ -583,49 +592,47 @@ export const getAnswerById = async (req, res) => {
   // Then get the question this answer belongs to
   const question = await Question.aggregate([
     {
-      $match: { _id: answer[0].answeredTo }
+      $match: { _id: answer[0].answeredTo },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $lookup: {
         from: "answers",
         localField: "answers",
         foreignField: "_id",
-        as: "answers"
-      }
+        as: "answers",
+      },
     },
     {
       $addFields: {
         author: {
           userId: "$createdBy",
           username: { $arrayElemAt: ["$userDetails.name", 0] },
-          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
+          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
         },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
-        totalComments: { $size: { $ifNull: ["$comments", []] } }
-      }
+        totalComments: { $size: { $ifNull: ["$comments", []] } },
+      },
     },
     {
       $project: {
-        userDetails: 0
-      }
+        userDetails: 0,
+      },
     },
     {
-      $sort: { createdAt: -1 }
-    }
+      $sort: { createdAt: -1 },
+    },
   ]);
-;
-
   res.status(StatusCodes.OK).json({
     question: question[0],
-    answer: answer[0]
+    answer: answer[0],
   });
 };
 export const getAnswersByQuestionId = async (req, res) => {
@@ -633,46 +640,46 @@ export const getAnswersByQuestionId = async (req, res) => {
     const { id: questionId } = req.params;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const sortBy = req.query.sortBy || 'newest';
+    const sortBy = req.query.sortBy || "newest";
     const skip = (page - 1) * limit;
 
     // First get the question with user details
     const question = await Question.aggregate([
       {
-        $match: { _id: new mongoose.Types.ObjectId(questionId) }
+        $match: { _id: new mongoose.Types.ObjectId(questionId) },
       },
       {
         $lookup: {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "userDetails"
-        }
+          as: "userDetails",
+        },
       },
       {
         $lookup: {
           from: "answers",
           localField: "answers",
           foreignField: "_id",
-          as: "answers"
-        }
+          as: "answers",
+        },
       },
       {
         $addFields: {
           author: {
             userId: "$createdBy",
             username: { $arrayElemAt: ["$userDetails.name", 0] },
-            userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
+            userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
           },
-          totalAnswers: { $size: "$answers" }
-        }
+          totalAnswers: { $size: "$answers" },
+        },
       },
       {
         $project: {
           userDetails: 0,
-          answers: 0
-        }
-      }
+          answers: 0,
+        },
+      },
     ]);
 
     if (!question.length) {
@@ -680,54 +687,56 @@ export const getAnswersByQuestionId = async (req, res) => {
     }
 
     // Get total count for pagination info
-    const totalAnswers = await Answer.countDocuments({ answeredTo: questionId });
+    const totalAnswers = await Answer.countDocuments({
+      answeredTo: questionId,
+    });
     const totalPages = Math.ceil(totalAnswers / limit);
 
     // Then get paginated answers with user details
     const pipeline = [
       {
-        $match: { answeredTo: new mongoose.Types.ObjectId(questionId) }
+        $match: { answeredTo: new mongoose.Types.ObjectId(questionId) },
       },
       {
         $lookup: {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "userDetails"
-        }
+          as: "userDetails",
+        },
       },
       {
         $lookup: {
           from: "qacomments",
           localField: "comments",
           foreignField: "_id",
-          as: "comments"
-        }
+          as: "comments",
+        },
       },
       {
         $addFields: {
           author: {
             userId: "$createdBy",
             username: { $arrayElemAt: ["$userDetails.name", 0] },
-            userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
+            userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
           },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
-          totalComments: { $size: { $ifNull: ["$comments", []] } }
-        }
+          totalComments: { $size: { $ifNull: ["$comments", []] } },
+        },
       },
       {
         $project: {
-          userDetails: 0
-        }
-      }
+          userDetails: 0,
+        },
+      },
     ];
 
     // Add sort stage based on filter
     switch (sortBy) {
-      case 'oldest':
+      case "oldest":
         pipeline.push({ $sort: { createdAt: 1 } });
         break;
-      case 'mostLiked':
+      case "mostLiked":
         pipeline.push({ $sort: { totalLikes: -1, createdAt: -1 } });
         break;
       default: // 'newest'
@@ -735,10 +744,7 @@ export const getAnswersByQuestionId = async (req, res) => {
     }
 
     // Add pagination stages
-    pipeline.push(
-      { $skip: skip },
-      { $limit: limit }
-    );
+    pipeline.push({ $skip: skip }, { $limit: limit });
 
     const answers = await Answer.aggregate(pipeline);
 
@@ -750,16 +756,16 @@ export const getAnswersByQuestionId = async (req, res) => {
         totalPages,
         totalAnswers,
         hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
+        hasPrevPage: page > 1,
+      },
     });
   } catch (error) {
     if (error instanceof NotFoundError) {
       res.status(StatusCodes.NOT_FOUND).json({ msg: error.message });
     } else {
-      console.error('Error in getAnswersByQuestionId:', error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
-        msg: 'Failed to fetch answers' 
+      console.error("Error in getAnswersByQuestionId:", error);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        msg: "Failed to fetch answers",
       });
     }
   }
@@ -776,23 +782,23 @@ export const getUserAnswers = async (req, res) => {
 
     const answers = await Answer.aggregate([
       {
-        $match: { createdBy: new mongoose.Types.ObjectId(userId) }
+        $match: { createdBy: new mongoose.Types.ObjectId(userId) },
       },
       {
         $lookup: {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "userDetails"
-        }
+          as: "userDetails",
+        },
       },
       {
         $lookup: {
           from: "questions",
           localField: "answeredTo",
           foreignField: "_id",
-          as: "question"
-        }
+          as: "question",
+        },
       },
       {
         $addFields: {
@@ -800,23 +806,23 @@ export const getUserAnswers = async (req, res) => {
           userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
           totalComments: { $size: { $ifNull: ["$comments", []] } },
-          question: { $arrayElemAt: ["$question", 0] }
-        }
+          question: { $arrayElemAt: ["$question", 0] },
+        },
       },
       {
         $project: {
-          userDetails: 0
-        }
+          userDetails: 0,
+        },
       },
       {
-        $sort: { createdAt: -1 }
+        $sort: { createdAt: -1 },
       },
       {
-        $skip: parseInt(skip)
+        $skip: parseInt(skip),
       },
       {
-        $limit: parseInt(limit)
-      }
+        $limit: parseInt(limit),
+      },
     ]);
 
     res.status(StatusCodes.OK).json({
@@ -826,13 +832,13 @@ export const getUserAnswers = async (req, res) => {
         totalPages,
         totalAnswers,
         hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
+        hasPrevPage: page > 1,
+      },
     });
   } catch (error) {
-    console.error('Error in getUserAnswers:', error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
-      msg: 'Failed to fetch user answers' 
+    console.error("Error in getUserAnswers:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: "Failed to fetch user answers",
     });
   }
 };
@@ -859,8 +865,8 @@ export const createAnswerComment = async (req, res) => {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $addFields: {
@@ -869,34 +875,34 @@ export const createAnswerComment = async (req, res) => {
         userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
         repliesLength: { $size: { $ifNull: ["$replies", []] } },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
-        totalReplies: { $size: { $ifNull: ["$replies", []] } }
-      }
+        totalReplies: { $size: { $ifNull: ["$replies", []] } },
+      },
     },
     {
       $project: {
-        userDetails: 0
-      }
-    }
+        userDetails: 0,
+      },
+    },
   ]);
- if (answer.createdBy.toString() !== req.user.userId) {
-          const notification = new Notification({
-            userId: answer.createdBy, // The user who created the post
-            createdBy: req.user.userId,
-            answerId: answerId,
-            type: 'answerComment',
-            message: `${req.user.username} commented on your answer`, // Assuming you have the username available
-          });
-          await notification.save();
+  if (answer.createdBy.toString() !== req.user.userId) {
+    const notification = new Notification({
+      userId: answer.createdBy, // The user who created the post
+      createdBy: req.user.userId,
+      answerId: answerId,
+      type: "answerComment",
+      message: `${req.user.username} commented on your answer`, // Assuming you have the username available
+    });
+    await notification.save();
 
-          // Retrieve the populated notification
+    // Retrieve the populated notification
 
-          io.to(answer.createdBy.toString()).emit('newNotification', notification); // Emit to the specific user's room
-        }
-        const user = await User.findById({ _id: answer.createdBy });
-        console.log({user1: req.user, user2: user})
+    io.to(answer.createdBy.toString()).emit("newNotification", notification); // Emit to the specific user's room
+  }
+  const user = await User.findById({ _id: answer.createdBy });
+  console.log({ user1: req.user, user2: user });
   res.status(StatusCodes.CREATED).json({
     message: "Comment created successfully",
-    comment: commentWithUser[0]
+    comment: commentWithUser[0],
   });
 };
 
@@ -906,24 +912,24 @@ export const getAllCommentsByAnswerId = async (req, res) => {
     {
       $match: {
         answerId: new mongoose.Types.ObjectId(answerId),
-        deleted: { $ne: true }
-      }
+        deleted: { $ne: true },
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $lookup: {
         from: "answerreplies",
         localField: "replies",
         foreignField: "_id",
-        as: "repliesData"
-      }
+        as: "repliesData",
+      },
     },
     {
       $addFields: {
@@ -931,18 +937,18 @@ export const getAllCommentsByAnswerId = async (req, res) => {
         userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
         repliesLength: { $size: { $ifNull: ["$replies", []] } },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
-        totalReplies: { $size: { $ifNull: ["$replies", []] } }
-      }
+        totalReplies: { $size: { $ifNull: ["$replies", []] } },
+      },
     },
     {
       $project: {
         userDetails: 0,
-        repliesData: 0
-      }
+        repliesData: 0,
+      },
     },
     {
-      $sort: { createdAt: -1 }
-    }
+      $sort: { createdAt: -1 },
+    },
   ]);
 
   res.status(StatusCodes.OK).json({ comments });
@@ -965,7 +971,7 @@ export const createAnswerReply = async (req, res) => {
     parentId: parentReply ? parentReply._id : null,
     createdBy: req.user.userId,
     content,
-    replyTo: comment ? comment.createdBy : parentReply.createdBy
+    replyTo: comment ? comment.createdBy : parentReply.createdBy,
   });
 
   if (comment) {
@@ -981,16 +987,16 @@ export const createAnswerReply = async (req, res) => {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "authorDetails"
-      }
+        as: "authorDetails",
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "replyTo",
         foreignField: "_id",
-        as: "replyToDetails"
-      }
+        as: "replyToDetails",
+      },
     },
     {
       $addFields: {
@@ -999,34 +1005,33 @@ export const createAnswerReply = async (req, res) => {
         commentUsername: { $arrayElemAt: ["$replyToDetails.name", 0] },
         commentUserAvatar: { $arrayElemAt: ["$replyToDetails.avatar", 0] },
         commentUserId: "$replyTo",
-        totalLikes: { $size: { $ifNull: ["$likes", []] } }
-      }
+        totalLikes: { $size: { $ifNull: ["$likes", []] } },
+      },
     },
     {
       $project: {
         authorDetails: 0,
-        replyToDetails: 0
-      }
-    }
+        replyToDetails: 0,
+      },
+    },
   ]);
-  if(req.user.userId !== comment.createdBy.toString() ) {
-    console.log("notified")
+  if (req.user.userId !== comment.createdBy.toString()) {
+    console.log("notified");
     const notification = new Notification({
       userId: comment.createdBy, // The user who created the post
       createdBy: req.user.userId,
       answerReplyId: reply._id,
       answerId: comment.answerId,
-      type: 'answerReply',
+      type: "answerReply",
       message: `${req.user.username} replied to your comment`, // Assuming you have the username available
     });
     await notification.save();
-     io.to(comment.createdBy.toString()).emit('newNotification', notification);
-
+    io.to(comment.createdBy.toString()).emit("newNotification", notification);
   }
 
   res.status(StatusCodes.CREATED).json({
     message: "Reply created successfully",
-    reply: replyWithUser[0]
+    reply: replyWithUser[0],
   });
 };
 
@@ -1037,24 +1042,24 @@ export const getAllAnswerRepliesByCommentId = async (req, res) => {
     {
       $match: {
         commentId: new mongoose.Types.ObjectId(commentId),
-        deleted: { $ne: true }
-      }
+        deleted: { $ne: true },
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "authorDetails"
-      }
+        as: "authorDetails",
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "replyTo",
         foreignField: "_id",
-        as: "replyToDetails"
-      }
+        as: "replyToDetails",
+      },
     },
     {
       $addFields: {
@@ -1063,18 +1068,18 @@ export const getAllAnswerRepliesByCommentId = async (req, res) => {
         commentUsername: { $arrayElemAt: ["$replyToDetails.name", 0] },
         commentUserAvatar: { $arrayElemAt: ["$replyToDetails.avatar", 0] },
         commentUserId: "$replyTo",
-        totalLikes: { $size: { $ifNull: ["$likes", []] } }
-      }
+        totalLikes: { $size: { $ifNull: ["$likes", []] } },
+      },
     },
     {
       $project: {
         authorDetails: 0,
-        replyToDetails: 0
-      }
+        replyToDetails: 0,
+      },
     },
     {
-      $sort: { createdAt: -1 }
-    }
+      $sort: { createdAt: -1 },
+    },
   ]);
 
   if (replies.length === 0) {
@@ -1110,16 +1115,16 @@ export const likeAnswerReply = async (req, res) => {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "authorDetails"
-      }
+        as: "authorDetails",
+      },
     },
     {
       $lookup: {
         from: "users",
         localField: "replyTo",
         foreignField: "_id",
-        as: "replyToDetails"
-      }
+        as: "replyToDetails",
+      },
     },
     {
       $addFields: {
@@ -1128,42 +1133,43 @@ export const likeAnswerReply = async (req, res) => {
         commentUsername: { $arrayElemAt: ["$replyToDetails.name", 0] },
         commentUserAvatar: { $arrayElemAt: ["$replyToDetails.avatar", 0] },
         commentUserId: "$replyTo",
-        totalLikes: { $size: "$likes" }
-      }
+        totalLikes: { $size: "$likes" },
+      },
     },
     {
       $project: {
         authorDetails: 0,
-        replyToDetails: 0
-      }
-    }
+        replyToDetails: 0,
+      },
+    },
   ]);
   const comment = await Comment.findById(reply.commentId);
-  if(req.user.userId !== reply.createdBy.toString() && !isLiked ) {
-   const notificationAlreadyExists = await Notification.findOne({ userId: reply.createdBy,
-    createdBy: req.user.userId,
-    answerReplyId: reply._id,
-    answerCommentId: reply.commentId,
-    answerId: comment.answerId,
-    type: 'answerCommentReplyLiked',});
-   if (!notificationAlreadyExists) {
-
-    const notification = new Notification({
-      userId: reply.createdBy, // The user who created the post
+  if (req.user.userId !== reply.createdBy.toString() && !isLiked) {
+    const notificationAlreadyExists = await Notification.findOne({
+      userId: reply.createdBy,
       createdBy: req.user.userId,
       answerReplyId: reply._id,
       answerCommentId: reply.commentId,
       answerId: comment.answerId,
-      type: 'answerCommentReplyLiked',
-      message: `${req.user.username} liked your reply`
+      type: "answerCommentReplyLiked",
     });
-    await notification.save();
-    io.to(reply.createdBy.toString()).emit('newNotification', notification);
-   }
+    if (!notificationAlreadyExists) {
+      const notification = new Notification({
+        userId: reply.createdBy, // The user who created the post
+        createdBy: req.user.userId,
+        answerReplyId: reply._id,
+        answerCommentId: reply.commentId,
+        answerId: comment.answerId,
+        type: "answerCommentReplyLiked",
+        message: `${req.user.username} liked your reply`,
+      });
+      await notification.save();
+      io.to(reply.createdBy.toString()).emit("newNotification", notification);
+    }
   }
   res.status(StatusCodes.OK).json({
     message: isLiked ? "Reply unliked" : "Reply liked",
-    reply: replyWithDetails[0]
+    reply: replyWithDetails[0],
   });
 };
 
@@ -1222,28 +1228,31 @@ export const likeAnswerComment = async (req, res) => {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $addFields: {
         createdBy: "$createdBy",
         username: { $arrayElemAt: ["$userDetails.name", 0] },
         userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
-        totalLikes: { $size: "$likes" }
-      }
+        totalLikes: { $size: "$likes" },
+      },
     },
     {
       $project: {
-        userDetails: 0
-      }
-    }
+        userDetails: 0,
+      },
+    },
   ]);
-  if(req.user.userId !== comment.createdBy.toString() &&!isLiked) {
-    const notificationAlreadyExists = await Notification.findOne({ userId: comment.createdBy, 
+  if (req.user.userId !== comment.createdBy.toString() && !isLiked) {
+    const notificationAlreadyExists = await Notification.findOne({
+      userId: comment.createdBy,
       createdBy: userId,
       answerId: comment.answerId,
-      answerCommentId: commentId, type: 'answerCommentLiked' });
+      answerCommentId: commentId,
+      type: "answerCommentLiked",
+    });
     if (!notificationAlreadyExists) {
       const notification = new Notification({
         userId: comment.createdBy, // The user who created the post
@@ -1251,20 +1260,20 @@ export const likeAnswerComment = async (req, res) => {
         answerId: comment.answerId,
         answerCommentId: commentId,
         message: `${req.user.username} liked your comment`,
-        type: 'answerCommentLiked',
+        type: "answerCommentLiked",
       });
       await notification.save();
       io.to(comment.createdBy.toString()).emit("newNotification", notification);
-        res.status(StatusCodes.OK).json({
-          message: isLiked ? "Comment unliked" : "Comment liked",
-          comment: commentWithDetails[0]
-        });
+      res.status(StatusCodes.OK).json({
+        message: isLiked ? "Comment unliked" : "Comment liked",
+        comment: commentWithDetails[0],
+      });
     }
   }
 
   res.status(StatusCodes.OK).json({
     message: isLiked ? "Comment unliked" : "Comment liked",
-    comment: commentWithDetails[0]
+    comment: commentWithDetails[0],
   });
 };
 
@@ -1275,26 +1284,26 @@ export const editAnswer = async (req, res) => {
   const { userId } = req.user;
 
   if (!context) {
-    throw new BadRequestError('Answer context is required');
+    throw new BadRequestError("Answer context is required");
   }
 
   // Find the answer and check if it exists
   const answer = await Answer.findById(answerId);
   if (!answer) {
-    throw new NotFoundError('Answer not found');
+    throw new NotFoundError("Answer not found");
   }
 
   // Check if the user is authorized to edit this answer
   if (answer.createdBy.toString() !== userId) {
-    throw new UnauthorizedError('Not authorized to edit this answer');
+    throw new UnauthorizedError("Not authorized to edit this answer");
   }
 
   // Update the answer
   const updatedAnswer = await Answer.findByIdAndUpdate(
     answerId,
-    { 
+    {
       context,
-      editedAt: new Date()
+      editedAt: new Date(),
     },
     { new: true, runValidators: true }
   );
@@ -1302,35 +1311,35 @@ export const editAnswer = async (req, res) => {
   // Fetch the updated answer with user details
   const answerWithDetails = await Answer.aggregate([
     {
-      $match: { _id: updatedAnswer._id }
+      $match: { _id: updatedAnswer._id },
     },
     {
       $lookup: {
         from: "users",
         localField: "createdBy",
         foreignField: "_id",
-        as: "userDetails"
-      }
+        as: "userDetails",
+      },
     },
     {
       $addFields: {
         author: {
           userId: "$createdBy",
           username: { $arrayElemAt: ["$userDetails.name", 0] },
-          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] }
-        }
-      }
+          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+        },
+      },
     },
     {
       $project: {
-        userDetails: 0
-      }
-    }
+        userDetails: 0,
+      },
+    },
   ]);
 
   res.status(StatusCodes.OK).json({
     msg: "Answer updated successfully",
-    answer: answerWithDetails[0]
+    answer: answerWithDetails[0],
   });
 };
 
@@ -1340,7 +1349,7 @@ export const editAnswerComment = async (req, res) => {
   const { userId } = req.user;
 
   if (!content) {
-    throw new BadRequestError('Comment content is required');
+    throw new BadRequestError("Comment content is required");
   }
 
   const comment = await Comment.findById(commentId);
@@ -1354,12 +1363,12 @@ export const editAnswerComment = async (req, res) => {
 
   const updatedComment = await Comment.findByIdAndUpdate(
     commentId,
-    { 
+    {
       content,
-      editedAt: new Date()
+      editedAt: new Date(),
     },
     { new: true }
-  ).populate('createdBy', 'name avatar');
+  ).populate("createdBy", "name avatar");
 
   res.status(StatusCodes.OK).json({
     message: "Comment updated successfully",
@@ -1368,8 +1377,8 @@ export const editAnswerComment = async (req, res) => {
       username: updatedComment.createdBy.name,
       userAvatar: updatedComment.createdBy.avatar,
       totalReplies: updatedComment.replies?.length || 0,
-      totalLikes: updatedComment.likes?.length || 0
-    }
+      totalLikes: updatedComment.likes?.length || 0,
+    },
   });
 };
 
@@ -1379,7 +1388,7 @@ export const editAnswerReply = async (req, res) => {
   const { userId } = req.user;
 
   if (!content) {
-    throw new BadRequestError('Reply content is required');
+    throw new BadRequestError("Reply content is required");
   }
 
   const reply = await Replies.findById(replyId);
@@ -1393,14 +1402,14 @@ export const editAnswerReply = async (req, res) => {
 
   const updatedReply = await Replies.findByIdAndUpdate(
     replyId,
-    { 
+    {
       content,
-      editedAt: new Date()
+      editedAt: new Date(),
     },
     { new: true }
   )
-  .populate('createdBy', 'name avatar')
-  .populate('replyTo', 'name avatar');
+    .populate("createdBy", "name avatar")
+    .populate("replyTo", "name avatar");
 
   res.status(StatusCodes.OK).json({
     message: "Reply updated successfully",
@@ -1411,12 +1420,12 @@ export const editAnswerReply = async (req, res) => {
       commentUsername: updatedReply.replyTo.name,
       commentUserAvatar: updatedReply.replyTo.avatar,
       commentUserId: updatedReply.replyTo._id,
-      totalLikes: updatedReply.likes?.length || 0
-    }
+      totalLikes: updatedReply.likes?.length || 0,
+    },
   });
 };
 
-// delete controllers 
+// delete controllers
 export const deleteQuestion = async (req, res) => {
   const { id: postId } = req.params;
   const session = await mongoose.startSession();
@@ -1595,21 +1604,29 @@ export const likeAnswer = async (req, res) => {
     { new: true }
   );
 
-if(updatedAnswer.createdBy.toString() !== userId){
-  const notificationAlreadyExists = await Notification.findOne({ userId: updatedAnswer.createdBy, answerId: answerId,createdBy: userId, type: 'answerLiked' });
-  if (!notificationAlreadyExists) {
-    const notification = new Notification({
-      userId: updatedAnswer.createdBy, // The user who created the post
+  if (updatedAnswer.createdBy.toString() !== userId) {
+    const notificationAlreadyExists = await Notification.findOne({
+      userId: updatedAnswer.createdBy,
+      answerId: answerId,
       createdBy: userId,
-      answerId: updatedAnswer._id,
-      questionId:existingAnswer.answeredTo,
-      type: 'answerLiked',
-      message: `${req.user.username} liked your answer`, // Assuming you have the username available
+      type: "answerLiked",
     });
-    await notification.save();
-    io.to(updatedAnswer.createdBy.toString()).emit('newNotification', notification);
-}
-}
+    if (!notificationAlreadyExists) {
+      const notification = new Notification({
+        userId: updatedAnswer.createdBy, // The user who created the post
+        createdBy: userId,
+        answerId: updatedAnswer._id,
+        questionId: existingAnswer.answeredTo,
+        type: "answerLiked",
+        message: `${req.user.username} liked your answer`, // Assuming you have the username available
+      });
+      await notification.save();
+      io.to(updatedAnswer.createdBy.toString()).emit(
+        "newNotification",
+        notification
+      );
+    }
+  }
   // Update total likes count
   updatedAnswer.totalLikes = updatedAnswer.likes.length;
   await updatedAnswer.save();
@@ -1619,4 +1636,62 @@ if(updatedAnswer.createdBy.toString() !== userId){
     likes: updatedAnswer.likes,
     totalLikes: updatedAnswer.totalLikes,
   });
-}
+};
+export const getMostAnsweredQuestions = async (req, res) => {
+  try {
+    const questions = await Question.aggregate([
+      {
+        $match: {
+          answers: { $exists: true, $ne: [] },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "userDetails",
+        },
+      },
+      {
+        $unwind: "$userDetails",
+      },
+      {
+        $sort: {
+          totalAnswers: -1,
+        },
+      },
+      {
+        $limit: 7,
+      },
+      {
+        $lookup: {
+          from: "answers",
+          localField: "answers",
+          foreignField: "_id",
+          as: "answers",
+        },
+      },
+      {
+        $addFields: {
+          author: {
+            userId: "$createdBy",
+            username: "$userDetails.name",
+            userAvatar: "$userDetails.avatar",
+          },
+        },
+      },
+      {
+        $project: {
+          userDetails: 0,
+        },
+      },
+    ]);
+    res.status(StatusCodes.OK).json({ questions });
+  } catch (error) {
+    console.error("Error fetching most answered questions:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: "Failed to fetch most answered questions",
+    });
+  }
+};

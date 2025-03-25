@@ -5,6 +5,7 @@ import {
   getNotifications,
   deleteAllNotifications,
   totalNotificationCount,
+  markNotificationsAsSeen
 } from "../controllers/notificationController.js";
 import {
   authenticateUser,
@@ -15,7 +16,8 @@ const router = express.Router();
 
 router.post("/", authenticateUser, createNotification);
 router.get("/:userId", authenticateUser, getNotifications);
-router.delete("/", authenticateUser, deleteAllNotifications);
+router.delete("/", deleteAllNotifications);
 router.get("/total/:userId", optionalAuthenticateUser, totalNotificationCount);
+router.patch("/mark-as-seen", authenticateUser, markNotificationsAsSeen);
 
 export default router;

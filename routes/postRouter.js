@@ -24,7 +24,8 @@ import {
   getPostById,
   updatePost,
   updatePostComment,
-  updatePostCommentReply
+  updatePostCommentReply,
+  mostLikedPosts,
 } from "../controllers/postController.js";
 
 router.post(
@@ -35,6 +36,7 @@ router.post(
   createPost
 );
 router.get("/", getAllPosts);
+router.get("/most-liked", mostLikedPosts);
 router.get("/:id", validateIdParam, getPostById);
 router.patch(
   "/:id",

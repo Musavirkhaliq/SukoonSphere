@@ -23,6 +23,7 @@ import {
   likeAnswerComment,
   likeAnswerReply,
   getAnswerById,
+  getMostAnsweredQuestions,
 } from "../controllers/qaController.js";
 import {
   validateAnswerInput,
@@ -49,6 +50,7 @@ router.get(
   validateIdParam,
   getAllCommentsByAnswerId
 );
+router.get("/most-answered-question", getMostAnsweredQuestions);
 router.get("/answer/:id", validateIdParam, getAnswerById);
 router.patch(
   "/answer/:id",

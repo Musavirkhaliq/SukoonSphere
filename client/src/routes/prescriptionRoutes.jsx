@@ -1,6 +1,11 @@
 import React, { lazy, Suspense } from "react";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
-import { GivePrescription, PatientPrescriptions, SinglePrescription } from "@/pages";
+import {
+  GivePrescription,
+  PatientPrescriptions,
+  SinglePrescription,
+  ConsolidateSessions,
+} from "@/pages";
 export const prescriptionRoutes = [
   {
     path: "/prescription/:id",
@@ -23,6 +28,14 @@ export const prescriptionRoutes = [
     element: (
       <Suspense fallback={<LoadingSpinner />}>
         <SinglePrescription />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/view-consolidated-prescription/:id",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <ConsolidateSessions />
       </Suspense>
     ),
   },
