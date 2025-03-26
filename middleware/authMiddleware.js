@@ -1,6 +1,7 @@
 import { UnauthenticatedError } from "../errors/customErors.js";
 import { attachCookiesToResponse, verifyJWT } from "../utils/tokenUtils.js";
 import RefreshToken from "../models/token/token.js";
+import { updateUserStreak } from "../utils/gamification.js";
 
 export const authenticateUser = async (req, res, next) => {
   const { accessToken, refreshToken } = req.signedCookies;
@@ -9,7 +10,8 @@ export const authenticateUser = async (req, res, next) => {
       const payload = verifyJWT(accessToken);
       req.user = payload.user;
       req.user.userId = payload.user._id;
-      req.user.username = payload.user.name 
+      req.user.username = payload.user.name
+      await updateUserStreak(payload.user._id); 
       return next();
     }
     const payload = verifyJWT(refreshToken);
@@ -28,6 +30,7 @@ export const authenticateUser = async (req, res, next) => {
     req.user = payload.user;
     req.user.userId = payload.user._id;
       req.user.username = payload.user.name;
+      await updateUserStreak(payload.user._id);
     next();
   } catch {
     throw new UnauthenticatedError("authentication invalid");
@@ -39,6 +42,7 @@ export const optionalAuthenticateUser = async (req, res, next) => {
   
   // If no tokens present, continue without authentication
   if (!accessToken && !refreshToken) {
+    await updateUserStreak(req.user.userId);
     return next();
   }
 
@@ -70,6 +74,7 @@ export const optionalAuthenticateUser = async (req, res, next) => {
     req.user = payload.user;
     req.user.userId = payload.user._id;
     req.user.username = payload.user.name;
+    await updateUserStreak(payload.user._id);
     next();
   } catch {
     // If token verification fails, continue without authentication

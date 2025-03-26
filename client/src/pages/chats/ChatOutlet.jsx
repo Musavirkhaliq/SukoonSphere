@@ -82,7 +82,7 @@ const seenMessages = useCallback(async () => {
     socket.on("messagesSeen", handleMessagesSeen);
 
     return () => {
-      socket.off("newMessage", fetchChatMessages);
+      socket.off("newMessage", handleNewMessage);
       socket.off("messagesSeen", handleMessagesSeen);
     };
   }, [id, user?.userId, seenMessages]);
