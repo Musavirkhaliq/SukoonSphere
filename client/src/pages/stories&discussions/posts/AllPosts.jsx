@@ -14,7 +14,6 @@ const AllPosts = () => {
   const [showModal, setShowModal] = useState(false);
   const [activeFilter, setActiveFilter] = useState("newest");
   const { ref, inView } = useInView();
-
   // Set up infinite query
   const {
     data,
@@ -63,8 +62,8 @@ const AllPosts = () => {
   }
 
   const allPosts = data?.pages.flatMap((page) => page.posts) || [];
-
-  return (
+ 
+  return (  
     <div>
       <div className="mb-6 p-4 sm:p-6 bg-blue-50 rounded-lg shadow-sm text-center flex justify-center items-center flex-col">
         <h2 className="text-xl sm:text-2xl font-bold mb-4 text-[var(--grey--900)]">
