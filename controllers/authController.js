@@ -84,7 +84,8 @@ export const login = async (req, res) => {
     name: user.name,
     email: user.email,
     avatar: user.avatar,
-    role: user.role
+    role: user.role,
+
   };
 
   attachCookiesToResponse({

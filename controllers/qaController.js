@@ -12,14 +12,12 @@ import {
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import { io } from "../server.js";
+import { updateUserPoints ,awardBadges} from "../utils/gamification.js";
 
 // question controllers
 export const addQuestion = async (req, res) => {
   const { questionText, context, tags } = req.body;
   const { userId } = req.user;
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
 
   const newQuestion = await Question.create(
     [
@@ -29,48 +27,18 @@ export const addQuestion = async (req, res) => {
         createdBy: userId, // Only store user ID
         tags,
       },
-    ],
-    { session }
+    ]
   );
 
   await User.findByIdAndUpdate(
     userId,
     { $push: { questions: newQuestion[0]._id } },
-    { session }
   );
-
-  // Fetch question with user details for response
-  const questionWithUser = await Question.aggregate([
-    {
-      $match: { _id: newQuestion[0]._id },
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "createdBy",
-        foreignField: "_id",
-        as: "userDetails",
-      },
-    },
-    {
-      $addFields: {
-        username: { $arrayElemAt: ["$userDetails.name", 0] },
-        userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
-      },
-    },
-    {
-      $project: {
-        userDetails: 0,
-      },
-    },
-  ]);
-
-  await session.commitTransaction();
-  session.endSession();
+  await updateUserPoints(userId, "question");
+  const earnedBadges = await awardBadges(userId, "question");
 
   res.status(StatusCodes.CREATED).json({
     msg: "Question added successfully",
-    question: questionWithUser[0],
   });
 };
 
@@ -452,9 +420,6 @@ export const createAnswer = async (req, res) => {
   const { userId } = req.user;
   const { id: questionId } = req.params;
   const { context } = req.body;
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     // First verify the question exists
     const question = await Question.findById(questionId);
@@ -469,49 +434,19 @@ export const createAnswer = async (req, res) => {
           createdBy: userId,
           answeredTo: questionId,
         },
-      ],
-      { session }
+      ]
     );
 
     await Question.findByIdAndUpdate(
       questionId,
       { $push: { answers: newAnswer[0]._id } },
-      { session }
     );
 
     await User.findByIdAndUpdate(
       userId,
       { $push: { answers: newAnswer[0]._id } },
-      { session }
     );
 
-    // Fetch answer with user details
-    const answerWithUser = await Answer.aggregate([
-      {
-        $match: { _id: newAnswer[0]._id },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "createdBy",
-          foreignField: "_id",
-          as: "userDetails",
-        },
-      },
-      {
-        $addFields: {
-          username: { $arrayElemAt: ["$userDetails.name", 0] },
-          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
-          totalLikes: { $size: { $ifNull: ["$likes", []] } },
-          totalComments: { $size: { $ifNull: ["$comments", []] } },
-        },
-      },
-      {
-        $project: {
-          userDetails: 0,
-        },
-      },
-    ]);
     // Send notification to user who asked the question
     if (question.createdBy.toString() !== req.user.userId) {
       const notification = await Notification.create({
@@ -528,16 +463,12 @@ export const createAnswer = async (req, res) => {
         notification
       );
     }
-    await session.commitTransaction();
-    session.endSession();
-
+    await updateUserPoints(userId, "answer");
+    const earnedBadges = await awardBadges(userId, "answer");
     res.status(StatusCodes.CREATED).json({
       msg: "Answer created successfully",
-      answer: answerWithUser[0],
     });
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     throw error;
   }
 };
@@ -899,7 +830,8 @@ export const createAnswerComment = async (req, res) => {
     io.to(answer.createdBy.toString()).emit("newNotification", notification); // Emit to the specific user's room
   }
   const user = await User.findById({ _id: answer.createdBy });
-  console.log({ user1: req.user, user2: user });
+  await updateUserPoints(user._id, "comment");
+  const earnedBadges = await awardBadges(user._id, "comment");
   res.status(StatusCodes.CREATED).json({
     message: "Comment created successfully",
     comment: commentWithUser[0],
@@ -1560,7 +1492,7 @@ export const deleteAnswerComment = async (req, res) => {
       "You are not authorized to delete this comment"
     );
   }
-
+  await updateUserPoints(req.user.userId, "deleteComment");
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -1603,6 +1535,12 @@ export const likeAnswer = async (req, res) => {
     },
     { new: true }
   );
+  if (hasLiked) {
+    await updateUserPoints(userId, "unlike");
+  } else {
+    await updateUserPoints(userId, "like");
+    const earnedBadges = await awardBadges(userId, "like");
+  }
 
   if (updatedAnswer.createdBy.toString() !== userId) {
     const notificationAlreadyExists = await Notification.findOne({

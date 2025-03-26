@@ -7,6 +7,7 @@ import Notification from "../models/notifications/postNotificationModel.js";
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import { deleteFile } from "../utils/fileUtils.js";
+import { updateUserPoints, awardBadges } from "../utils/gamification.js";
 import { io } from "../server.js";
 
 export const createPost = async (req, res) => {
@@ -24,6 +25,8 @@ export const createPost = async (req, res) => {
     { $push: { posts: post._id } },
     { new: true }
   );
+  await updateUserPoints(req.user.userId, "post");
+  const earnedBadges = await awardBadges(req.user.userId, "post");
   res.status(StatusCodes.CREATED).json({ msg: "Post uploaded successfully" });
 };
 
@@ -236,6 +239,7 @@ export const likePosts = async (req, res) => {
       // User is unliking the post
       post.likes = post.likes.filter((user) => user.toString() !== userId);
       await post.save();
+      await updateUserPoints(userId, "unlike");
       return res
         .status(StatusCodes.OK)
         .json({ msg: "Post unliked successfully", likes: post.likes });
@@ -265,6 +269,8 @@ export const likePosts = async (req, res) => {
           ); // Emit to the specific user's room
         }
       }
+      await updateUserPoints(userId, "like");
+      const earnedBadges = await awardBadges(userId, "like");
     }
 
     await post.save();
@@ -292,6 +298,8 @@ export const createPostComment = async (req, res) => {
     const post = await Post.findById(postId);
     post.comments.push(comment._id);
     await post.save();
+    await updateUserPoints(req.user.userId, "comment");
+    const earnedBadges = await awardBadges(req.user.userId, "comment");
 
     // Fetch comment with current user details for response
     const commentWithUser = await PostComments.aggregate([
@@ -545,51 +553,22 @@ export const getAllRepliesByCommentId = async (req, res) => {
 
 export const deletePost = async (req, res) => {
   const { id: postId } = req.params;
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    const post = await Post.findById(postId).session(session);
-    if (!post) {
-      throw new BadRequestError("Post not found");
-    }
+    const post = await Post.findById(postId);
+    if (!post) throw new BadRequestError("Post not found");
 
     if (post.createdBy.toString() !== req.user.userId) {
-      throw new UnauthorizedError("You are not authorized to delete this post");
+      throw new UnauthorizedError("Not authorized to delete this post");
     }
 
-    // Delete the image if it exists
     if (post.imageUrl) {
-      console.log("Deleting image:", post.imageUrl);
       await deleteFile(post.imageUrl);
     }
 
-    const comments = await PostComments.find({ postId }).session(session);
-
-    const commentIds = comments.map((comment) => comment._id);
-    await PostReplies.deleteMany({ parentId: { $in: commentIds } }).session(
-      session
-    );
-
-    await PostComments.deleteMany({ postId }).session(session);
-    await Post.findByIdAndDelete(postId).session(session);
-
-    await User.findByIdAndUpdate(
-      req.user.userId,
-      { $pull: { posts: postId } },
-      { session }
-    );
-
-    await session.commitTransaction();
+    await Post.findByIdAndDelete(postId);
+    await User.findByIdAndUpdate(req.user.userId, { $pull: { posts: postId } });
     res.status(StatusCodes.OK).json({ message: "Post deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting post:", error);
-    await session.abortTransaction();
-    throw error;
-  } finally {
-    session.endSession();
-  }
-};
+  } 
+
 
 export const deletePostComment = async (req, res) => {
   const { id: commentId } = req.params;
@@ -607,26 +586,17 @@ export const deletePostComment = async (req, res) => {
     );
   }
 
-  // Start a session for transaction
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  await PostReplies.deleteMany({ parentId: commentId }).session(session);
-
   // Delete the comment itself
-  await PostComments.findByIdAndDelete(commentId).session(session);
+  await PostComments.findByIdAndDelete(commentId);
 
   await Post.findByIdAndUpdate(
     comment.postId,
     { $pull: { comments: commentId } },
-    { session }
   );
-
-  await session.commitTransaction();
+  await updateUserPoints(req.user.userId, "deleteComment");
   res
     .status(StatusCodes.OK)
     .json({ message: "Comment and associated replies deleted successfully" });
-  session.endSession();
 };
 
 export const deletePostCommentReply = async (req, res) => {
