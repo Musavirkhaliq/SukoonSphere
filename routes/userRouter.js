@@ -19,6 +19,7 @@ import {
   deleteSuggestion,
   updateSuggestionStatus,
   userSuggestions,
+  getUserGamification
 } from "../controllers/userController.js";
 import upload from "../middleware/multer.js";
 
@@ -52,5 +53,8 @@ router.get('/suggestions', authenticateUser, profileMiddleware(['admin']), userS
 router.post('/suggestions', authenticateUser, createSuggestion);
 router.delete('/suggestions/:suggestionId', authenticateUser, profileMiddleware(['admin']), deleteSuggestion);
 router.patch('/suggestions/:suggestionId/status', authenticateUser, profileMiddleware(['admin']), updateSuggestionStatus);
+
+// Gamification routes
+router.get('/gamification', authenticateUser, getUserGamification);
 
 export default router;

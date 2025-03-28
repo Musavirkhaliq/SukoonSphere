@@ -10,10 +10,11 @@ import Notification from "../models/notifications/postNotificationModel.js";
 import UserSuggestion from "../models/UserSuggestion.js";
 import { io } from "../server.js";
 import Answer from "../models/qaSection/answerModel.js";
+import { getUserProgress } from "../utils/gamification.js";
 
 export const getUserProfile = async (req, res) => {
   const user = await User.findById(req.user.userId).select(
-    "name email avatar _id role"
+    "name email avatar _id role "
   );
   res.status(StatusCodes.OK).json(user);
 };
@@ -682,4 +683,80 @@ export const updateSuggestionStatus = async (req, res) => {
             error: error.message
         });
     }
+};
+export const getUserGamification = async (req, res) => {
+  try {
+    // Find the logged-in user with specific fields
+    const user = await User.findById(req.user.userId).select(
+      "name email avatar _id role totalPoints badges postCount answerCount questionCount commentCount likeCount streakCount longestStreak"
+    );
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({ 
+        message: "User not found" 
+      });
+    }
+
+    // Calculate user's progress and badges
+    const progress = getUserProgress(user);
+
+    // Calculate user's rank
+    const userRank = await User.countDocuments({ 
+      totalPoints: { $gt: user.totalPoints } 
+    }) + 1;
+
+    // Retrieve top 20 users
+    const topUsers = await User.aggregate([
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          avatar: 1,
+          _id: 1,
+          totalPoints: 1,
+          badges: 1,
+          postCount: 1,
+          answerCount: 1,
+          questionCount: 1,
+          commentCount: 1,
+          role: 1,
+          streakCount: 1,
+          longestStreak: 1
+        }
+      },
+      {
+        $sort: { totalPoints: -1 }
+      },
+      {
+        $limit: 20
+      }
+    ]);
+
+    // Format top users with rank and point breakdown
+    const formattedTopUsers = topUsers.map((topUser, index) => ({
+      ...topUser,
+      rank: index + 1,
+      pointBreakdown: {
+        posts: topUser.postCount * 10,
+        answers: topUser.answerCount * 15,
+        questions: topUser.questionCount * 5,
+        comments: topUser.commentCount * 3
+      }
+    }));
+
+    // Respond with user details, progress, rank, and top users
+    res.status(StatusCodes.OK).json({
+      user: {
+        ...user.toObject(),
+        rank: userRank
+      },
+      progress,
+      topUsers: formattedTopUsers
+    });
+  } catch (error) {
+    console.error("Error in getUserGamification:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      message: "An error occurred while fetching user gamification details" 
+    });
+  }
 };
