@@ -1,4 +1,4 @@
-in backups folder run bash backup.sh
+    in backups folder run bash backup.sh
 
 
 
