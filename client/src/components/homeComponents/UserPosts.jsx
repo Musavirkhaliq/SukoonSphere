@@ -5,6 +5,7 @@ import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 import customFetch from "@/utils/customFetch";
 import UserAvatar from "../shared/UserAvatar";
+import { Link } from "react-router-dom";
 
 const SkeletonPostCard = () => {
   return (
@@ -34,6 +35,21 @@ const SkeletonPostCard = () => {
           <div className="h-4 bg-gray-200 rounded w-6"></div>
         </div>
       </div>
+    </div>
+  );
+};
+
+// New CallToActionCard component
+const CallToActionCard = () => {
+  return (
+    <div className="bg-white rounded-lg p-4 shadow-md w-full max-w-md h-60 flex flex-col items-center justify-center text-center">
+      <h3 className="text-lg font-semibold mb-2">Share Your Thoughts!</h3>
+      <p className="text-sm text-gray-600 mb-4">
+        Join the community and post your own ideas,share your experiences & many more.
+      </p>
+      <Link to="/posts" className="btn-2">
+        Post Now
+      </Link>
     </div>
   );
 };
@@ -73,15 +89,6 @@ export default function UserPosts() {
     },
     autoplay: "play",
     interval: 2000,
-    speed: 1000,
-    easing: "cubic-bezier(0.25, 1, 0.5, 1)",
-    rewind: false,
-    lazyLoad: "nearby",
-    waitForTransition: true,
-    updateOnMove: true,
-    trimSpace: false,
-    wheelMinThreshold: 10,
-    wheelSleep: 400,
     preloadPages: 2
   };
 
@@ -138,6 +145,11 @@ export default function UserPosts() {
                 <PostCard post={post} />
               </SplideSlide>
             ))}
+          {!loading && (
+            <SplideSlide className="pb-12">
+              <CallToActionCard />
+            </SplideSlide>
+          )}
         </Splide>
       </div>
     </section>

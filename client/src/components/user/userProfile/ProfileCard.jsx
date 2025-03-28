@@ -169,13 +169,22 @@ const ProfileCard = ({ user, fetchUserById }) => {
                   Give Prescription
                 </Link>
               )}
+            {user?.role === "user" &&
+              user?._id == currentUser?._id && (
+                <Link
+                  to={`/gamifiedDashboard`}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  View Achievements
+                </Link>
+              )}
             {user._id === currentUser?._id &&
               currentUser?.role !== "contributor" && (
                 <Link
                   to={`/prescriptions/${currentUser?._id}`}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  see prescriptions
+                  See prescriptions
                 </Link>
               )}
           </div>

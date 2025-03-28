@@ -13,9 +13,9 @@ const LevelProgress = ({ data }) => {
   const calculateProgress = () => {
     const totalTasks = data.progress?.completed?.length + data.progress?.pending?.length;
     const completedTasksCount = data.progress?.completed?.length;
-    
-    return totalTasks > 0 
-      ? (completedTasksCount / totalTasks) * 100 
+
+    return totalTasks > 0
+      ? (completedTasksCount / totalTasks) * 100
       : 0;
   };
 
@@ -30,7 +30,7 @@ const LevelProgress = ({ data }) => {
         };
       }
     }
-    
+
     return levelThresholds[0];
   };
 
@@ -42,11 +42,10 @@ const LevelProgress = ({ data }) => {
       {levelThresholds.map((level) => (
         <div
           key={level.name}
-          className={`p-2 rounded-lg ${
-            currentLevel.name === level.name
-              ? "bg-purple-100"
-              : "bg-gray-100"
-          }`}
+          className={`p-2 rounded-lg ${currentLevel.name === level.name
+            ? "bg-purple-100"
+            : "bg-gray-100"
+            }`}
         >
           <span className="block text-sm font-medium">
             {level.name}
@@ -56,11 +55,11 @@ const LevelProgress = ({ data }) => {
           </span>
         </div>
       ))}
-      
+
       <div className="col-span-4 mt-2 bg-gray-50 p-2 rounded-lg">
         <div className="w-full bg-gray-200 rounded-full h-2.5">
-          <div 
-            className="bg-purple-600 h-2.5 rounded-full" 
+          <div
+            className="bg-[var(--primary)] h-2.5 rounded-full"
             style={{
               width: `${Math.min(overallProgress, 100)}%`
             }}
