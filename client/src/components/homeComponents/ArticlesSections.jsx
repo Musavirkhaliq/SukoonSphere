@@ -49,6 +49,10 @@ export default function ArticleCards() {
     fetchMostLikedArticles();
   }, []);
 
+  if (!articles.length) {
+    return null;
+  }
+
   const splideOptions = {
     type: "loop",
     perPage: 4,

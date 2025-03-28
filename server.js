@@ -20,7 +20,7 @@ import ArticleRouter from "./routes/articleRouter.js";
 import VideoRouter from "./routes/videoRouter.js";
 import PodcastRouter from "./routes/podcastRouter.js";
 import GalleryRouter from "./routes/galleryRouter.js";
-import NotificationRouter from "./routes/notificationRouter.js"; 
+import NotificationRouter from "./routes/notificationRouter.js";
 import MessageRouter from "./routes/messageRouter.js";
 import ChatRouter from "./routes/chatRouter.js";
 import PrescriptionRouter from "./routes/prescriptionRouter.js";
@@ -48,8 +48,7 @@ const app = express();
 const server = http.createServer(app); // Create server instance
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Allow your front-end origin
-    methods: ["GET", "POST"],
+    origin: "http://localhost:5173",
     credentials: true, // Allow credentials if needed
   },
 });
@@ -80,7 +79,7 @@ app.use("/api/v1/articles", ArticleRouter);
 app.use("/api/v1/gallery", GalleryRouter);
 app.use("/api/v1/videos", VideoRouter);
 app.use("/api/v1/podcasts", PodcastRouter);
-app.use("/api/v1/notifications", NotificationRouter); 
+app.use("/api/v1/notifications", NotificationRouter);
 app.use("/api/v1/messages", MessageRouter);
 app.use("/api/v1/chats", ChatRouter);
 app.use("/api/v1/prescriptions", PrescriptionRouter);
@@ -107,13 +106,13 @@ io.on('connection', (socket) => {
 
   // Join a room based on user ID
   socket.on('join', async (userId) => {
-      socket.join(userId);
-      console.log(`User ${userId} joined room`);
+    socket.join(userId);
+    console.log(`User ${userId} joined room`);
 
   });
 
   socket.on('disconnect', () => {
-      console.log('User disconnected');
+    console.log('User disconnected');
   });
 });
 

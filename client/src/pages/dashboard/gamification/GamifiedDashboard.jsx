@@ -8,9 +8,7 @@ import ActiveChallenges from "@/components/gamifiedComponents/ActiveChallenges";
 import customFetch from "@/utils/customFetch";
 import UserProgress from "@/components/gamifiedComponents/UserProgress";
 import React, { useEffect, useState } from "react";
-import {
-  FaLightbulb,
-} from "react-icons/fa";
+
 
 
 const ProgressBar = ({ progress }) => (
@@ -35,15 +33,14 @@ const GamifiedDashboard = () => {
     const gamification = async () => {
       const { data } = await customFetch.get(`/user/gamification`);
       setData(data);
-      console.log({data});
     };
     gamification();
   }, []);
- return (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
-        <Header user={data?.user} completedTasks={data?.progress?.completed?.length}  />
+        <Header user={data?.user} completedTasks={data?.progress?.completed?.length} />
 
         {/* Navigation Tabs */}
         <div className="flex gap-4 mb-6">
@@ -52,11 +49,10 @@ const GamifiedDashboard = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  activeTab === tab
-                    ? "bg-purple-500 text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50"
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === tab
+                  ? "bg-[var(--primary)] text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
@@ -68,8 +64,8 @@ const GamifiedDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {activeTab === "overview" && (
             <>
-             <UserProgress data={data} />
-             <ActiveChallenges pending={data?.progress?.pending} ProgressBar={ProgressBar} />
+              <UserProgress data={data} />
+              <ActiveChallenges pending={data?.progress?.pending} ProgressBar={ProgressBar} />
             </>
           )}
 
@@ -79,12 +75,12 @@ const GamifiedDashboard = () => {
           )}
           {activeTab === "challenges" && (
             <Challenges pending={data?.progress?.pending} ProgressBar={ProgressBar} />
-          )}         
+          )}
         </div>
         {activeTab === "leaderboard" && (
           <LeaderBoard data={data} />
-  )}  
-     <QuickTips />
+        )}
+        <QuickTips />
       </div>
     </div>
   );

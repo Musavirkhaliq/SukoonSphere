@@ -150,15 +150,15 @@ function NavMenu({ showMobile = true }) {
 
           <DesktopNav />
           {user ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="relative flex items-center gap-2">
+            <div className="flex items-center justify-center gap-4">
+              <div className="relative flex items-center gap-4">
                 <button
                   onClick={handleNotificationClick}
                   className="text-2xl text-gray-800"
                 >
-                  <MdOutlineNotificationsActive className="w-6 h-6 text-gray-600 mt-1 mr-2  " />
+                  <MdOutlineNotificationsActive className="w-6 h-6 text-gray-600 mt-1 " />
                   {notificationCount > 0 && (
-                    <span className="absolute -top-3 right-0 bg-red-500 text-white text-xs rounded-full p-1 w-4 h-fit">
+                    <span className="absolute -top-3 right-12 bg-red-500 text-white text-xs rounded-full p-1 w-4 h-fit">
                       {notificationCount > 99 ? "99+" : notificationCount}
                     </span>
                   )}
@@ -177,13 +177,13 @@ function NavMenu({ showMobile = true }) {
                     onClose={closeDropdown}
                   />
                 )}
+                <UserSection
+                  user={user}
+                  miniMenu={miniMenu}
+                  toggleMiniMenu={toggleMiniMenu}
+                  handleLogout={handleLogout}
+                />
               </div>
-              <UserSection
-                user={user}
-                miniMenu={miniMenu}
-                toggleMiniMenu={toggleMiniMenu}
-                handleLogout={handleLogout}
-              />
             </div>
           ) : (
             <AuthButtons />
