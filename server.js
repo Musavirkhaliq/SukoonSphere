@@ -24,6 +24,8 @@ import NotificationRouter from "./routes/notificationRouter.js";
 import MessageRouter from "./routes/messageRouter.js";
 import ChatRouter from "./routes/chatRouter.js";
 import PrescriptionRouter from "./routes/prescriptionRouter.js";
+import ChatbotRouter from "./routes/chatbotRouter.js";
+import AnalyticsRouter from "./routes/analyticsRouter.js";
 
 // models
 import Notification from "./models/notifications/postNotificationModel.js";
@@ -62,7 +64,7 @@ app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "https://www.sukoonsphere.org",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
   pingInterval: 25000, // Send ping every 25s
@@ -83,6 +85,8 @@ app.use("/api/v1/notifications", NotificationRouter);
 app.use("/api/v1/messages", MessageRouter);
 app.use("/api/v1/chats", ChatRouter);
 app.use("/api/v1/prescriptions", PrescriptionRouter);
+app.use("/api/v1/chatbot", ChatbotRouter);
+app.use("/api/v1/analytics", AnalyticsRouter);
 
 // Serve Static Files
 app.use("/public", express.static(path.resolve(__dirname, "./public")));

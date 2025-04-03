@@ -16,7 +16,8 @@ import {
   deletePodcastPlaylist
 } from "../controllers/podcastsController.js";
 
-import { authenticateUser } from "../middleware/authMiddleware.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middleware/authMiddleware.js";
+import { trackContentView } from "../middleware/activityTrackingMiddleware.js";
 import { uploadPodcastFiles } from "../middleware/podcastUploadMiddleware.js";
 
 // Create a new podcast
@@ -47,14 +48,14 @@ router.get("/playlists", getAllPlaylistPodcasts);
 // Get user's single podcasts for a specific user
 router.get("/user/:userId/singles", getUserSinglePodcasts);
 
-// Get user's playlist podcasts for a specific user 
+// Get user's playlist podcasts for a specific user
 router.get("/user/:userId/playlists", getUserPlaylistPodcasts);
 
 // Get a single playlist by ID
 router.get("/playlist/:id", getPlaylistPodcast);
 
 //2,5 Get a single podcast by ID
-router.get("/:id", getSinglePodcast);
+router.get("/:id", optionalAuthenticateUser, trackContentView, getSinglePodcast);
 
 //4 Get a playlist podcast with episodes by ID(playlistId)
 router.get("/playlists/:id", getPlaylistPodcast);
@@ -71,4 +72,4 @@ router.patch("/:id", authenticateUser, uploadPodcastFiles, editPodcast);
 // Edit a podcast playlist by ID
 router.patch('/playlist/:id', authenticateUser, uploadPodcastFiles, editPodcastPlaylist);
 
-export default router;  
+export default router;

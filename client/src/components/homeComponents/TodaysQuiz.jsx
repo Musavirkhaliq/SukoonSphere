@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import SectionTitle from "../sharedComponents/SectionTitle";
+import React from "react";
+import EnhancedSectionTitle from "../shared/EnhancedSectionTitle";
 import QuizSummary from "../quizComponents/QuizSummary";
 import QuizQuestions from "../quizComponents/QuizQuestions";
+import { FaBrain } from "react-icons/fa";
 
 function TodaysQuiz() {
 
@@ -61,18 +62,28 @@ function TodaysQuiz() {
   ];
 
   return (
-    <>
-      <SectionTitle title="Today's Quiz" />
-      <div className="max-w-7xl mx-auto  ">
-        <div className="grid grid-cols-1  lg:grid-cols-12 gap-4  px-4 md:px-6 ">
+    <div className="section-container featured-section">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <EnhancedSectionTitle
+          title="Mental Health Disorders Today's Quiz"
+          subtitle="Take our quick assessment to learn more about your mental health patterns"
+        />
+
+        <div className="mental-health-quiz-header">
+          <h3>What is my Attachment Style?</h3>
+          <p>Secure, anxious, avoidant, and disorganized—which one are you?</p>
+          <FaBrain className="absolute top-4 right-4 text-blue-200 text-opacity-50 text-4xl" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-4 md:px-6">
           <div
-            className=" col-span-full lg:col-span-5  grid gap-6 bg-white rounded-[20px] shadow-lg"
+            className="col-span-full lg:col-span-5 grid gap-6 bg-white rounded-[20px] shadow-lg overflow-hidden"
             data-aos="fade-down"
           >
             <QuizQuestions quizQuestionsList={quizQuestions} />
           </div>
           <div
-            className="col-span-full lg:col-span-7  rounded-lg"
+            className="col-span-full lg:col-span-7 rounded-lg"
             data-aos="fade-up"
             data-aos-delay="300"
           >
@@ -86,13 +97,13 @@ function TodaysQuiz() {
               }
               ContentTitle={"The Four Attachment Styles "}
               ContentSubtitle={
-                "Early attachment styles may not be exactly the same as those in adult relationships, but they can be a good predictor of adult behavior patterns.Your attachment style consists of a variation of attachment strategies, which strategies show up the most depend on the overall safety you have felt in relationships."
+                "Early attachment styles may not be exactly the same as those in adult relationships, but they can be a good predictor of adult behavior patterns. Your attachment style consists of a variation of attachment strategies, which strategies show up the most depend on the overall safety you have felt in relationships."
               }
             />
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { authenticateUser } from "../middleware/authMiddleware.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middleware/authMiddleware.js";
+import { trackContentView } from "../middleware/activityTrackingMiddleware.js";
 import {
   addQuestion,
   createAnswer,
@@ -51,7 +52,7 @@ router.get(
   getAllCommentsByAnswerId
 );
 router.get("/most-answered-question", getMostAnsweredQuestions);
-router.get("/answer/:id", validateIdParam, getAnswerById);
+router.get("/answer/:id", optionalAuthenticateUser, validateIdParam, trackContentView, getAnswerById);
 router.patch(
   "/answer/:id",
   authenticateUser,
@@ -97,7 +98,7 @@ router.post(
   validateAnswerInput,
   createAnswer
 );
-router.get("/question/:id/answers", validateIdParam, getAnswersByQuestionId);
+router.get("/question/:id/answers", optionalAuthenticateUser, validateIdParam, trackContentView, getAnswersByQuestionId);
 router.get("/user-answers/:id", validateIdParam, getUserAnswers);
 router.delete(
   "/question/:id",

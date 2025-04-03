@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { authenticateUser } from "../middleware/authMiddleware.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middleware/authMiddleware.js";
+import { trackContentView } from "../middleware/activityTrackingMiddleware.js";
 import upload from "../middleware/multer.js";
 
 import { getUserVideos,
@@ -16,7 +17,7 @@ const router = Router();
 
 router.post("/create-video", authenticateUser, upload.single('coverImage'), createVideo);
 router.get("/user-videos", authenticateUser, getUserVideos);
-router.get("/video/:id", getSingleVideo);
+router.get("/video/:id", optionalAuthenticateUser, trackContentView, getSingleVideo);
 router.patch("/update-video/:id", authenticateUser, upload.single('coverImage'), updateVideo);
 router.delete("/delete-video/:id", authenticateUser, deleteVideo);
 router.get("/all-videos", getAllVideos);
