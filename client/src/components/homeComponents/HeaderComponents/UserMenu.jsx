@@ -12,7 +12,7 @@ function UserMenu({ user, miniMenu, handleLogout }) {
     <div
       className={`${
         miniMenu ? "opacity-100 max-h-[500px] " : "opacity-0 max-h-0"
-      } absolute overflow-hidden transition-all duration-300 
+      } absolute overflow-hidden transition-all duration-300
       ease-in-out shadow-lg rounded-[4px] bg-[var(--body)] flex flex-col w-72 top-10 right-0 `}
       style={{
         transition: "opacity 0.5s ease, max-height 0.5s ease ",
