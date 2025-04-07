@@ -4,7 +4,7 @@ import customFetch from "../../../utils/customFetch";
 import PostCard from "@/components/posts/PostCard";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
-import PostCommentSlide from "@/components/posts/PostCommentSlide";
+import PostCommentModal from "@/components/posts/PostCommentModal";
 
 const SinglePost = () => {
   const [showComments, setShowComments] = useState(true);
@@ -62,7 +62,7 @@ const SinglePost = () => {
       console.log({ likeError: error });
     }
   };
-  const [showCommentSlide, setShowCommentSlide] = useState(true);
+  const [showCommentModal, setShowCommentModal] = useState(true);
 
   return (
     <div className="flex flex-col gap-2">
@@ -73,10 +73,10 @@ const SinglePost = () => {
         onCommentClick={() => setShowComments((prev) => !prev)}
         user={user}
       />
-      {showCommentSlide && (
-        <PostCommentSlide
-          isOpen={showCommentSlide}
-          onClose={() => setShowCommentSlide(false)}
+      {showCommentModal && (
+        <PostCommentModal
+          isOpen={showCommentModal}
+          onClose={() => setShowCommentModal(false)}
           postId={post._id}
         />
       )}

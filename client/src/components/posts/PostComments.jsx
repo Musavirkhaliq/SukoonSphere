@@ -61,9 +61,21 @@ const PostComments = ({ postId }) => {
 
   React.useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
+      console.log('Loading more comments...');
       fetchNextPage();
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  // Ensure the intersection observer is properly set up
+  React.useEffect(() => {
+    // Force a check for more comments when the component mounts
+    if (hasNextPage && !isFetchingNextPage) {
+      const timer = setTimeout(() => {
+        fetchNextPage();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   if (status === "loading") {
     return (
@@ -84,49 +96,77 @@ const PostComments = ({ postId }) => {
   const allComments = data?.pages.flatMap((page) => page.comments) || [];
 
   return (
-    <div className="mt-8">
+    <div>
       {/* Comment Form */}
-      <form onSubmit={handleSubmitComment} className="mb-6">
+      <form onSubmit={handleSubmitComment} className="mb-4 bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden">
         <textarea
           value={commentContent}
           onChange={(e) => setCommentContent(e.target.value)}
           placeholder={
             user ? "Write your comment..." : "Please login to comment"
           }
-          className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
-          rows="3"
+          className="w-full p-3 border-b border-gray-100 focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-none text-gray-700 transition-all duration-200"
+          rows="2"
           disabled={!user}
         />
-        <button type="submit" disabled={!user} className="btn-2 mt-2">
-          Post Comment
-        </button>
+        <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
+          {!user && (
+            <p className="text-xs text-gray-500">Login to comment</p>
+          )}
+          <div className="ml-auto">
+            <button
+              type="submit"
+              disabled={!user || !commentContent.trim()}
+              className={`px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 ${!user || !commentContent.trim() ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[var(--primary)] text-white hover:bg-[var(--primary-dark)]'}`}
+            >
+              Post
+            </button>
+          </div>
+        </div>
       </form>
 
       {/* Comments List */}
-      <div className="space-y-4">
-        {allComments.map((comment) => (
-          <PostCommentCard
-            key={comment._id}
-            comment={comment}
-            postId={postId}
-            onCommentUpdate={refetch}
-          />
-        ))}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-gray-800">
+            {allComments.length > 0
+              ? `Comments (${allComments.length}${hasNextPage ? '+' : ''})`
+              : 'Comments'}
+          </h3>
+          <div className="text-xs text-gray-500">
+            {allComments.length > 0 && 'Most recent first'}
+          </div>
+        </div>
+
+        <div className="divide-y divide-gray-100">
+          {allComments.map((comment) => (
+            <div key={comment._id} className="py-3 first:pt-0">
+              <PostCommentCard
+                comment={comment}
+                postId={postId}
+                onCommentUpdate={refetch}
+              />
+            </div>
+          ))}
+        </div>
 
         {/* Loading indicator */}
-        <div ref={ref} className="py-4 text-center">
+        <div ref={ref} className="py-3 text-center">
           {isFetchingNextPage && (
-            <FaSpinner className="animate-spin h-6 w-6 mx-auto text-primary" />
+            <div className="flex items-center justify-center gap-2">
+              <FaSpinner className="animate-spin h-4 w-4 text-primary" />
+              <span className="text-gray-500 text-xs">Loading more...</span>
+            </div>
           )}
           {!hasNextPage && allComments.length > 0 && (
-            <p className="text-gray-500">No more comments</p>
+            <p className="text-gray-400 text-xs py-1">No more comments</p>
           )}
         </div>
 
         {allComments.length === 0 && (
-          <p className="text-center text-gray-500 py-4">
-            No comments yet. Be the first to comment!
-          </p>
+          <div className="text-center text-gray-500 py-6 bg-gray-50 rounded-lg border border-gray-100">
+            <p className="text-sm">No comments yet. Be the first to share your thoughts!</p>
+          </div>
         )}
       </div>
     </div>

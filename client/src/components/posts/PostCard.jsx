@@ -11,7 +11,7 @@ import PostActions from "../shared/PostActions";
 import { toast } from "react-toastify";
 import EditPostModal from "./EditPostModal";
 import { formatDistanceToNow } from "date-fns";
-import PostCommentSlide from "./PostCommentSlide";
+import PostCommentModal from "./PostCommentModal";
 
 const PostCard = ({
   post,
@@ -27,7 +27,7 @@ const PostCard = ({
   const [likesCount, setLikesCount] = useState(post?.totalLikes || 0);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPost, setCurrentPost] = useState(post);
-  const [showCommentSlide, setShowCommentSlide] = useState(false);
+  const [showCommentModal, setShowCommentModal] = useState(false);
   const navigate = useNavigate();
   const handleDelete = () => {
     console.log('handleDelete called, showing delete modal');
@@ -143,8 +143,8 @@ const PostCard = ({
 
           {/* {comment === "link" ? ( */}
           <div
-            onClick={() => setShowCommentSlide(true)}
-            className="flex items-center gap-1 hover:text-blue-500 cursor-pointer"
+            onClick={() => setShowCommentModal(true)}
+            className="flex items-center gap-1 hover:text-blue-500 cursor-pointer transition-colors duration-200"
           >
             <FaRegComment />
             <span>{currentPost.totalComments || 0}</span>
@@ -170,10 +170,10 @@ const PostCard = ({
           )}
         </div>
       </div>
-      {showCommentSlide && (
-        <PostCommentSlide
-          isOpen={showCommentSlide}
-          onClose={() => setShowCommentSlide(false)}
+      {showCommentModal && (
+        <PostCommentModal
+          isOpen={showCommentModal}
+          onClose={() => setShowCommentModal(false)}
           postId={currentPost._id}
         />
       )}
