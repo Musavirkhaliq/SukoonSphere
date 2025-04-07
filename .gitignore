@@ -5,7 +5,6 @@ dist-ssr
 .env
 package-lock.json
 /public
-.env
 
 # Editor directories and files
 .vscode/*
@@ -17,3 +16,5 @@ package-lock.json
 *.njsproj
 *.sln
 *.sw?
+node_modules
+node_modules
