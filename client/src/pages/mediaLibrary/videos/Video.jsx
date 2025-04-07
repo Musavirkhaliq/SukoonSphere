@@ -11,6 +11,7 @@ import VideoComments from "@/components/mediaLibrary/videos/VideoComments";
 import VideoReactions from "@/components/mediaLibrary/videos/VideoReactions";
 import VideoAchievements from "@/components/mediaLibrary/videos/VideoAchievements";
 import VideoBadgePopup from "@/components/mediaLibrary/videos/VideoBadgePopup";
+import VideoMaterials from "@/components/mediaLibrary/videos/VideoMaterials";
 import VideoPlaylistApi from "@/utils/videoPlaylistApi";
 
 const Video = () => {
@@ -56,6 +57,13 @@ const Video = () => {
     const fetchVideo = async () => {
         try {
             const { data } = await customFetch.get(`/videos/video/${videoId}`);
+
+            // Debug video author information
+            console.log('Video data received:', data.video);
+            console.log('Video author (raw):', data.video.author);
+            console.log('Video author ID:', typeof data.video.author === 'string' ? data.video.author : data.video.author?._id);
+            console.log('Current user:', user);
+
             setVideo(data.video);
 
             // Check if this video is part of a playlist
@@ -243,6 +251,14 @@ const Video = () => {
                                     )}
                                 </div>
 
+                                {/* Video Materials */}
+                                {video && (
+                                    <VideoMaterials
+                                        videoId={videoId}
+                                        videoAuthorId={typeof video.author === 'string' ? video.author : video.author?._id}
+                                    />
+                                )}
+
                                 {/* Playlist Navigation */}
                                 {isLoadingPlaylist && (
                                     <div className="bg-gray-50 p-3 border-t border-b flex items-center justify-center">
@@ -314,6 +330,8 @@ const Video = () => {
                                                 <p className="text-xs text-gray-500 mt-1 text-right">{Math.round(progress)}% watched</p>
                                             </div>
                                         )}
+
+
 
                                         {/* Video Reactions - Collapsible */}
                                         {video && (
