@@ -1,0 +1,266 @@
+/* SukoonAI Page Styles */
+.therapy-container {
+  display: flex;
+  height: calc(100vh - 65px);
+  background-color: #f8f9fa;
+  position: relative;
+  --sukoon-primary: #4a6cf7;
+  --sukoon-secondary: #6c63ff;
+  --sukoon-accent: #ff6b6b;
+  --sukoon-light: #f0f4ff;
+  --sukoon-dark: #2d3748;
+  --sukoon-gradient: linear-gradient(135deg, var(--sukoon-primary), var(--sukoon-secondary));
+}
+
+/* Mobile Header */
+.therapy-mobile-header {
+  display: none;
+  position: fixed;
+  top: 65px;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: var(--sukoon-gradient);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  padding: 0 1rem;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+}
+
+.sukoon-branding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.therapy-mobile-header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.sukoon-tagline {
+  font-size: 0.7rem;
+  margin: 0;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+.therapy-menu-button,
+.therapy-new-session-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.therapy-menu-button:hover,
+.therapy-new-session-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Sidebar */
+.therapy-sidebar {
+  width: 300px;
+  background-color: #fff;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.therapy-sidebar-header {
+  padding: 1.5rem;
+  background: var(--sukoon-gradient);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sukoon-sidebar-branding h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.sukoon-sidebar-tagline {
+  font-size: 0.8rem;
+  margin: 0;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+.therapy-sidebar-header .therapy-new-session-button {
+  width: 100%;
+  justify-content: center;
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+/* Main Content */
+.therapy-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.therapy-session-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sukoon-session-info h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--sukoon-dark);
+  margin: 0;
+}
+
+.sukoon-session-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0.25rem 0 0 0;
+  font-style: italic;
+}
+
+/* Tabs */
+.therapy-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+.therapy-tab {
+  background-color: transparent;
+  border: none;
+  color: #666;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.therapy-tab:hover {
+  background-color: var(--sukoon-light);
+  color: var(--sukoon-primary);
+}
+
+.therapy-tab.active {
+  background-color: var(--sukoon-primary);
+  color: #fff;
+}
+
+.tab-icon {
+  font-size: 1rem;
+}
+
+/* Tab Content */
+.therapy-tab-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Loading State */
+.therapy-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+}
+
+.sukoon-loading-icon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sukoon-gradient);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 20px rgba(108, 99, 255, 0.2);
+}
+
+.sukoon-robot-icon {
+  font-size: 2.5rem;
+  color: white;
+}
+
+.therapy-loading p {
+  font-size: 1.1rem;
+  color: var(--sukoon-dark);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .therapy-mobile-header {
+    display: flex;
+  }
+
+  .therapy-container {
+    height: calc(100vh - 125px);
+    margin-top: 60px;
+  }
+
+  .therapy-sidebar {
+    position: fixed;
+    top: 125px;
+    left: 0;
+    bottom: 0;
+    z-index: 90;
+    transform: translateX(-100%);
+    width: 85%;
+    max-width: 300px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .therapy-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .therapy-session-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .therapy-tabs {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+}

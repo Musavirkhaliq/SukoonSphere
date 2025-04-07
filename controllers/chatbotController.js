@@ -140,3 +140,77 @@ export const handleStreamingChatMessage = async (req, res) => {
   // This will be implemented in the future for streaming responses
   res.status(501).json({ error: "Streaming not yet implemented" });
 };
+
+// Function to get all conversations for a user
+export const getUserConversations = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    // Find all conversations for the user, sorted by last updated
+    const conversations = await ChatbotConversation.find({
+      userId
+    }).sort({ lastUpdated: -1 }).limit(20); // Limit to 20 most recent conversations
+
+    // Format the conversations for the frontend
+    const formattedConversations = conversations.map(conv => {
+      // Get the first user message as the title, if available
+      const firstUserMessage = conv.messages.find(msg => msg.sender === 'user');
+      const lastMessage = conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null;
+
+      return {
+        _id: conv._id,
+        title: firstUserMessage ?
+          (firstUserMessage.text.length > 30 ? firstUserMessage.text.substring(0, 30) + '...' : firstUserMessage.text) :
+          'New Conversation',
+        lastMessage: lastMessage ?
+          (lastMessage.text.length > 50 ? lastMessage.text.substring(0, 50) + '...' : lastMessage.text) :
+          '',
+        updatedAt: conv.lastUpdated,
+        isActive: conv.isActive,
+        messageCount: conv.messages.length
+      };
+    });
+
+    return res.status(200).json({
+      conversations: formattedConversations
+    });
+  } catch (error) {
+    console.error("Error fetching conversations:", error);
+    return res.status(500).json({ error: "Failed to retrieve conversations" });
+  }
+};
+
+// Function to get messages for a specific conversation
+export const getConversationMessages = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    const { conversationId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    // Find the specific conversation
+    const conversation = await ChatbotConversation.findOne({
+      _id: conversationId,
+      userId
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ error: "Conversation not found" });
+    }
+
+    return res.status(200).json({
+      messages: conversation.messages,
+      conversationId: conversation._id,
+      isActive: conversation.isActive
+    });
+  } catch (error) {
+    console.error("Error fetching conversation messages:", error);
+    return res.status(500).json({ error: "Failed to retrieve conversation messages" });
+  }
+};

@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { RxCross2 } from "react-icons/rx";
 import { BsChatDots, BsThreeDotsVertical } from "react-icons/bs";
 import { FaArrowRightLong } from "react-icons/fa6";
+import { FaRobot } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import CompanyLogo from "../../../assets/images/SukoonSphere_Logo.png";
 import links from "@/utils/SharedComp/PageLinks";
@@ -16,16 +17,17 @@ import { BiLogIn, BiUserPlus } from "react-icons/bi";
 import { FiUserPlus } from "react-icons/fi";
 import { BiMessageSquareAdd } from "react-icons/bi";
 import { CiMedal } from "react-icons/ci";
-import NotificationDropdown from "../NotificationDropdown";
+import NotificationButton from "../../notifications/NotificationButton";
 import socket from "@/utils/socket/socket";
 import customFetch from "@/utils/customFetch";
+import { toast } from "react-toastify";
 
 function NavMenu({ showMobile = true }) {
   const [activeSublink, setActiveSublink] = useState(null);
   const [miniMenu, setMiniMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(0);
   const [unseenMessages, setUnseenMessages] = useState(0);
+  // We still need this for socket events, but it won't be used for UI
+  const [notificationCount, setNotificationCount] = useState(0);
   const navigate = useNavigate();
   const { user, logout } = useUser();
   const toggleMiniMenu = () => setMiniMenu(!miniMenu);
@@ -86,15 +88,7 @@ function NavMenu({ showMobile = true }) {
         icon: <BiLogIn />,
       },
     ];
-  const handleNotificationClick = () => {
-    setShowNotifications(!showNotifications);
-  };
-
-
-  const closeDropdown = async () => {
-    setShowNotifications(false);
-    await customFetch.patch('/notifications/mark-as-seen');
-  };
+  // Notification handling is now managed by NotificationContext
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -108,32 +102,49 @@ function NavMenu({ showMobile = true }) {
   }, [activeSublink]);
 
   useEffect(() => {
-    socket.emit("join", loggedInUser?._id);
+    if (!loggedInUser?._id) return;
 
-    socket.on("newNotification", () => {
-      setNotificationCount((prevCount) => prevCount + 1);
-    });
-    socket.on("newMessage", () => {
+    socket.emit("join", loggedInUser._id);
+
+    // Listen for chat notifications
+    socket.on("chatNotification", ({ notification, chatId }) => {
+      // Update unseen messages count
       setUnseenMessages((prevCount) => prevCount + 1);
+
+      // Check if the user is currently on the chat page
+      const isOnChatPage = window.location.pathname.includes(`/chats/${chatId}`);
+
+      // Only show notification if not on the chat page
+      if (!isOnChatPage) {
+        // Play notification sound
+        const audio = new Audio('/notification.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(err => console.log('Audio play error:', err));
+
+        // Show toast notification for new messages
+        toast.info(notification.message, {
+          onClick: () => {
+            navigate(`/chats/${chatId}`);
+          }
+        });
+      }
     });
-    socket.on("notificationCount", (count) => {
-      setNotificationCount(count);
-    });
+
     return () => {
-      socket.off("newNotification");
-      socket.off("notificationCount");
-      socket.off("newMessage");
+      socket.off("chatNotification");
     };
-  });
+  }, [loggedInUser, navigate]);
   useEffect(() => {
-    const fetchTotalNotificationsAndUnseenMessages = async () => {
-      const { data: { count: notificationCount } } = await customFetch.get(`/notifications/total/${loggedInUser?._id}`);
-      const { data: { count: unseenMessages } } = await customFetch.get(`/messages/total-unseen/${loggedInUser?._id}`);
-      console.log({ notificationCount, unseenMessages });
-      setNotificationCount(notificationCount);
-      setUnseenMessages(unseenMessages);
+    const fetchUnseenMessages = async () => {
+      if (!loggedInUser?._id) return;
+      try {
+        const { data: { count: unseenMessages } } = await customFetch.get(`/messages/total-unseen/${loggedInUser?._id}`);
+        setUnseenMessages(unseenMessages);
+      } catch (error) {
+        console.error("Error fetching unseen messages:", error);
+      }
     };
-    fetchTotalNotificationsAndUnseenMessages();
+    fetchUnseenMessages();
   }, [loggedInUser]);
   return (
     <>
@@ -152,17 +163,7 @@ function NavMenu({ showMobile = true }) {
           {user ? (
             <div className="flex items-center justify-center gap-4">
               <div className="relative flex items-center gap-4">
-                <button
-                  onClick={handleNotificationClick}
-                  className="text-2xl text-gray-800"
-                >
-                  <MdOutlineNotificationsActive className="w-6 h-6 text-gray-600 mt-1 " />
-                  {notificationCount > 0 && (
-                    <span className="absolute -top-3 right-12 bg-red-500 text-white text-xs rounded-full p-1 w-4 h-fit">
-                      {notificationCount > 99 ? "99+" : notificationCount}
-                    </span>
-                  )}
-                </button>
+                <NotificationButton />
                 <Link className="relative" to="/chats">
                   <BsChatDots className="text-2xl" />
                   {unseenMessages > 0 && (
@@ -171,12 +172,18 @@ function NavMenu({ showMobile = true }) {
                     </span>
                   )}
                 </Link>
-                {showNotifications && (
-                  <NotificationDropdown
-                    user={loggedInUser}
-                    onClose={closeDropdown}
-                  />
-                )}
+                <Link
+                  to="/sukoonai"
+                  className="relative group"
+                >
+                  <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
+                    <FaRobot className="text-white text-lg" />
+                  </div>
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-[var(--grey--900)] text-[var(--white-color)] px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    SukoonAI
+                  </div>
+                </Link>
+                {/* Notification dropdown is now handled by NotificationButton */}
                 <UserSection
                   user={user}
                   miniMenu={miniMenu}
@@ -216,6 +223,11 @@ function NavMenu({ showMobile = true }) {
                 <Link to="/Posts">
                   <BiMessageSquareAdd className="text-2xl" />
                 </Link>
+                <Link to="/sukoonai">
+                  <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
+                    <FaRobot className="text-white text-lg" />
+                  </div>
+                </Link>
               </>
             )}
             {user ? (
@@ -231,33 +243,22 @@ function NavMenu({ showMobile = true }) {
                   />
                 </Link>
 
-                <div className="relative">
-                  <button
-                    onClick={handleNotificationClick}
-                    className="text-2xl text-gray-800"
-                  >
-                    <MdOutlineNotificationsActive className="w-6 h-6 mt-1" />
-                    {notificationCount > 0 && (
-                      <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
-                        {notificationCount}
-                      </span>
-                    )}
-                  </button>
-                  {showNotifications && (
-                    <NotificationDropdown
-                      user={loggedInUser}
-                      onClose={closeDropdown}
-                    />
-                  )}
-                </div>
+                <NotificationButton />
               </>
             ) : (
-              <Link to="/auth/sign-in">
-                <button className="bg-[var(--secondary)] px-2 py-1 text-sm rounded-[6px] hover:scale-105 transition-all duration-300 hover:bg-[var(--secondary-hover)] flex items-center">
-                  <BiUserPlus className="text-xl text-gray-600 inline-block" />
-                  <span className="ml-2">Sign In</span>
-                </button>
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link to="/sukoonai">
+                  <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
+                    <FaRobot className="text-white text-lg" />
+                  </div>
+                </Link>
+                <Link to="/auth/sign-in">
+                  <button className="bg-[var(--secondary)] px-2 py-1 text-sm rounded-[6px] hover:scale-105 transition-all duration-300 hover:bg-[var(--secondary-hover)] flex items-center">
+                    <BiUserPlus className="text-xl text-gray-600 inline-block" />
+                    <span className="ml-2">Sign In</span>
+                  </button>
+                </Link>
+              </div>
             )}
           </div>
         </div>

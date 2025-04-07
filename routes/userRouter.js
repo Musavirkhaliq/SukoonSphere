@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticateUser } from "../middleware/authMiddleware.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middleware/authMiddleware.js";
 import { profileMiddleware } from "../middleware/profileMiddleware.js";
 import {
   AcceptContributorsRequest,
@@ -21,6 +21,7 @@ import {
   userSuggestions,
   getUserGamification
 } from "../controllers/userController.js";
+import { searchUsers, checkFollowing } from "../controllers/userSearchController.js";
 import upload from "../middleware/multer.js";
 
 const router = Router();
@@ -31,7 +32,8 @@ router.patch(
   upload.single("avatar"),
   changeUserProfile
 );
-router.patch("/follow/:id", authenticateUser, followOrUnfollowUser);
+router.post("/follow/:id", authenticateUser, followOrUnfollowUser);
+router.post("/unfollow/:id", authenticateUser, followOrUnfollowUser);
 router.get("/followers/:id", getAllFollowers);
 router.get("/following/:id", getAllFollowing);
 router.get("/profile", profileMiddleware(), getUserProfile);
@@ -56,5 +58,9 @@ router.patch('/suggestions/:suggestionId/status', authenticateUser, profileMiddl
 
 // Gamification routes
 router.get('/gamification', authenticateUser, getUserGamification);
+
+// User search routes
+router.get('/search', searchUsers);
+router.get('/check-following/:userId', authenticateUser, checkFollowing);
 
 export default router;

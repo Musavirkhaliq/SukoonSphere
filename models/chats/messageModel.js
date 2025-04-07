@@ -13,7 +13,8 @@ const messageSchema = new mongoose.Schema(
       filePath: { type: String },
       fileName: { type: String },
       fileSize: { type: Number },
-      mimeType: { type: String }
+      mimeType: { type: String },
+      isVoiceMessage: { type: Boolean, default: false }
     }],
     deletedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },

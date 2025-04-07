@@ -18,6 +18,10 @@ import UserRouter from "./routes/userRouter.js";
 import QaSectionRouter from "./routes/qaRouter.js";
 import ArticleRouter from "./routes/articleRouter.js";
 import VideoRouter from "./routes/videoRouter.js";
+import VideoPlaylistRouter from "./routes/videoPlaylistRouter.js";
+import VideoCommentRouter from "./routes/videoCommentRouter.js";
+import VideoReactionRouter from "./routes/videoReactionRouter.js";
+import VideoAchievementRouter from "./routes/videoAchievementRouter.js";
 import PodcastRouter from "./routes/podcastRouter.js";
 import GalleryRouter from "./routes/galleryRouter.js";
 import NotificationRouter from "./routes/notificationRouter.js";
@@ -25,6 +29,7 @@ import MessageRouter from "./routes/messageRouter.js";
 import ChatRouter from "./routes/chatRouter.js";
 import PrescriptionRouter from "./routes/prescriptionRouter.js";
 import ChatbotRouter from "./routes/chatbotRouter.js";
+import TherapyRouter from "./routes/therapyRouter.js";
 import AnalyticsRouter from "./routes/analyticsRouter.js";
 
 // models
@@ -50,7 +55,7 @@ const app = express();
 const server = http.createServer(app); // Create server instance
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://www.sukoonsphere.org",
     credentials: true, // Allow credentials if needed
   },
 });
@@ -80,12 +85,17 @@ app.use("/api/v1/qa-section", QaSectionRouter);
 app.use("/api/v1/articles", ArticleRouter);
 app.use("/api/v1/gallery", GalleryRouter);
 app.use("/api/v1/videos", VideoRouter);
+app.use("/api/v1/video-playlists", VideoPlaylistRouter);
+app.use("/api/v1/video-comments", VideoCommentRouter);
+app.use("/api/v1/video-reactions", VideoReactionRouter);
+app.use("/api/v1/video-achievements", VideoAchievementRouter);
 app.use("/api/v1/podcasts", PodcastRouter);
 app.use("/api/v1/notifications", NotificationRouter);
 app.use("/api/v1/messages", MessageRouter);
 app.use("/api/v1/chats", ChatRouter);
 app.use("/api/v1/prescriptions", PrescriptionRouter);
 app.use("/api/v1/chatbot", ChatbotRouter);
+app.use("/api/v1/therapy", TherapyRouter);
 app.use("/api/v1/analytics", AnalyticsRouter);
 
 // Serve Static Files
@@ -104,6 +114,9 @@ app.use("*", (req, res) => {
 // Error Handling Middleware
 app.use(errorHandlerMiddleware);
 
+// Track open chats to prevent sending notifications
+const openChats = new Map(); // Map of userId -> Set of chatIds
+
 // Socket.IO Connection
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -112,7 +125,23 @@ io.on('connection', (socket) => {
   socket.on('join', async (userId) => {
     socket.join(userId);
     console.log(`User ${userId} joined room`);
+  });
 
+  // Track when a user opens a chat
+  socket.on('chatOpen', ({ chatId, userId }) => {
+    if (!openChats.has(userId)) {
+      openChats.set(userId, new Set());
+    }
+    openChats.get(userId).add(chatId);
+    console.log(`User ${userId} opened chat ${chatId}`);
+  });
+
+  // Track when a user closes a chat
+  socket.on('chatClosed', ({ chatId, userId }) => {
+    if (openChats.has(userId)) {
+      openChats.get(userId).delete(chatId);
+      console.log(`User ${userId} closed chat ${chatId}`);
+    }
   });
 
   socket.on('disconnect', () => {
@@ -134,4 +163,4 @@ const PORT = process.env.PORT || 5100; // Default to 5100 if PORT is not set
   }
 })();
 
-export { io }; // Export the io instance for use in controllers
+export { io, openChats }; // Export the io instance and openChats map for use in controllers

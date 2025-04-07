@@ -212,7 +212,7 @@ audio::-webkit-media-controls-panel {
 
   --green: #39aba3;
   --green-hover: #288982;
-  /* 
+  /*
 all other colors below
 */
 
@@ -414,6 +414,70 @@ all other colors below
 .btn-3:hover {
   background-color: var(--ternery-hover);
   transform: scale(1.03);
+}
+
+/* Button sizes */
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+}
+
+/* Outline button */
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: scale(1.03);
+}
+
+/* Animation for completed items */
+@keyframes pulse-once {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.animate-pulse-once {
+  animation: pulse-once 2s ease-in-out;
+}
+
+/* Animation for modal entrance */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(1000px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05) translateY(-20px);
+  }
+  80% {
+    transform: scale(0.95) translateY(10px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.8s ease-out;
 }
 
 .btn-4 {

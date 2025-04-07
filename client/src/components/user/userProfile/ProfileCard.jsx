@@ -144,28 +144,22 @@ const ProfileCard = ({ user, fetchUserById }) => {
                 Edit Profile
               </button>
             ) : (
-              <>
-                <button
-                  onClick={handleFollowUnfollow}
-                  className="px-6 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  {isFollowing ? "Unfollow" : "Follow"}
-                </button>
-                <button
-                  onClick={handleMessageClick}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Message
-                </button>
-              </>
+              <><button
+              onClick={handleFollowUnfollow}
+              className="px-6 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              {isFollowing ? "Unfollow" : "Follow"}
+            </button>
+             <button
+             onClick={handleMessageClick}
+             className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+           >
+             Message
+           </button></>
             )}
-            {user?.role === "user" &&
-              user?._id !== currentUser?._id &&
-              currentUser?.role === "contributor" && (
-                <Link
-                  to={`/prescription/${user?._id}`}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
+            {
+              (user?.role === "user" && user?._id !== currentUser?._id && currentUser?.role === "contributor") &&(
+                <Link to={`/prescription/${user?._id}`} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                   Give Prescription
                 </Link>
               )}

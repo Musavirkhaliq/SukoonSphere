@@ -41,7 +41,7 @@ const ArticleCard = ({ article }) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="community-card article-card"
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
@@ -58,20 +58,20 @@ const ArticleCard = ({ article }) => {
           {article.category || "Mental Health"}
         </div>
       </Link>
-      
+
       <div className="card-content">
         <Link to={`/articles/article/${article._id}`} className="article-title-link">
           <h3 className="article-title">{article.title}</h3>
         </Link>
         <div className="article-preview">
           {article.content ? (
-            <p>{article.content.substring(0, 120)}...</p>
+            <p>{article.content.replace(/<[^>]*>/g, '').substring(0, 120)}...</p>
           ) : (
             <p>Read this insightful article about mental health and wellbeing...</p>
           )}
         </div>
       </div>
-      
+
       <div className="card-footer article-footer">
         <div className="article-meta">
           <div className="article-author">
@@ -89,7 +89,7 @@ const ArticleCard = ({ article }) => {
             <span>{new Date(article.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
-        
+
         <div className="article-stats">
           <div className="article-stat">
             <BiUpvote />
@@ -105,7 +105,7 @@ const ArticleCard = ({ article }) => {
           </div>
         </div>
       </div>
-      
+
       <Link to={`/articles/article/${article._id}`} className="article-read-more">
         <span>Read Article</span>
         <FaChevronRight />
@@ -172,7 +172,7 @@ export default function EnhancedArticles() {
           View All Articles
         </Link>
       </div>
-      
+
       <div className="splide-container">
         <Splide options={splideOptions} className="enhanced-splide">
           {loading

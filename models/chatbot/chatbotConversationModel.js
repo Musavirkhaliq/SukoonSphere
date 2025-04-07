@@ -50,11 +50,11 @@ ChatbotConversationSchema.pre("save", function (next) {
 // Static method to find or create a conversation for a user
 ChatbotConversationSchema.statics.findOrCreateConversation = async function (userId) {
   // Find the most recent active conversation for this user
-  let conversation = await this.findOne({ 
-    userId, 
-    isActive: true 
+  let conversation = await this.findOne({
+    userId,
+    isActive: true
   }).sort({ lastUpdated: -1 });
-  
+
   // If no active conversation exists, create a new one
   if (!conversation) {
     conversation = await this.create({
@@ -62,7 +62,7 @@ ChatbotConversationSchema.statics.findOrCreateConversation = async function (use
       messages: [],
     });
   }
-  
+
   return conversation;
 };
 
@@ -86,7 +86,7 @@ ChatbotConversationSchema.statics.startNewConversation = async function (userId)
     { userId, isActive: true },
     { isActive: false }
   );
-  
+
   // Create a new conversation
   return await this.create({
     userId,

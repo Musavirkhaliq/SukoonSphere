@@ -33,6 +33,11 @@ const HomeArticleCard = ({ article, index }) => {
                 <h2 className="text-xl font-semibold text-[var(--grey--900)] group-hover:text-blue-600 transition-colors duration-200 mb-3 line-clamp-2">
                     {article.title}
                 </h2>
+                {article.content && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        {article.content.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                    </p>
+                )}
                 <div className="flex flex-col gap-3 mt-auto">
                     <div className="flex items-center justify-end gap-4 text-sm">
                         <div className="flex items-center gap-2">

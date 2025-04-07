@@ -165,4 +165,4 @@ export const ChatSidebar = createOptimizedComponent(
 )
 export const DefaultChat = createOptimizedComponent(
   () => import("./chatsComponents/DefaultChat")
-) 
+)

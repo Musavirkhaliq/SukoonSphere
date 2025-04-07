@@ -24,12 +24,12 @@ const fetchChatMessages = useCallback(async () => {
     setActiveUser(data?.receiver);
     setChat(data?.chat);
     setIsInitialFetch(false);
-    
+
     // Mark messages as seen immediately after fetching them
     const unseenMessages = data?.messages?.some(
       (msg) => !msg.seen && msg.sender._id !== user?.userId
     );
-    
+
     if (unseenMessages) {
       await customFetch.patch(`/messages/mark-as-seen/${id}`);
     }
@@ -67,6 +67,16 @@ const seenMessages = useCallback(async () => {
       }
     };
 
+    // Handle messages sent by the current user (no notification)
+    const handleMessageSent = (message) => {
+      if (message?.chatId === id) {
+        setMessages((prev) => {
+          // Prevent duplicate messages
+          return [...prev, message];
+        });
+      }
+    };
+
     const handleMessagesSeen = ({ chatId }) => {
       if (chatId === id) {
         setMessages((prev) =>
@@ -78,18 +88,34 @@ const seenMessages = useCallback(async () => {
       }
     };
 
+    // Inform the server that this chat is currently open
+    // This will prevent sending notifications for this chat
+    const informChatIsOpen = () => {
+      socket.emit('chatOpen', { chatId: id, userId: user?.userId });
+    };
+
+    // Call immediately and set up interval
+    informChatIsOpen();
+    const interval = setInterval(informChatIsOpen, 30000); // Every 30 seconds
+
     socket.on("newMessage", handleNewMessage);
+    socket.on("messageSent", handleMessageSent); // Listen for messages sent by current user
     socket.on("messagesSeen", handleMessagesSeen);
 
     return () => {
       socket.off("newMessage", handleNewMessage);
+      socket.off("messageSent", handleMessageSent);
       socket.off("messagesSeen", handleMessagesSeen);
+
+      // Inform server that chat is no longer open
+      socket.emit('chatClosed', { chatId: id, userId: user?.userId });
+      clearInterval(interval);
     };
   }, [id, user?.userId, seenMessages]);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-none border-b">
+    <div className="flex flex-col h-full relative">
+      <div className="flex-none border-b sticky top-0 z-10 bg-white shadow-sm">
         <ChatHeader
           activeUser={activeUser}
           onMenuClick={toggleSidebar}
@@ -98,7 +124,7 @@ const seenMessages = useCallback(async () => {
         />
       </div>
 
-      <div className="flex-1 overflow-hidden bg-gray-50 mb-14 md:mb-0">
+      <div className="flex-1 overflow-hidden bg-gray-50">
         <ChatMessages
           user={user}
           messages={messages}
@@ -106,7 +132,7 @@ const seenMessages = useCallback(async () => {
         />
       </div>
 
-      <div className="flex-none">
+      <div className="flex-none fixed bottom-0 left-0 right-0 lg:relative bg-white shadow-lg lg:shadow-none z-10">
         <ChatInput chatId={id} fetchChatMessages={fetchChatMessages} />
       </div>
     </div>

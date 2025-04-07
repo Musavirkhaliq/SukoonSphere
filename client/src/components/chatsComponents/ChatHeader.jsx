@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { MdDelete } from 'react-icons/md';
-import { useParams } from 'react-router-dom';
+import { MdDelete, MdArrowBack, MdMoreVert } from 'react-icons/md';
+import { useParams, useNavigate } from 'react-router-dom';
 import DeleteModal from '../shared/DeleteModal';
 import { toast } from 'react-toastify';
 import customFetch from '@/utils/customFetch';
 
-const ChatHeader = ({ activeUser, onMenuClick ,totalMessages,setMessages }) => {
+const ChatHeader = ({ activeUser, onMenuClick, totalMessages, setMessages }) => {
   const {id:chatId} = useParams();
+  const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleting,setDeleting] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const deleteAllMessages = async() => {
     try {
@@ -24,50 +26,85 @@ const ChatHeader = ({ activeUser, onMenuClick ,totalMessages,setMessages }) => {
       setDeleting(false);
     }
   }
+  const goBack = () => {
+    navigate('/chats');
+  };
+
   return (
-   <> <div className="px-4 py-3 flex items-center justify-between bg-white">
-      <div className="flex items-center space-x-3">
+    <>
+      <div className="px-4 py-3 flex items-center justify-between bg-white">
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={goBack}
+            className="md:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            aria-label="Go back"
+          >
+            <MdArrowBack className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={onMenuClick}
+            className="hidden md:block lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            aria-label="Open sidebar"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          <div className="relative">
+            {activeUser?.avatar ? (
+              <img
+                src={activeUser.avatar || "/placeholder.svg"}
+                alt={activeUser.name}
+                className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shadow-sm">
+                <span className="text-blue-600 font-medium">
+                  {activeUser?.name?.[0]?.toUpperCase()}
+                </span>
+              </div>
+            )}
+            {/* Don't show online indicator since we don't have real-time status tracking */}
+          </div>
+
+          <div className="flex flex-col">
+            <h4 className="font-medium text-gray-800">{activeUser?.name}</h4>
+            <span className="text-xs text-gray-500">
+              {/* Show a generic status since we don't have real-time status tracking */}
+              Active now
+            </span>
+          </div>
+        </div>
+
         <div className="relative">
-          {activeUser?.avatar ? (
-            <img
-              src={activeUser.avatar || "/placeholder.svg"}
-              alt={activeUser.name}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-500 font-medium">
-                {activeUser?.name?.[0]}
-              </span>
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            aria-label="More options"
+          >
+            <MdMoreVert className="w-5 h-5" />
+          </button>
+
+          {showMenu && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200 py-1">
+              {totalMessages > 0 && (
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(true);
+                    setShowMenu(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <MdDelete className="w-5 h-5" />
+                  Delete all messages
+                </button>
+              )}
             </div>
           )}
-          {activeUser?.online && (
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-          )}
         </div>
-        <h4>{activeUser?.name}</h4>
-    
       </div>
-      <div>
-      <button 
-        onClick={onMenuClick}
-        className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-    {totalMessages > 0 &&  <button 
-        onClick={() => setShowDeleteModal(true)}
-        className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-      >
-        <MdDelete className="w-6 h-6 hover:text-red-600" />
-      </button>}
-      </div>
-      
-      
-
-    </div>
     <DeleteModal
           isOpen={showDeleteModal}
           onClose={() => setShowDeleteModal(false)}

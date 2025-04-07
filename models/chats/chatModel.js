@@ -10,6 +10,18 @@ const chatSchema = new mongoose.Schema(
       },
     ],
     lastMessage: { type: String },
+    lastMessageSender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
+    hasUnreadMessages: {
+      type: Boolean,
+      default: false
+    },
+    totalUnreadMessages: {
+      type: Number,
+      default: 0
+    },
     disabled:{
       type:Boolean,
       default:true
@@ -20,7 +32,7 @@ const chatSchema = new mongoose.Schema(
       required: true,
     },
   },
- 
+
   {
     timestamps: true,
   }

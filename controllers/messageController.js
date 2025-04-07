@@ -1,9 +1,11 @@
 // controllers/messageController.js
 import Message from "../models/chats/messageModel.js";
 import Chat from "../models/chats/chatModel.js";
-import { io } from "../server.js";
+import { io, openChats } from "../server.js";
 import userModel from "../models/userModel.js";
+import PostNotification from "../models/notifications/postNotificationModel.js";
 import { checkFileType } from "../utils/chats.js";
+import mongoose from "mongoose";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -11,18 +13,38 @@ export const sendMessage = async (req, res) => {
     const sender = req.user.userId;
     const files = req.files || [];
 
-    const attachments = files.map((file) => ({
-      fileType: checkFileType(file),
-      filePath: `/public/chats/${file.filename}`,
-      fileName: file.originalname,
-      fileSize: file.size,
-      mimeType: file.mimetype,
-    }));
+    const attachments = files.map((file) => {
+      // Check if this is a voice message
+      const isVoiceMessage = file.originalname.includes('voice-message') ||
+                           file.originalname.endsWith('.webm') ||
+                           file.mimetype.includes('webm');
+
+      // Set appropriate content for voice messages
+      let messageContent = content;
+      if (isVoiceMessage && content === 'Voice message') {
+        messageContent = '🎤 Voice message';
+      }
+
+      return {
+        fileType: checkFileType(file),
+        filePath: `/public/chats/${file.filename}`,
+        fileName: file.originalname,
+        fileSize: file.size,
+        mimeType: file.mimetype,
+        isVoiceMessage: isVoiceMessage
+      };
+    });
+
+    // Set appropriate content for voice messages
+    let messageContent = content;
+    if (attachments.some(att => att.isVoiceMessage) && content === 'Voice message') {
+      messageContent = '🎤 Voice message';
+    }
 
     const message = new Message({
       chatId,
       sender,
-      content,
+      content: messageContent,
       seen: false,
       hasAttachment: files.length > 0,
       attachments: attachments,
@@ -36,10 +58,15 @@ export const sendMessage = async (req, res) => {
       "name avatar"
     );
 
-    // Update chat's lastMessage and updatedAt
+    // Update chat's lastMessage, lastMessageSender, and updatedAt
     const chat = await Chat.findByIdAndUpdate(chatId, {
-      lastMessage: content,
+      lastMessage: messageContent,
+      lastMessageSender: sender,
       updatedAt: Date.now(),
+      // Set hasUnreadMessages to true for the receiver
+      hasUnreadMessages: true,
+      // Increment totalUnreadMessages
+      $inc: { totalUnreadMessages: 1 }
     });
 
     // Get receiver ID
@@ -47,9 +74,18 @@ export const sendMessage = async (req, res) => {
       (id) => id.toString() !== sender.toString()
     );
 
-    // Emit to both sender and receiver
+    // Emit to both sender and receiver, but only create notification for receiver
     io.to(receiverId.toString()).emit("newMessage", populatedMessage);
-    io.to(sender.toString()).emit("newMessage", populatedMessage);
+    io.to(sender.toString()).emit("messageSent", populatedMessage); // Different event for sender
+
+    // Check if the receiver has the chat open
+    const isChatOpen = openChats.has(receiverId.toString()) &&
+                      openChats.get(receiverId.toString()).has(chatId.toString());
+
+    // Only create a notification if the chat is not open
+    if (!isChatOpen) {
+      await createChatNotification(sender, receiverId, chatId, messageContent);
+    }
 
     res.status(201).json(populatedMessage);
   } catch (error) {
@@ -76,7 +112,7 @@ export const getMessages = async (req, res) => {
   const receiver = await userModel
     .findById(receiverId)
     .select("name avatar _id");
-   
+
   res.status(200).json({ messages, receiver, chat });
 };
 export const totalUnseenMessages = async (req, res) => {
@@ -115,10 +151,28 @@ export const markMessagesAsSeen = async (req, res) => {
     const { chatId } = req.params;
     const { userId } = req.user;
 
+    // Mark messages as seen
     const updatedMessages = await Message.updateMany(
       { chatId, seen: false, sender: { $ne: userId } },
       { $set: { seen: true } }
     );
+
+    // Also mark chat notifications as seen
+    await PostNotification.updateMany(
+      {
+        userId: userId,
+        chatId: chatId,
+        type: 'requestChat',
+        seen: false
+      },
+      { $set: { seen: true } }
+    );
+
+    // Reset unread message counters in the chat
+    await Chat.findByIdAndUpdate(chatId, {
+      hasUnreadMessages: false,
+      totalUnreadMessages: 0
+    });
 
     if (updatedMessages.modifiedCount > 0) {
       const chat = await Chat.findById(chatId);
@@ -126,10 +180,20 @@ export const markMessagesAsSeen = async (req, res) => {
         (id) => id.toString() !== userId.toString()
       );
       io.to(senderId.toString()).emit("messagesSeen", { chatId });
+
+      // Update notification count for the user
+      const unreadCount = await PostNotification.countDocuments({
+        userId: userId,
+        seen: false
+      });
+
+      // Emit the updated count
+      io.to(userId.toString()).emit('notificationCount', unreadCount);
     }
 
     res.status(200).json({ success: true });
   } catch (error) {
+    console.error("Error marking messages as seen:", error);
     res.status(500).json({ message: "Failed to mark messages as seen", error });
   }
 };
@@ -171,6 +235,54 @@ export const deleteMessageById = async (req, res) => {
   res.status(200).json({ message: "Message deleted successfully" });
 };
 
+// Helper function to create a chat notification
+const createChatNotification = async (senderId, receiverId, chatId, messageContent) => {
+  try {
+    // Don't create notifications if sender and receiver are the same
+    if (senderId.toString() === receiverId.toString()) {
+      return null;
+    }
+
+    // Create notification message - without sender's name
+    let notificationMessage = `New message`;
+
+    // Check if it's a voice message
+    if (messageContent.includes('🎤 Voice message')) {
+      notificationMessage = `New voice message`;
+    }
+    // Check if it's an attachment
+    else if (messageContent === 'Attachment') {
+      notificationMessage = `New attachment`;
+    }
+
+    // Create the notification - but don't save it to the database
+    // We'll only use it for real-time notification, not for the notification center
+    const notification = {
+      userId: receiverId,
+      chatId: chatId,
+      type: 'chatMessage', // Changed type to differentiate from regular notifications
+      message: notificationMessage,
+      createdBy: senderId,
+      seen: false,
+      temporary: true // Mark as temporary so it's not shown in the notification center
+    };
+
+    // Emit a special chat notification event to the receiver only
+    // This will be handled differently from regular notifications
+    io.to(receiverId.toString()).emit('chatNotification', {
+      notification,
+      chatId
+    });
+
+    // We don't need to update the notification count since this won't appear in the notification center
+
+    return notification;
+  } catch (error) {
+    console.error('Error creating chat notification:', error);
+    return null;
+  }
+};
+
 export const deleteAllMessagesByChatId = async (req, res) => {
   const { chatId } = req.params;
   const { userId } = req.user;
@@ -204,7 +316,7 @@ export const deleteAllMessagesByChatId = async (req, res) => {
 export const getTotalUnseenMessages = async (req, res) => {
   try {
     const { userId } = req.user;
-    
+
     if (!userId) {
       return res.status(200).json({ count: 0 });
     }
@@ -234,13 +346,13 @@ export const getTotalUnseenMessages = async (req, res) => {
     ]);
 
     const total = unseenCount.length > 0 ? unseenCount[0].total : 0;
-    
+
     res.status(200).json({ count: total });
   } catch (error) {
     console.error("Error getting total unseen messages:", error);
-    res.status(500).json({ 
-      message: "Failed to get total unseen messages", 
-      error: error.message 
+    res.status(500).json({
+      message: "Failed to get total unseen messages",
+      error: error.message
     });
   }
 };

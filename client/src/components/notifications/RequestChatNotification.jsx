@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import React from "react";
-import { IoCalendarOutline } from "react-icons/io5";
+import { IoCalendarOutline, IoChatbubbleEllipses } from "react-icons/io5";
 import { RiUserFollowFill } from "react-icons/ri";
+import { FaMicrophone } from "react-icons/fa";
 import customFetch from "@/utils/customFetch";
 
 const NOTIFICATION_TYPES = {
@@ -10,6 +11,16 @@ const NOTIFICATION_TYPES = {
     icon: RiUserFollowFill,
     iconColor: "text-indigo-600",
     message: "has requested to chat",
+  },
+  MESSAGE: {
+    icon: IoChatbubbleEllipses,
+    iconColor: "text-blue-500",
+    message: "sent you a message",
+  },
+  VOICE_MESSAGE: {
+    icon: FaMicrophone,
+    iconColor: "text-red-500",
+    message: "sent you a voice message",
   },
 };
 
@@ -30,12 +41,21 @@ const NotificationItem = ({ item, type, link }) => {
   const enableChat = async (e) => {
     e.preventDefault(); // Prevent link navigation
     e.stopPropagation(); // Stop event bubbling
-    
+
     try {
       await customFetch.patch(`/chats/accept-chat-request/${item.chatId}`);
       navigate(`/chats/${item.chatId}`);
     } catch (error) {
       console.error("Error enabling chat:", error);
+    }
+  };
+
+  const goToChat = (e) => {
+    e.preventDefault(); // Prevent link navigation
+    e.stopPropagation(); // Stop event bubbling
+
+    if (item.chatId) {
+      navigate(`/chats/${item.chatId}`);
     }
   };
 
@@ -63,7 +83,7 @@ const NotificationItem = ({ item, type, link }) => {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1 flex-wrap">
-          <Link 
+          <Link
             to={`/about/user/${item.createdBy._id}`}
             className="font-medium text-gray-900 hover:text-indigo-600 hover:underline transition-colors"
           >
@@ -71,28 +91,41 @@ const NotificationItem = ({ item, type, link }) => {
           </Link>
           <span className="text-gray-600 text-sm">{config.message}</span>
         </div>
-        
+
         <div className="flex items-center text-xs text-gray-500 mt-1">
           <IoCalendarOutline className="w-3.5 h-3.5 mr-1" />
           <span>{formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</span>
         </div>
-        
-        {/* Action button */}
-        {item.chatDisabled !== undefined && (
-          <button
-            onClick={enableChat}
-            disabled={!item.chatDisabled}
-            className={`mt-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              item.chatDisabled
-                ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                : "bg-gray-100 text-gray-400 cursor-default"
-            }`}
-          >
-            {item.chatDisabled ? "Accept Request" : "Accepted"}
-          </button>
-        )}
+
+        {/* Action buttons */}
+        <div className="mt-2 flex gap-2">
+          {/* Chat request button */}
+          {item.chatDisabled !== undefined && (
+            <button
+              onClick={enableChat}
+              disabled={!item.chatDisabled}
+              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                item.chatDisabled
+                  ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  : "bg-gray-100 text-gray-400 cursor-default"
+              }`}
+            >
+              {item.chatDisabled ? "Accept Request" : "Accepted"}
+            </button>
+          )}
+
+          {/* View message button */}
+          {item.chatId && (
+            <button
+              onClick={goToChat}
+              className="px-3 py-1 rounded-full text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            >
+              View Chat
+            </button>
+          )}
+        </div>
       </div>
-      
+
       {/* Unread indicator */}
       {!item.seen && (
         <div className="absolute right-3 top-3">
@@ -103,10 +136,23 @@ const NotificationItem = ({ item, type, link }) => {
   );
 };
 
-export const RequestChatNotification = ({ item }) => (
-  <NotificationItem
-    item={item}
-    type="FOLLOWED"
-    link={`/about/user/${item.createdBy._id}`}
-  />
-);
+export const RequestChatNotification = ({ item }) => {
+  // Determine the notification type based on the message content
+  let notificationType = "FOLLOWED";
+
+  if (item.message) {
+    if (item.message.includes("voice message")) {
+      notificationType = "VOICE_MESSAGE";
+    } else if (item.message.includes("sent you a message")) {
+      notificationType = "MESSAGE";
+    }
+  }
+
+  return (
+    <NotificationItem
+      item={item}
+      type={notificationType}
+      link={item.chatId ? `/chats/${item.chatId}` : `/about/user/${item.createdBy?._id}`}
+    />
+  );
+};

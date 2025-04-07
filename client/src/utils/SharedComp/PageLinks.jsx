@@ -1,5 +1,5 @@
 import React from "react";
-import { FaHome, FaCaretRight, FaBrain } from "react-icons/fa";
+import { FaHome, FaCaretRight, FaBrain, FaRobot, FaLightbulb } from "react-icons/fa";
 import { BiQuestionMark } from "react-icons/bi";
 import { BsChatDots } from "react-icons/bs";
 import { MdVideoLibrary } from "react-icons/md";
@@ -14,6 +14,12 @@ const links = [
     name: "Home",
     address: "/",
     icon: <RiHomeSmileFill />,
+  },
+  {
+    name: "SukoonAI",
+    address: "/sukoonai",
+    description: "AI-powered self-discovery journey",
+    icon: <FaRobot className="text-lg" />,
   },
   {
     name: "Articles & Resources",

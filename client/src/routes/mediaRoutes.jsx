@@ -11,10 +11,12 @@ import SingleVideos from '@/pages/mediaLibrary/videos/SingleVideos';
 import { singleVideosLoader } from '@/loaders/singleVideosLoader';
 import Video from '@/pages/mediaLibrary/videos/Video';
 import AllVideos from '@/pages/mediaLibrary/videos/AllVideos';
-import { PlaylistVideos, PodcastHome } from '@/pages';
+import VideoPlaylists from '@/pages/mediaLibrary/videos/VideoPlaylists';
+import PlaylistDetails from '@/pages/mediaLibrary/videos/PlaylistDetails';
+import { PodcastHome } from '@/pages';
 import AllsinglePodcasts from '@/pages/mediaLibrary/podcasts/AllsinglePodcasts';
 import AllPdocastPlaylists from '@/pages/mediaLibrary/podcasts/AllPdocastPlaylists';
-import PlaylistDetails from '@/pages/mediaLibrary/podcasts/PlaylistDetails';
+import PodcastPlaylistDetails from '@/pages/mediaLibrary/podcasts/PlaylistDetails';
 import SingleEpisode from '@/pages/mediaLibrary/podcasts/SingleEpisode';
 import { playlistVideosLoader } from '@/loaders/playlistVideosLoader';
 
@@ -62,8 +64,11 @@ export const mediaRoutes = [
             },
             {
                 path: 'playlists',
-                element: <PlaylistVideos />,
-                loader: playlistVideosLoader
+                element: <VideoPlaylists />
+            },
+            {
+                path: 'playlist/:playlistId',
+                element: <PlaylistDetails />
             },
         ],
     },
@@ -96,7 +101,7 @@ export const mediaRoutes = [
                 path: 'playlist/:playlistId',
                 element: (
                     <Suspense fallback={<LoadingSpinner />}>
-                        <PlaylistDetails />
+                        <PodcastPlaylistDetails />
                     </Suspense>
                 ),
             },

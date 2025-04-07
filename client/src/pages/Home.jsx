@@ -11,6 +11,7 @@ import EnhancedUserPosts from "@/components/homeComponents/EnhancedUserPosts";
 import EnhancedQuestions from "@/components/homeComponents/EnhancedQuestions";
 import EnhancedArticles from "@/components/homeComponents/EnhancedArticles";
 import "@/assets/styles/HomogeneousLayout.css";
+import "@/assets/styles/EnhancedMentalHealthTopics.css";
 
 // Lazy load components
 const TodaysQuote = lazy(
@@ -23,11 +24,12 @@ const TodaysQuiz = lazy(
 // const Infography = lazy(
 //   () => import("../components/homeComponents/Infography")
 // );
-const DisorderTags = lazy(
-  () => import("../components/homeComponents/DisorderTags")
+const EnhancedMentalHealthTopics = lazy(
+  () => import("../components/homeComponents/EnhancedMentalHealthTopics")
 );
 // const OurTeam = lazy(() => import("../components/homeComponents/OurTeam"));
 const QuizWithPopup = lazy(() => import("../components/homeComponents/QuizWithPopup"));
+const SukoonAIPromo = lazy(() => import("../components/homeComponents/SukoonAIPromo"));
 
 const Home = () => {
   return (
@@ -52,15 +54,28 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Community and Engagement Section */}
+      {/* SukoonAI Promo Section */}
       <section className="homogeneous-section">
         <div className="section-content">
           <div className="homogeneous-header">
-            <h2 className="homogeneous-title">Mental Health Topics</h2>
-            <p className="homogeneous-subtitle">Explore common mental health disorders and conditions</p>
+            <h2 className="homogeneous-title">Self-Discovery Journey</h2>
+            <p className="homogeneous-subtitle">Explore yourself with our AI-powered personal growth companion</p>
           </div>
           <Suspense fallback={<LoadingSpinner />}>
-            <DisorderTags />
+            <SukoonAIPromo />
+          </Suspense>
+        </div>
+      </section>
+
+      {/* Mental Health Topics Section */}
+      <section className="homogeneous-section featured-section">
+        <div className="section-content">
+          <div className="homogeneous-header">
+            <h2 className="homogeneous-title">Mental Health Topics</h2>
+            <p className="homogeneous-subtitle">Explore common mental health disorders, their symptoms, and learn how to recognize them</p>
+          </div>
+          <Suspense fallback={<LoadingSpinner />}>
+            <EnhancedMentalHealthTopics />
           </Suspense>
         </div>
       </section>

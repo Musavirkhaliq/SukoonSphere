@@ -3,7 +3,9 @@ import {
   handleChatMessage,
   handleStreamingChatMessage,
   getChatHistory,
-  startNewConversation
+  startNewConversation,
+  getUserConversations,
+  getConversationMessages
 } from "../controllers/chatbotController.js";
 import { optionalAuthenticateUser, authenticateUser } from "../middleware/authMiddleware.js";
 
@@ -18,5 +20,7 @@ router.post("/stream", optionalAuthenticateUser, handleStreamingChatMessage);
 // Protected routes (require authentication)
 router.get("/history", authenticateUser, getChatHistory);
 router.post("/new-conversation", authenticateUser, startNewConversation);
+router.get("/conversations", authenticateUser, getUserConversations);
+router.get("/conversations/:conversationId", authenticateUser, getConversationMessages);
 
 export default router;

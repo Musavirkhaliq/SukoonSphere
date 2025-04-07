@@ -11,7 +11,7 @@ export const getAllVideos = async (req, res) => {
 export const createVideo = async (req, res) => {
     const { userId } = req.user;
     if (req.user.role !== "contributor") {
-      throw new UnauthenticatedError("You are not authorized to create a video");    
+      throw new UnauthenticatedError("You are not authorized to create a video");
     }
 
     try {
@@ -20,9 +20,9 @@ export const createVideo = async (req, res) => {
       }
 
       const coverImagePath = `${process.env.BACKEND_URL}/public/uploads/${req.file.filename}`;
-      
+
       const videoData = { ...req.body };
-      
+
       const video = await Video.create({
         ...videoData,
         author: userId,
@@ -53,13 +53,13 @@ export const updateVideo = async (req, res) => {
 
     try {
       const updateData = { ...req.body };
-      
+
       // Handle tags from FormData for updates
       if (Array.isArray(req.body.tags)) {
         updateData.tags = req.body.tags.map(tag => tag.trim()).filter(Boolean);
       } else if (req.body['tags[]']) {
         // Handle tags sent as tags[]
-        updateData.tags = Array.isArray(req.body['tags[]']) 
+        updateData.tags = Array.isArray(req.body['tags[]'])
           ? req.body['tags[]'].map(tag => tag.trim()).filter(Boolean)
           : [req.body['tags[]']].map(tag => tag.trim()).filter(Boolean);
       } else if (typeof req.body.tags === 'string') {
@@ -134,7 +134,7 @@ export const getSingleVideo = async (req, res) => {
 };
 
 export const getUserVideos = async (req, res) => {
-    const { userId } = req.user;    
+    const { userId } = req.user;
     const videos = await Video.find({ author: userId });
     res.status(StatusCodes.OK).json({ videos });
 };
@@ -145,7 +145,7 @@ export const getSingleVideos = async (req, res) => {
     throw new BadRequestError("Video not found");
   }
   res.status(StatusCodes.OK).json({ video });
-};   
+};
 
 export const getPlaylistVideos = async (req, res) => {
   const video = await Video.find({ type: "playlist" });

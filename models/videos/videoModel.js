@@ -22,6 +22,41 @@ const videoSchema = new mongoose.Schema(
       enum: ["single", "playlist"],
       default: "single",
     },
+    duration: {
+      type: Number, // Duration in seconds
+      default: 0
+    },
+    tags: [
+      {
+        type: String,
+        trim: true
+      }
+    ],
+    category: {
+      type: String,
+      trim: true
+    },
+    // For playlist videos
+    playlistId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Video",
+      default: null
+    },
+    // For tracking popularity
+    viewCount: {
+      type: Number,
+      default: 0
+    },
+    likeCount: {
+      type: Number,
+      default: 0
+    },
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "VideoComment",
+      },
+    ],
   },
   {
     timestamps: true,

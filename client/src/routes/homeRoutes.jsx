@@ -5,8 +5,9 @@ const Posts = lazy(() => import("../pages/stories&discussions/posts/Posts"));
 const Answer = lazy(() => import("../pages/stories&discussions/qaSection/answer/Answer"));
 const Article = lazy(() => import("../pages/articles&resources/articles/Article"));
 const AllQuestionAnswers = lazy(() => import("../pages/stories&discussions/qaSection/AllQuestionAnswers"));
+const SukoonAI = lazy(() => import("../pages/therapy/Therapy"));
 
-// Keep the loader as 
+// Keep the loader as
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
 
 import { answerAction } from "@/pages/stories&discussions/qaSection/answer/Answer";
@@ -144,5 +145,13 @@ export const homeRoutes = [
         ],
       },
     ],
+  },
+  {
+    path: "/sukoonai",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <SukoonAI />
+      </Suspense>
+    ),
   },
 ];

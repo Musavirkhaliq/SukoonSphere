@@ -4,12 +4,15 @@ import customFetch from "../utils/customFetch";
 import { toast } from "react-toastify";
 import { useUser } from "../context/UserContext";
 import ChatbotAttention from "./ChatbotAttention";
+import FullScreenChatbot from "./FullScreenChatbot";
+import { FaExpandAlt } from "react-icons/fa";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [currentUtterance, setCurrentUtterance] = useState(null);
@@ -369,6 +372,42 @@ const Chatbot = () => {
     }
   };
 
+  // Toggle full screen mode
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen);
+
+    // If we're going to full screen, make sure the chatbot is open
+    if (!isFullScreen && !isChatbotOpen) {
+      setIsChatbotOpen(true);
+    }
+
+    // If we're exiting full screen, keep the chatbot open
+    if (isFullScreen) {
+      setIsChatbotOpen(true);
+    }
+  };
+
+  // Handle closing full screen mode
+  const handleCloseFullScreen = () => {
+    setIsFullScreen(false);
+    setIsChatbotOpen(true);
+  };
+
+  // If in full screen mode, render the full screen chatbot
+  if (isFullScreen) {
+    return (
+      <FullScreenChatbot
+        onClose={handleCloseFullScreen}
+        initialMessages={messages}
+        onSendMessage={handleSendMessage}
+        voiceGender={voiceGender}
+        onVoiceGenderChange={setVoiceGender}
+        isHistoryLoaded={isHistoryLoaded}
+        user={user}
+      />
+    );
+  }
+
   return (
     <>
       {/* Chatbot Attention component */}
@@ -412,6 +451,13 @@ const Chatbot = () => {
               title={`Switch to ${voiceGender === "female" ? "male" : "female"} voice`}
             >
               {voiceGender === "female" ? '👩' : '👨'}
+            </button>
+            <button
+              className="fullscreen-button"
+              onClick={toggleFullScreen}
+              title="Open in full screen"
+            >
+              <FaExpandAlt />
             </button>
             <button className="close-button" onClick={toggleChatbot}>✕</button>
           </div>

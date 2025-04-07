@@ -1,5 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
+import UserSearchBar from "../../../components/common/UserSearchBar";
+import { FaUsers } from "react-icons/fa";
 
 const Posts = () => {
   const groups = [
@@ -62,8 +64,51 @@ const Posts = () => {
           </div>
         </div>
 
-        {/* Right Sidebar - Profile */}
-        <div className="hidden shadow-sm lg:block lg:col-span-3  rounded-lg">
+        {/* Mobile User Search - Visible on small screens */}
+        <div className="lg:hidden col-span-full mb-4">
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="mb-2">
+              <h3 className="text-lg font-semibold mb-2 flex items-center">
+                <FaUsers className="mr-2 text-[var(--primary)]" />
+                Find People
+              </h3>
+              <UserSearchBar isMobile={true} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Sidebar - User Search (Desktop) */}
+        <div className="hidden shadow-sm lg:block lg:col-span-3 rounded-lg">
+          <div className="bg-white p-4 rounded-lg sticky top-20">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold mb-2 flex items-center">
+                <FaUsers className="mr-2 text-[var(--primary)]" />
+                Find People
+              </h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Search for users to follow and connect with
+              </p>
+              <UserSearchBar isMobile={false} />
+            </div>
+
+            <div className="mt-6">
+              <h4 className="font-medium text-gray-700 mb-2">Why Connect?</h4>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li className="flex items-start">
+                  <span className="text-[var(--primary)] mr-2">•</span>
+                  <span>Follow users to see their posts in your feed</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-[var(--primary)] mr-2">•</span>
+                  <span>Connect with people who share similar interests</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-[var(--primary)] mr-2">•</span>
+                  <span>Build your support network for mental wellness</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
