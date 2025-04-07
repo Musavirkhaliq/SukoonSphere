@@ -328,14 +328,20 @@ export const likePosts = async (req, res) => {
   }
 };
 export const createPostComment = async (req, res) => {
-  const { content } = req.body;
+  const { content, isAnonymous } = req.body;
   const { id: postId } = req.params;
 
   try {
+    // Convert isAnonymous from string to boolean if needed
+    const isAnonymousValue = typeof isAnonymous === 'string'
+      ? isAnonymous === 'true'
+      : Boolean(isAnonymous);
+
     const comment = await PostComments.create({
       postId,
-      createdBy: req.user.userId, // Only store user ID
+      createdBy: req.user.userId, // Always store user ID for database relations
       content,
+      isAnonymous: isAnonymousValue,
     });
 
     const post = await Post.findById(postId);
@@ -359,8 +365,20 @@ export const createPostComment = async (req, res) => {
       },
       {
         $addFields: {
-          username: { $arrayElemAt: ["$userDetails.username", 0] },
-          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+          username: {
+            $cond: [
+              "$isAnonymous",
+              "Anonymous",
+              { $arrayElemAt: ["$userDetails.username", 0] }
+            ]
+          },
+          userAvatar: {
+            $cond: [
+              "$isAnonymous",
+              null, // Will use default avatar for anonymous comments
+              { $arrayElemAt: ["$userDetails.avatar", 0] }
+            ]
+          },
         },
       },
       {
@@ -413,8 +431,20 @@ export const getAllCommentsByPostId = async (req, res) => {
     },
     {
       $addFields: {
-        username: { $arrayElemAt: ["$userDetails.name", 0] },
-        userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+        username: {
+          $cond: [
+            "$isAnonymous",
+            "Anonymous",
+            { $arrayElemAt: ["$userDetails.name", 0] }
+          ]
+        },
+        userAvatar: {
+          $cond: [
+            "$isAnonymous",
+            null, // Will use default avatar for anonymous comments
+            { $arrayElemAt: ["$userDetails.avatar", 0] }
+          ]
+        },
         totalReplies: { $size: { $ifNull: ["$replies", []] } },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
       },
@@ -871,8 +901,13 @@ export const updatePost = async (req, res) => {
 
 export const updatePostComment = async (req, res) => {
   const { id: commentId } = req.params;
-  const { content } = req.body;
+  const { content, isAnonymous } = req.body;
   const { userId } = req.user;
+
+  // Convert isAnonymous from string to boolean if needed
+  const isAnonymousValue = typeof isAnonymous === 'string'
+    ? isAnonymous === 'true'
+    : Boolean(isAnonymous);
 
   if (!content) {
     throw new BadRequestError("Comment content is required");
@@ -891,6 +926,7 @@ export const updatePostComment = async (req, res) => {
     commentId,
     {
       content,
+      isAnonymous: isAnonymousValue,
       editedAt: new Date(),
     },
     { new: true }

@@ -4,12 +4,13 @@ import { useInView } from "react-intersection-observer";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
-import { FaSpinner } from "react-icons/fa";
+import { FaSpinner, FaUserSecret } from "react-icons/fa";
 import PostCommentCard from "./PostCommentCard";
 
 const PostComments = ({ postId }) => {
   const { user } = useUser();
   const [commentContent, setCommentContent] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const { ref, inView } = useInView();
 
   const {
@@ -50,8 +51,10 @@ const PostComments = ({ postId }) => {
     try {
       await customFetch.post(`/posts/${postId}/comments`, {
         content: commentContent,
+        isAnonymous: isAnonymous,
       });
       setCommentContent("");
+      setIsAnonymous(false); // Reset anonymous flag after posting
       refetch();
       toast.success("Comment added successfully!");
     } catch (error) {
@@ -110,8 +113,22 @@ const PostComments = ({ postId }) => {
           disabled={!user}
         />
         <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
-          {!user && (
+          {!user ? (
             <p className="text-xs text-gray-500">Login to comment</p>
+          ) : (
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isAnonymous}
+                onChange={() => setIsAnonymous(!isAnonymous)}
+                className="form-checkbox h-3 w-3 text-blue-600 rounded focus:ring-blue-500"
+                disabled={!user}
+              />
+              <span className="text-xs flex items-center gap-1 text-gray-600">
+                <FaUserSecret className={isAnonymous ? "text-blue-600" : "text-gray-400"} size={12} />
+                Post anonymously
+              </span>
+            </label>
           )}
           <div className="ml-auto">
             <button

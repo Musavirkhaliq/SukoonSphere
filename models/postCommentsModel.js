@@ -24,10 +24,14 @@ const commentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isAnonymous: {
+      type: Boolean,
+      default: false,
+    },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", 
+        ref: "User",
       },
     ],
     replies: [

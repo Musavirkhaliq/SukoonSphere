@@ -3,7 +3,7 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
-import { FaReply, FaThumbsUp } from "react-icons/fa";
+import { FaReply, FaThumbsUp, FaUserSecret } from "react-icons/fa";
 import DeleteModal from "../shared/DeleteModal";
 import PostActions from "../shared/PostActions";
 import UserAvatar from "../shared/UserAvatar";
@@ -16,6 +16,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
   const [replyContent, setReplyContent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
+  const [isEditAnonymous, setIsEditAnonymous] = useState(comment.isAnonymous || false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [replies, setReplies] = useState([]);
@@ -62,6 +63,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
     try {
       await customFetch.patch(`/posts/comments/${comment._id}`, {
         content: editContent,
+        isAnonymous: isEditAnonymous,
       });
       setIsEditing(false);
       onCommentUpdate();
@@ -128,7 +130,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
               size="verySmall"
             />
           </div>
-          {user && user._id === comment.createdBy && (
+          {user && String(user._id) === String(comment.createdBy) && (
             <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
           )}
         </div>
@@ -142,19 +144,34 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
               className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
               rows="3"
             />
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditContent(comment.content);
-                }}
-                className="btn-red !py-1"
-              >
-                Cancel
-              </button>
-              <button onClick={handleSaveEdit} className="btn-2 !py-1">
-                Save
-              </button>
+            <div className="flex items-center justify-between mt-2">
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isEditAnonymous}
+                  onChange={() => setIsEditAnonymous(!isEditAnonymous)}
+                  className="form-checkbox h-3 w-3 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <span className="text-xs flex items-center gap-1 text-gray-600">
+                  <FaUserSecret className={isEditAnonymous ? "text-blue-600" : "text-gray-400"} size={12} />
+                  Post anonymously
+                </span>
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditContent(comment.content);
+                    setIsEditAnonymous(comment.isAnonymous || false);
+                  }}
+                  className="btn-red !py-1"
+                >
+                  Cancel
+                </button>
+                <button onClick={handleSaveEdit} className="btn-2 !py-1">
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         ) : (
