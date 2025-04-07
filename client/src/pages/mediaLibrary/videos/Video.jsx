@@ -2,7 +2,7 @@ import { YoutubeEmbed } from "@/components";
 import customFetch from "@/utils/customFetch";
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaArrowLeft, FaArrowRight, FaList, FaChevronDown, FaChevronUp, FaComments, FaThumbsUp, FaTrophy } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaList, FaChevronDown, FaChevronUp, FaComments, FaTrophy } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import useVideoProgress from "@/hooks/useVideoProgress";
 
@@ -35,9 +35,9 @@ const Video = () => {
     const [playlistCompleted, setPlaylistCompleted] = useState(false);
 
     // Collapsible section states
-    const [showReactions, setShowReactions] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [showAchievements, setShowAchievements] = useState(false);
+    const [showFullDescription, setShowFullDescription] = useState(false);
 
     // References
     const videoRef = useRef(null);
@@ -251,14 +251,6 @@ const Video = () => {
                                     )}
                                 </div>
 
-                                {/* Video Materials */}
-                                {video && (
-                                    <VideoMaterials
-                                        videoId={videoId}
-                                        videoAuthorId={typeof video.author === 'string' ? video.author : video.author?._id}
-                                    />
-                                )}
-
                                 {/* Playlist Navigation */}
                                 {isLoadingPlaylist && (
                                     <div className="bg-gray-50 p-3 border-t border-b flex items-center justify-center">
@@ -311,15 +303,15 @@ const Video = () => {
                                     </div>
                                 )}
 
-                                {/* Video Info */}
+                                {/* Video Info - Reorganized */}
                                 {video && (
                                     <div className="p-4">
-                                        <h1 className="text-2xl font-bold text-gray-800 mb-2">{video.title}</h1>
-                                        <p className="text-gray-600">{video.description}</p>
+                                        {/* 1. Video Title */}
+                                        <h1 className="text-2xl font-bold text-gray-800 mb-4">{video.title}</h1>
 
-                                        {/* Watch Progress for logged-in users */}
+                                        {/* 2. Watch Progress for logged-in users */}
                                         {user && progress > 0 && (
-                                            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                                            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                                                 <p className="text-sm text-gray-600 mb-1">Your progress</p>
                                                 <div className="w-full bg-gray-200 rounded-full h-2.5">
                                                     <div
@@ -331,57 +323,77 @@ const Video = () => {
                                             </div>
                                         )}
 
+                                        {/* 3. Video Reactions - YouTube Style */}
+                                        <div className="mb-4">
+                                            <VideoReactions videoId={videoId} videoTitle={video.title} />
+                                        </div>
 
+                                        {/* 4. Video Description - Completely Toggleable */}
+                                        <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+                                            <div
+                                                className="flex flex-col p-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                                                onClick={() => setShowFullDescription(!showFullDescription)}
+                                            >
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <h3 className="text-lg font-semibold flex items-center">
+                                                        <span className="mr-2">Description</span>
+                                                        <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">
+                                                            {showFullDescription ? 'Hide' : 'Show'}
+                                                        </span>
+                                                    </h3>
+                                                    <span className="text-gray-500">
+                                                        {showFullDescription ? <FaChevronUp /> : <FaChevronDown />}
+                                                    </span>
+                                                </div>
 
-                                        {/* Video Reactions - Collapsible */}
-                                        {video && (
-                                            <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
-                                                <button
-                                                    onClick={() => setShowReactions(!showReactions)}
-                                                    className="w-full p-3 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
-                                                >
-                                                    <div className="flex items-center">
-                                                        <FaThumbsUp className="mr-2 text-[var(--primary)]" />
-                                                        <span className="font-medium">Reactions</span>
-                                                        {video.likes && video.likes.length > 0 && (
-                                                            <span className="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">
-                                                                {video.likes.length}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    {showReactions ? <FaChevronUp /> : <FaChevronDown />}
-                                                </button>
-
-                                                {showReactions && (
-                                                    <div className="p-4">
-                                                        <VideoReactions videoId={videoId} videoTitle={video.title} />
+                                                {/* Preview of description when collapsed */}
+                                                {!showFullDescription && video.description && (
+                                                    <div className="text-sm text-gray-500 line-clamp-1 mt-1">
+                                                        {video.description}
                                                     </div>
                                                 )}
                                             </div>
-                                        )}
+
+                                            {/* Description content - only visible when expanded */}
+                                            {showFullDescription && (
+                                                <div className="p-4 animate-fadeIn border-t border-gray-200">
+                                                    <div className="text-gray-600 whitespace-pre-line">
+                                                        {video.description}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* 5. Video Materials */}
+                                        <VideoMaterials
+                                            videoId={videoId}
+                                            videoAuthorId={typeof video.author === 'string' ? video.author : video.author?._id}
+                                        />
                                     </div>
                                 )}
                             </div>
 
-                            {/* Comments Section - Collapsible */}
+                            {/* 6. Comments Section - Collapsible */}
                             {video && (
-                                <div className="mt-6 border border-gray-200 rounded-lg overflow-hidden">
-                                    <button
-                                        onClick={() => setShowComments(!showComments)}
-                                        className="w-full p-3 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
-                                    >
-                                        <div className="flex items-center">
-                                            <FaComments className="mr-2 text-[var(--primary)]" />
-                                            <span className="font-medium">Comments</span>
-                                        </div>
-                                        {showComments ? <FaChevronUp /> : <FaChevronDown />}
-                                    </button>
+                                <div className="mt-4">
+                                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                        <button
+                                            onClick={() => setShowComments(!showComments)}
+                                            className="w-full p-3 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
+                                        >
+                                            <div className="flex items-center">
+                                                <FaComments className="mr-2 text-[var(--primary)]" />
+                                                <span className="font-medium">Comments</span>
+                                            </div>
+                                            {showComments ? <FaChevronUp /> : <FaChevronDown />}
+                                        </button>
 
-                                    {showComments && (
-                                        <div className="p-4">
-                                            <VideoComments videoId={videoId} />
-                                        </div>
-                                    )}
+                                        {showComments && (
+                                            <div className="p-4">
+                                                <VideoComments videoId={videoId} />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
