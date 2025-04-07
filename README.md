@@ -1,6 +1,21 @@
+# SukoonSphere
+
 SukoonSphere is an innovative digital platform designed to address critical gaps in mental health awareness, education, and access to care. Through both a website and mobile app, SukoonSphere aims to create a comprehensive and supportive environment where users can access information, connect with professionals, and engage in meaningful discussions about mental health. The platform will serve as a hub for individuals seeking support, professionals looking to enhance their skills, and institutions aiming to collaborate with experts.
 
-Project Objectives:
+## Environment Setup
+
+### Environment Variables
+This project uses environment variables for configuration. Example files are provided:
+- `.env.example` in the root directory
+- `client/.env.example` in the client directory
+
+To set up your environment:
+1. Copy these example files to create your own `.env` files
+2. Fill in your own values for the variables
+
+**IMPORTANT: Never commit `.env` files to version control as they may contain sensitive information like API keys and secrets.**
+
+## Project Objectives:
 1.	Increase Mental Health Awareness: Provide accessible, engaging content that educates the public on mental health issues, treatments, and wellness practices.
 2.	Create a Safe Space for Dialogue: Facilitate open conversations between individuals affected by mental health issues and those seeking to understand them better, especially students.
 3.	Facilitate Professional Connections: Connect mental health experts with institutions and individuals in need of their services.
@@ -45,7 +60,7 @@ Key Features:
 
 
 
-        
+
 
 
 /*/*/*/*/*/**/*/*/*/*/*  Website Deployment Process  /*/*/*/*/*/**/*/*/*/*/*
@@ -60,7 +75,12 @@ Step 2- Navigate to repository.
 Step 3- Setup node modules.
         command: npm i (both in client and BE)
 
-Step 4- Create build version of client.
+Step 4- Set up environment variables.
+        - Copy `.env.example` to `.env` in the root directory
+        - Copy `client/.env.example` to `client/.env`
+        - Fill in your own values for the environment variables
+
+Step 5- Create build version of client.
         command: npm run build
 
 /*/*/*/*/**/*/*/*/* VPS commands- Deploy website /*/*/*/*/*/**/*/
@@ -643,11 +663,11 @@ export default GamifiedDashboard;
 
 
 import React, { useEffect, useState } from "react";
-import { 
-  FaMedal, 
-  FaStar, 
-  FaFire, 
-  FaCheckCircle, 
+import {
+  FaMedal,
+  FaStar,
+  FaFire,
+  FaCheckCircle,
   FaTasks,
   FaTrophy,
   FaChartBar,
@@ -655,16 +675,16 @@ import {
   FaUser,
   FaClipboardList
 } from "react-icons/fa";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  ResponsiveContainer, 
-  PieChart, 
-  Pie, 
-  Cell, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
   Legend
 } from "recharts";
 import customFetch from "@/utils/customFetch";
@@ -713,9 +733,9 @@ const GamifiedDashboard = () => {
       <div className="container mx-auto max-w-6xl">
         {/* User Header */}
         <div className="bg-white shadow-xl rounded-2xl p-6 mb-6 flex items-center">
-          <img 
-            src={data.user.avatar || '/default-avatar.png'} 
-            alt={data.user.name} 
+          <img
+            src={data.user.avatar || '/default-avatar.png'}
+            alt={data.user.name}
             className="w-28 h-28 rounded-full mr-6 border-4 border-blue-500 object-cover"
           />
           <div>
@@ -745,14 +765,14 @@ const GamifiedDashboard = () => {
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value)}
                 className={`flex items-center justify-center py-3 space-x-2 rounded-lg transition-all duration-300 group ${
-                  activeTab === tab.value 
-                    ? "bg-blue-500 text-white shadow-lg" 
+                  activeTab === tab.value
+                    ? "bg-blue-500 text-white shadow-lg"
                     : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
                 }`}
               >
                 <tab.icon className={`text-lg ${
-                  activeTab === tab.value 
-                    ? "text-white" 
+                  activeTab === tab.value
+                    ? "text-white"
                     : "text-gray-400 group-hover:text-blue-500"
                 }`} />
                 <span className="font-semibold">{tab.label}</span>
@@ -776,17 +796,17 @@ const GamifiedDashboard = () => {
                   <BarChart data={activityData}>
                     <XAxis dataKey="name" className="text-sm" />
                     <YAxis className="text-sm" />
-                    <Tooltip 
+                    <Tooltip
                       cursor={{fill: 'rgba(0,0,0,0.1)'}}
                       contentStyle={{
-                        backgroundColor: 'white', 
-                        borderRadius: '12px', 
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                       }}
                     />
-                    <Bar 
-                      dataKey="value" 
-                      fill="#3B82F6" 
+                    <Bar
+                      dataKey="value"
+                      fill="#3B82F6"
                       radius={[10, 10, 0, 0]}
                     />
                   </BarChart>
@@ -817,14 +837,14 @@ const GamifiedDashboard = () => {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{
-                        backgroundColor: 'white', 
-                        borderRadius: '12px', 
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                       }}
                     />
-                    <Legend 
+                    <Legend
                       iconType="circle"
                       align="center"
                       verticalAlign="bottom"
@@ -844,8 +864,8 @@ const GamifiedDashboard = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {data.progress?.pending?.map((item, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="bg-blue-50 p-5 rounded-xl hover:shadow-md transition-all duration-300"
                   >
                     <div className="flex items-center mb-3">
@@ -855,8 +875,8 @@ const GamifiedDashboard = () => {
                       </div>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
-                      <div 
-                        className="bg-blue-600 h-3 rounded-full" 
+                      <div
+                        className="bg-blue-600 h-3 rounded-full"
                         style={{
                           width: `${((item.currentProgress || 0) / item.nextMilestone) * 100}%`
                         }}
@@ -885,8 +905,8 @@ const GamifiedDashboard = () => {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {data.progress?.completed?.map((badge, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="bg-green-50 p-4 rounded-xl flex items-center justify-center space-x-3 hover:bg-green-100 transition-all duration-300"
                   >
                     <FaTrophy className="text-green-500 text-2xl" />
@@ -915,11 +935,11 @@ const GamifiedDashboard = () => {
                   </thead>
                   <tbody>
                     {data.topUsers?.map((user, index) => (
-                      <tr 
-                        key={user._id} 
+                      <tr
+                        key={user._id}
                         className={`border-b border-gray-100 ${
-                          user._id === data.user._id 
-                            ? "bg-blue-100 font-semibold" 
+                          user._id === data.user._id
+                            ? "bg-blue-100 font-semibold"
                             : "hover:bg-blue-50"
                         }`}
                       >
