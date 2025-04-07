@@ -30,6 +30,7 @@ const PostCard = ({
   const [showCommentSlide, setShowCommentSlide] = useState(false);
   const navigate = useNavigate();
   const handleDelete = () => {
+    console.log('handleDelete called, showing delete modal');
     setShowDeleteModal(true);
   };
 
@@ -46,15 +47,20 @@ const PostCard = ({
 
   const handleDeletePost = async () => {
     try {
-      await customFetch.delete(`/posts/${post._id}`);
-      window.location.reload();
+      // Make sure we're using the current post ID
+      const postId = currentPost._id || post._id;
+      console.log('Deleting post with ID:', postId);
+      const response = await customFetch.delete(`/posts/${postId}`);
+      console.log('Delete response:', response);
       toast.success("Post deleted successfully!");
+      window.location.reload();
     } catch (error) {
-      console.log(error);
+      console.error('Error deleting post:', error);
+      toast.error(error?.response?.data?.msg || 'Failed to delete post');
     }
   };
 
-  console.log({ post });
+  console.log('Post data:', { post, currentPost });
   const handleLike = async () => {
     if (!user) {
       toast.error("Please login to like this post!");
@@ -87,7 +93,15 @@ const PostCard = ({
             />
           </div>
 
-          {user?._id === currentPost.createdBy && (
+          {/* Debug info */}
+          {console.log('User auth check:', {
+            userId: user?._id,
+            postCreatedBy: currentPost.createdBy,
+            isMatch: user?._id === currentPost.createdBy,
+            isAnonymous: currentPost.isAnonymous
+          })}
+
+          {user?._id && currentPost.createdBy && String(user._id) === String(currentPost.createdBy) && (
             <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
           )}
         </div>

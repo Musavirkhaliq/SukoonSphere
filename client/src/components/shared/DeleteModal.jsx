@@ -49,7 +49,10 @@ const DeleteModal = ({
                             Cancel
                         </button>
                         <button
-                            onClick={onDelete}
+                            onClick={() => {
+                                console.log('Delete confirmation clicked');
+                                onDelete();
+                            }}
                             disabled={isLoading}
                             className="btn-red transition-colors disabled:opacity-50"
                         >
@@ -62,4 +65,4 @@ const DeleteModal = ({
     );
 };
 
-export default DeleteModal; 
+export default DeleteModal;

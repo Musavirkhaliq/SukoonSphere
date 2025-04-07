@@ -12,13 +12,20 @@ import { io } from "../server.js";
 
 export const createPost = async (req, res) => {
   const newPost = {
-    createdBy: req.user.userId, // Only store user ID
+    createdBy: req.user.userId, // Always store user ID for database relations
     ...req.body,
   };
+
+  // Convert isAnonymous from string to boolean if needed
+  if (typeof newPost.isAnonymous === 'string') {
+    newPost.isAnonymous = newPost.isAnonymous === 'true';
+  }
+
   if (req.file) {
     const filepaath = `${process.env.BACKEND_URL}/public/uploads/${req.file.filename}`;
     newPost.imageUrl = filepaath;
   }
+
   const post = await Post.create(newPost);
   await User.findByIdAndUpdate(
     req.user.userId,
@@ -57,8 +64,20 @@ export const getAllPosts = async (req, res) => {
       // Add computed fields
       {
         $addFields: {
-          username: { $arrayElemAt: ["$userDetails.name", 0] },
-          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+          username: {
+            $cond: [
+              "$isAnonymous",
+              "Anonymous",
+              { $arrayElemAt: ["$userDetails.name", 0] }
+            ]
+          },
+          userAvatar: {
+            $cond: [
+              "$isAnonymous",
+              null, // Will use default avatar for anonymous posts
+              { $arrayElemAt: ["$userDetails.avatar", 0] }
+            ]
+          },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
           totalComments: { $size: { $ifNull: ["$comments", []] } },
         },
@@ -151,8 +170,20 @@ export const getAllPostsByUserId = async (req, res) => {
     },
     {
       $addFields: {
-        username: { $arrayElemAt: ["$userDetails.name", 0] },
-        userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+        username: {
+          $cond: [
+            "$isAnonymous",
+            "Anonymous",
+            { $arrayElemAt: ["$userDetails.name", 0] }
+          ]
+        },
+        userAvatar: {
+          $cond: [
+            "$isAnonymous",
+            null, // Will use default avatar for anonymous posts
+            { $arrayElemAt: ["$userDetails.avatar", 0] }
+          ]
+        },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
         totalComments: { $size: { $ifNull: ["$comments", []] } },
       },
@@ -208,8 +239,20 @@ export const getPostById = async (req, res) => {
     },
     {
       $addFields: {
-        username: { $arrayElemAt: ["$userDetails.name", 0] },
-        userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+        username: {
+          $cond: [
+            "$isAnonymous",
+            "Anonymous",
+            { $arrayElemAt: ["$userDetails.name", 0] }
+          ]
+        },
+        userAvatar: {
+          $cond: [
+            "$isAnonymous",
+            null, // Will use default avatar for anonymous posts
+            { $arrayElemAt: ["$userDetails.avatar", 0] }
+          ]
+        },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
         totalComments: { $size: { $ifNull: ["$comments", []] } },
       },
@@ -552,22 +595,54 @@ export const getAllRepliesByCommentId = async (req, res) => {
 };
 
 export const deletePost = async (req, res) => {
-  const { id: postId } = req.params;
+  try {
+    const { id: postId } = req.params;
+    console.log('Delete request for post ID:', postId);
+
     const post = await Post.findById(postId);
-    if (!post) throw new BadRequestError("Post not found");
+    if (!post) {
+      console.log('Post not found with ID:', postId);
+      throw new BadRequestError("Post not found");
+    }
+
+    console.log('Found post:', {
+      id: post._id,
+      createdBy: post.createdBy,
+      isAnonymous: post.isAnonymous,
+      description: post.description?.substring(0, 30) + '...'
+    });
+
+    console.log('Delete authorization check:', {
+      postCreatedBy: post.createdBy.toString(),
+      userId: req.user.userId,
+      isMatch: post.createdBy.toString() === req.user.userId,
+      isAnonymous: post.isAnonymous
+    });
 
     if (post.createdBy.toString() !== req.user.userId) {
       throw new UnauthorizedError("Not authorized to delete this post");
     }
 
     if (post.imageUrl) {
-      await deleteFile(post.imageUrl);
+      try {
+        await deleteFile(post.imageUrl);
+      } catch (fileError) {
+        console.error('Error deleting image file:', fileError);
+        // Continue with post deletion even if image deletion fails
+      }
     }
 
     await Post.findByIdAndDelete(postId);
     await User.findByIdAndUpdate(req.user.userId, { $pull: { posts: postId } });
     res.status(StatusCodes.OK).json({ message: "Post deleted successfully" });
-  } 
+  } catch (error) {
+    console.error('Error in deletePost:', error);
+    if (error instanceof BadRequestError || error instanceof UnauthorizedError) {
+      throw error;
+    }
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ msg: "Failed to delete post" });
+  }
+}
 
 
 export const deletePostComment = async (req, res) => {
@@ -748,6 +823,11 @@ export const updatePost = async (req, res) => {
     } catch (error) {
       throw new BadRequestError("Invalid tags format");
     }
+  }
+
+  // Convert isAnonymous from string to boolean if needed
+  if (typeof req.body.isAnonymous === 'string') {
+    req.body.isAnonymous = req.body.isAnonymous === 'true';
   }
 
   // Handle image removal

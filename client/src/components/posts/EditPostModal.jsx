@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { FaImage, FaTimes, FaShare, FaPlus } from "react-icons/fa";
+import { FaImage, FaTimes, FaShare, FaPlus, FaUserSecret } from "react-icons/fa";
 import customFetch from "@/utils/customFetch";
 
 const EditPostModal = ({ post, onClose, onPostUpdated }) => {
@@ -11,6 +11,7 @@ const EditPostModal = ({ post, onClose, onPostUpdated }) => {
   const [tags, setTags] = useState(post.tags || []);
   const [tagInput, setTagInput] = useState("");
   const [description, setDescription] = useState(post.description || "");
+  const [isAnonymous, setIsAnonymous] = useState(post.isAnonymous || false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -56,6 +57,7 @@ const EditPostModal = ({ post, onClose, onPostUpdated }) => {
       setIsSubmitting(true);
       const formData = new FormData();
       formData.append("description", description);
+      formData.append("isAnonymous", isAnonymous);
 
       // Handle tags as JSON string
       formData.append("tags", JSON.stringify(tags));
@@ -211,23 +213,39 @@ const EditPostModal = ({ post, onClose, onPostUpdated }) => {
             )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-3 border-t">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-red"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn-2 gap-2"
-            >
-              <FaShare />
-              {isSubmitting ? "Updating..." : "Update"}
-            </button>
+          <div className="flex items-center justify-between pt-3 border-t">
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={() => setIsAnonymous(!isAnonymous)}
+                  className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm flex items-center gap-1">
+                  <FaUserSecret className={isAnonymous ? "text-blue-600" : "text-gray-500"} />
+                  Post anonymously
+                </span>
+              </label>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn-red"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn-2 gap-2"
+              >
+                <FaShare />
+                {isSubmitting ? "Updating..." : "Update"}
+              </button>
+            </div>
           </div>
         </form>
       </div>

@@ -31,12 +31,12 @@ const postSchema = new mongoose.Schema(
       default: null
     },
     tags: {
-      type: [String],  
+      type: [String],
     },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", 
+        ref: "User",
       },
     ],
     comments: [
@@ -46,6 +46,10 @@ const postSchema = new mongoose.Schema(
       },
     ],
     deleted: {
+      type: Boolean,
+      default: false,
+    },
+    isAnonymous: {
       type: Boolean,
       default: false,
     },

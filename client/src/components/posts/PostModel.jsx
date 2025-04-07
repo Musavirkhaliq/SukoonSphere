@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { FaImage, FaTimes, FaShare, FaPlus } from "react-icons/fa";
+import { FaImage, FaTimes, FaShare, FaPlus, FaUserSecret } from "react-icons/fa";
 import customFetch from "@/utils/customFetch";
 
 const PostModal = ({ onClose }) => {
@@ -9,6 +9,7 @@ const PostModal = ({ onClose }) => {
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
   const [description, setDescription] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -44,6 +45,7 @@ const PostModal = ({ onClose }) => {
       setIsSubmitting(true);
       const formData = new FormData();
       formData.append("description", description);
+      formData.append("isAnonymous", isAnonymous);
 
       if (selectedImage?.file) {
         formData.append("imageUrl", selectedImage.file);
@@ -187,18 +189,34 @@ const PostModal = ({ onClose }) => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-3 border-t">
-            <button type="button" onClick={onClose} className="btn-red">
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn-2 flex gap-2"
-            >
-              <FaShare />
-              {isSubmitting ? "Sharing..." : "Share"}
-            </button>
+          <div className="flex items-center justify-between pt-3 border-t">
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={() => setIsAnonymous(!isAnonymous)}
+                  className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm flex items-center gap-1">
+                  <FaUserSecret className={isAnonymous ? "text-blue-600" : "text-gray-500"} />
+                  Post anonymously
+                </span>
+              </label>
+            </div>
+            <div className="flex gap-3">
+              <button type="button" onClick={onClose} className="btn-red">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn-2 flex gap-2"
+              >
+                <FaShare />
+                {isSubmitting ? "Sharing..." : "Share"}
+              </button>
+            </div>
           </div>
         </form>
       </div>

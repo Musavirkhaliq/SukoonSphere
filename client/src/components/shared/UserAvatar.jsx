@@ -1,6 +1,7 @@
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
+import { FaUserSecret } from "react-icons/fa";
 
 const UserAvatar = ({ createdBy, username, userAvatar, createdAt, size = "medium" }) => {
   const sizeClasses = {
@@ -41,11 +42,20 @@ const UserAvatar = ({ createdBy, username, userAvatar, createdAt, size = "medium
         className={`${sizeClasses[size].image} rounded-full object-cover mt-1`}
       />
       <div className="cursor-pointer">
-        <Link className="hover:text-blue-400" to={`/about/user/${createdBy}`}>
-          <p className={`font-semibold  text-[var(--grey--900)] capitalize ${sizeClasses[size].text} m-0 hover:underline `}>
-            {username}
-          </p>
-        </Link>
+        {username === "Anonymous" ? (
+          <div className="flex items-center gap-1">
+            <p className={`font-semibold text-[var(--grey--900)] ${sizeClasses[size].text} m-0 flex items-center gap-1`}>
+              <FaUserSecret className="text-gray-500" />
+              {username}
+            </p>
+          </div>
+        ) : (
+          <Link className="hover:text-blue-400" to={`/about/user/${createdBy}`}>
+            <p className={`font-semibold text-[var(--grey--900)] capitalize ${sizeClasses[size].text} m-0 hover:underline`}>
+              {username}
+            </p>
+          </Link>
+        )}
         <p className={`${sizeClasses[size].date} text-gray-500 mb-0`}>
           {createdAt
             ? formatDistanceToNow(new Date(createdAt), { addSuffix: true })
