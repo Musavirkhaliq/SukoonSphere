@@ -5,74 +5,150 @@ import {
   FaCalendarAlt,
   FaRegCommentAlt,
   FaUser,
+  FaClock
 } from "react-icons/fa";
 import { BiUpvote } from "react-icons/bi";
+import { motion } from "framer-motion";
+import { format } from "date-fns";
 
 const ArticleCard = ({ article, index }) => {
-  console.log({ article });
-  return (
-    <Link
-      key={`${article._id}-${index}`}
-      to={`/articles/article/${article._id}`}
-      className="group bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col"
-    >
-      <div className="relative h-48 bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          {article.imageUrl ? (
-            <img
-              src={article.imageUrl}
-              alt={article.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <FaBookOpen className="w-12 h-12 text-blue-200 group-hover:scale-110 transition-transform duration-200" />
-          )}
-        </div>
-      </div>
+  // Format date in a more readable way
+  const formattedDate = format(new Date(article.createdAt), 'MMM d, yyyy');
 
-      <div className="p-6 flex-1 flex flex-col">
-        <h2 className="text-xl font-semibold text-[var(--grey--900)] group-hover:text-blue-600 transition-colors duration-200 mb-3 line-clamp-2">
-          {article.title}
-        </h2>
-        <div className="flex flex-col gap-3 mt-auto">
-          <div className="flex items-center justify-end gap-4 text-sm">
+  // Estimate reading time (assuming average reading speed of 200 words per minute)
+  const calculateReadingTime = (content) => {
+    if (!content) return '1 min read';
+    const wordCount = content.split(/\s+/).length;
+    const readingTime = Math.ceil(wordCount / 200);
+    return `${readingTime} min read`;
+  };
+
+  // Animation variants for hover effects
+  const cardVariants = {
+    hover: {
+      y: -5,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const imageVariants = {
+    hover: {
+      scale: 1.05,
+      transition: { duration: 0.5 }
+    }
+  };
+
+  return (
+    <motion.div
+      whileHover="hover"
+      variants={cardVariants}
+      className="h-full"
+    >
+      <Link
+        key={`${article._id}-${index}`}
+        to={`/articles/article/${article._id}`}
+        className="group bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:border-blue-200 transition-all duration-200 flex flex-col h-full"
+      >
+        {/* Larger cover image with gradient overlay */}
+        <div className="relative h-64 sm:h-72 overflow-hidden">
+          <motion.div
+            className="absolute inset-0"
+            variants={imageVariants}
+          >
+            {article.imageUrl ? (
+              <img
+                src={article.imageUrl}
+                alt={article.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center">
+                <FaBookOpen className="w-16 h-16 text-white opacity-75" />
+              </div>
+            )}
+            {/* Gradient overlay for better text visibility */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-80"></div>
+          </motion.div>
+
+          {/* Article metadata on the image */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            {/* Reading time and date */}
+            <div className="flex items-center justify-between text-xs mb-2">
+              <div className="flex items-center gap-2">
+                <FaClock className="w-3 h-3" />
+                <span>{calculateReadingTime(article.content)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaCalendarAlt className="w-3 h-3" />
+                <span>{formattedDate}</span>
+              </div>
+            </div>
+
+            {/* Title on the image for larger screens */}
+            <h2 className="text-xl sm:text-2xl font-bold leading-tight line-clamp-2 text-white hidden sm:block">
+              {article.title}
+            </h2>
+          </div>
+        </div>
+
+        <div className="p-5 flex-1 flex flex-col">
+          {/* Title for mobile screens */}
+          <h2 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 mb-3 line-clamp-2 sm:hidden">
+            {article.title}
+          </h2>
+
+          {/* Article text preview */}
+          {article.content && (
+            <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+              {article.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
+            </p>
+          )}
+
+          {/* Engagement metrics */}
+          <div className="flex items-center gap-6 my-3">
             <div className="flex items-center gap-2">
-              <BiUpvote className="w-5 h-5 text-[var(--grey--900)]" />
-              <span className="text-[var(--grey--600)]">
+              <div className="p-1.5 rounded-full bg-blue-50 group-hover:bg-blue-100 transition-colors duration-200">
+                <BiUpvote className="w-4 h-4 text-blue-600" />
+              </div>
+              <span className="text-sm font-medium text-gray-700">
                 {article?.likes?.length || 0}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <FaRegCommentAlt className="w-4 h-4 text-[var(--grey--900)]" />
-              <span className="text-[var(--grey--600)]">
+              <div className="p-1.5 rounded-full bg-indigo-50 group-hover:bg-indigo-100 transition-colors duration-200">
+                <FaRegCommentAlt className="w-3.5 h-3.5 text-indigo-600" />
+              </div>
+              <span className="text-sm font-medium text-gray-700">
                 {article?.comments?.length || 0}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-sm text-[var(--grey--600)] pt-4 border-t border-gray-100">
+          {/* Author info */}
+          <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
             <div className="flex items-center">
               {article?.authorAvatar ? (
                 <img
                   src={article?.authorAvatar}
                   alt={article?.authorName}
-                  className="w-6 h-6 mr-2 object-cover rounded-full"
+                  className="w-8 h-8 mr-2 object-cover rounded-full border-2 border-white shadow-sm"
                 />
               ) : (
-                <FaUser className="w-4 h-4 mr-2" />
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2 shadow-sm">
+                  <FaUser className="w-4 h-4 text-blue-600" />
+                </div>
               )}
-              <span className="text-[var(--grey--900)] line-clamp-1">
+              <span className="text-sm font-medium text-gray-800 line-clamp-1">
                 {article?.authorName || "Anonymous"}
               </span>
             </div>
-            <div className="flex items-center">
-              <FaCalendarAlt className="w-4 h-4 mr-2 text-[var(--grey--900)]" />
-              <span>{new Date(article.createdAt).toLocaleDateString()}</span>
-            </div>
+
+            {/* Read more indicator */}
+            <span className="text-sm font-medium text-blue-600 group-hover:underline">Read more</span>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 };
 

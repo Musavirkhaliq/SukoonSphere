@@ -1,0 +1,247 @@
+/* Section Separator Styles */
+
+.section-separator {
+  position: relative;
+  margin: 4rem 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(107, 114, 128, 0.2), transparent);
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-separator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background-color: #f9fafb;
+  border: 2px solid rgba(107, 114, 128, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-separator::after {
+  content: '•';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: #6b7280;
+}
+
+.section-separator.with-icon {
+  margin: 5rem 0;
+}
+
+.section-separator.with-icon::before {
+  width: 60px;
+  height: 60px;
+  background-color: #f9fafb;
+  border: 2px solid rgba(107, 114, 128, 0.2);
+  z-index: 1;
+}
+
+.section-separator.with-icon::after {
+  content: '';
+}
+
+.section-separator-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: #6b7280;
+  z-index: 2;
+}
+
+/* Section Container */
+.section-container {
+  padding: 2rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Special section styles */
+.section-container.primary-section {
+  background-color: #ffffff;
+}
+
+.section-container.secondary-section {
+  background-color: #f9fafb;
+  border-radius: 0;
+  position: relative;
+}
+
+.section-container.secondary-section::before,
+.section-container.secondary-section::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 50px;
+  left: 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.section-container.secondary-section::before {
+  top: -1px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 50'%3E%3Cpath fill='%23f9fafb' d='M0,32L80,37.3C160,43,320,53,480,48C640,43,800,21,960,16C1120,11,1280,21,1360,26.7L1440,32L1440,53L1360,53C1280,53,1120,53,960,53C800,53,640,53,480,53C320,53,160,53,80,53L0,53Z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.section-container.secondary-section::after {
+  bottom: -1px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 50'%3E%3Cpath fill='%23f9fafb' d='M0,21L80,16C160,11,320,0,480,5.3C640,11,800,32,960,37.3C1120,43,1280,32,1360,26.7L1440,21L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* Featured section - for Today's Quiz */
+.section-container.featured-section {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border-radius: 0;
+  padding: 3rem 0;
+  position: relative;
+  margin: 4rem 0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.section-container.featured-section::before,
+.section-container.featured-section::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 70px;
+  left: 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.section-container.featured-section::before {
+  top: -1px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 70'%3E%3Cpath fill='%23e0f2fe' d='M0,64L48,58.7C96,53,192,43,288,48C384,53,480,75,576,80C672,85,768,75,864,64C960,53,1056,43,1152,42.7C1248,43,1344,53,1392,58.7L1440,64L1440,70L1392,70C1344,70,1248,70,1152,70C1056,70,960,70,864,70C768,70,672,70,576,70C480,70,384,70,288,70C192,70,96,70,48,70L0,70Z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.section-container.featured-section::after {
+  bottom: -1px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 70'%3E%3Cpath fill='%23e0f2fe' d='M0,5L48,10.7C96,16,192,27,288,21.3C384,16,480,0,576,0C672,0,768,16,864,26.7C960,37,1056,43,1152,42.7C1248,43,1344,37,1392,34.7L1440,32L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* Section title enhancement */
+.section-title-enhanced {
+  position: relative;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.section-title-enhanced h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.section-title-enhanced h2::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 3px;
+}
+
+.section-title-enhanced p {
+  font-size: 1.1rem;
+  color: #6b7280;
+  max-width: 700px;
+  margin: 1rem auto 0;
+}
+
+/* Mental health quiz specific styling */
+.mental-health-quiz-header {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.mental-health-quiz-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+  opacity: 0.6;
+  animation: rotate 25s linear infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.mental-health-quiz-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.mental-health-quiz-header p {
+  color: #1e3a8a;
+  font-size: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .section-separator {
+    margin: 3rem 0;
+  }
+  
+  .section-container.featured-section {
+    padding: 2rem 0;
+    margin: 3rem 0;
+  }
+  
+  .section-container.featured-section::before,
+  .section-container.featured-section::after {
+    height: 40px;
+  }
+  
+  .section-title-enhanced h2 {
+    font-size: 1.5rem;
+  }
+  
+  .section-title-enhanced p {
+    font-size: 1rem;
+  }
+  
+  .mental-health-quiz-header h3 {
+    font-size: 1.25rem;
+  }
+}

@@ -69,11 +69,31 @@ const Articles = () => {
     return () => clearTimeout(timer);
   }, [searchInput, searchQuery, setSearchParams]);
 
+  // Check for editArticle query parameter
+  const editArticleId = searchParams.get("editArticle");
+
   useEffect(() => {
     if (paramsId) {
       fetchUserArticles();
     }
   }, [paramsId, currentPage, currentFilter, searchQuery]);
+
+  // Handle edit article from query parameter
+  useEffect(() => {
+    if (editArticleId && articles.length > 0) {
+      const articleToEdit = articles.find(article => article._id === editArticleId);
+      if (articleToEdit) {
+        handleEdit(articleToEdit);
+        // Remove the query parameter after handling it
+        setSearchParams(prev => {
+          const newParams = new URLSearchParams(prev);
+          newParams.delete("editArticle");
+          return newParams;
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editArticleId, articles]);
 
   const fetchUserArticles = async () => {
     try {

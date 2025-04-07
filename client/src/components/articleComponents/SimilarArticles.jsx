@@ -1,133 +1,150 @@
 import { BiUpvote } from "react-icons/bi";
-
 import {
   FaBookOpen,
   FaCalendarAlt,
   FaRegCommentAlt,
   FaUser,
+  FaClock
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { format } from "date-fns";
 
 const SimilarArticles = ({ similarArticles }) => {
   if (!similarArticles || similarArticles.length === 0) return null;
 
-  return (
-    <div className="mt-12 border-t border-gray-200 pt-8">
-      <h3 className="text-2xl font-bold mb-6 text-[var(--primary)]">
-        Similar Articles
-      </h3>
+  // Estimate reading time (assuming average reading speed of 200 words per minute)
+  const calculateReadingTime = (content) => {
+    if (!content) return '1 min read';
+    const wordCount = content.split(/\s+/).length;
+    const readingTime = Math.ceil(wordCount / 200);
+    return `${readingTime} min read`;
+  };
 
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {similarArticles.map((similarArticle) => (
-          <Link
-            key={similarArticle._id}
-            to={`/articles/article/${similarArticle._id}`}
-            className="group block bg-white rounded-lg shadow-md transition-all duration-300 overflow-hidden"
+  // Animation variants for hover effects
+  const cardVariants = {
+    hover: {
+      y: -5,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const imageVariants = {
+    hover: {
+      scale: 1.05,
+      transition: { duration: 0.5 }
+    }
+  };
+
+  return (
+    <div className="mt-16 pt-12 border-t border-gray-200">
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-2xl font-bold text-gray-900 relative">
+          <span className="relative z-10">Similar Articles</span>
+          <span className="absolute bottom-0 left-0 w-full h-3 bg-blue-100 opacity-50 -z-10 transform -rotate-1"></span>
+        </h3>
+        <Link to="/articles" className="text-blue-600 font-medium hover:underline">View all articles</Link>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {similarArticles.map((article, index) => (
+          <motion.div
+            key={`${article._id}-${index}`}
+            whileHover="hover"
+            variants={cardVariants}
+            className="h-full"
           >
-            <div className="p-4">
-              <h4 className="font-semibold text-lg mb-2 text-[var(--primary)] group-hover:text-[var(--ternery)] transition-colors duration-200 line-clamp-2">
-                {similarArticle.title}
-              </h4>
-              <div className="flex items-center text-sm text-gray-600 mt-2">
-                <div className="flex items-center">
-                  {similarArticle.authorAvatar ? (
+            <Link
+              to={`/articles/article/${article._id}`}
+              className="group bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:border-blue-200 transition-all duration-200 flex flex-col h-full"
+            >
+              {/* Cover image with gradient overlay */}
+              <div className="relative h-48 overflow-hidden">
+                <motion.div
+                  className="absolute inset-0"
+                  variants={imageVariants}
+                >
+                  {article.imageUrl ? (
                     <img
-                      src={similarArticle.authorAvatar}
-                      alt={similarArticle.authorName}
-                      className="w-6 h-6 rounded-full object-cover mr-2"
+                      src={article.imageUrl}
+                      alt={article.title}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <FaUser className="w-4 h-4 mr-2" />
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center">
+                      <FaBookOpen className="w-16 h-16 text-white opacity-75" />
+                    </div>
                   )}
-                  <span>{similarArticle.authorName || "Anonymous"}</span>
+                  {/* Gradient overlay for better text visibility */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-80"></div>
+                </motion.div>
+
+                {/* Article metadata on the image */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                  {/* Reading time and date */}
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <div className="flex items-center gap-2">
+                      <FaClock className="w-3 h-3" />
+                      <span>{calculateReadingTime(article.content)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FaCalendarAlt className="w-3 h-3" />
+                      <span>{format(new Date(article.createdAt), 'MMM d, yyyy')}</span>
+                    </div>
+                  </div>
                 </div>
-                <span className="mx-2">•</span>
-                <span>
-                  {new Date(similarArticle.createdAt).toLocaleDateString(
-                    "en-US",
-                    {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    }
-                  )}
-                </span>
               </div>
-            </div>
-          </Link>
-        ))}
-      </div> */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {similarArticles.map((similarArticle, index) => (
-          <Link
-            key={`${similarArticle._id}-${index}`}
-            to={`/articles/article/${similarArticle._id}`}
-            className="group bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col"
-          >
-            <div className="relative h-48 bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden">
-              <div className="absolute inset-0 flex items-center justify-center">
-                {similarArticle.imageUrl ? (
-                  <img
-                    src={similarArticle.imageUrl}
-                    alt={similarArticle.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <FaBookOpen className="w-12 h-12 text-blue-200 group-hover:scale-110 transition-transform duration-200" />
+
+              <div className="p-4 flex-1 flex flex-col">
+                <h2 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 mb-3 line-clamp-2">
+                  {article.title}
+                </h2>
+
+                {/* Article text preview */}
+                {article.content && (
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {article.content.replace(/<[^>]*>/g, '').substring(0, 120)}...
+                  </p>
                 )}
-              </div>
-            </div>
 
-            <div className="p-6 flex-1 flex flex-col">
-              <h2 className="text-xl font-semibold text-[var(--grey--900)] group-hover:text-blue-600 transition-colors duration-200 mb-3 line-clamp-2">
-                {similarArticle.title}
-              </h2>
-              <div className="flex flex-col gap-3 mt-auto">
-                <div className="flex items-center justify-end gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <BiUpvote className="w-5 h-5 text-[var(--grey--900)]" />
-                    <span className="text-[var(--grey--600)]">
-                      {similarArticle.likes?.length || 0}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FaRegCommentAlt className="w-4 h-4 text-[var(--grey--900)]" />
-                    <span className="text-[var(--grey--600)]">
-                      {similarArticle.comments?.length || 0}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-sm text-[var(--grey--600)] pt-4 border-t border-gray-100">
+                {/* Author info */}
+                <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
                   <div className="flex items-center">
-                    {similarArticle.authorAvatar ? (
+                    {article?.authorAvatar ? (
                       <img
-                        src={similarArticle.authorAvatar}
-                        alt={similarArticle.authorName}
-                        className="w-6 h-6 mr-2 object-cover rounded-full"
+                        src={article?.authorAvatar}
+                        alt={article?.authorName}
+                        className="w-6 h-6 mr-2 object-cover rounded-full border border-white shadow-sm"
                       />
                     ) : (
-                      <FaUser className="w-4 h-4 mr-2" />
+                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                        <FaUser className="w-3 h-3 text-blue-600" />
+                      </div>
                     )}
-                    <span>{similarArticle.authorName || "Anonymous"}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <FaCalendarAlt className="w-4 h-4 mr-2 text-[var(--grey--900)]" />
-                    <span>
-                      {new Date(similarArticle.createdAt).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        }
-                      )}
+                    <span className="text-xs font-medium text-gray-700 line-clamp-1">
+                      {article?.authorName || "Anonymous"}
                     </span>
+                  </div>
+
+                  {/* Engagement metrics */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
+                      <BiUpvote className="w-3.5 h-3.5 text-blue-600" />
+                      <span className="text-xs text-gray-600">
+                        {article?.likes?.length || 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FaRegCommentAlt className="w-3 h-3 text-indigo-600" />
+                      <span className="text-xs text-gray-600">
+                        {article?.comments?.length || 0}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </div>

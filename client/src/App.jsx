@@ -3,13 +3,14 @@ import React, { lazy, Suspense, useEffect } from 'react';
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { routes } from './routes';
 import { UserProvider } from './context/UserContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import socket from './utils/socket/socket';
 const App = () => {
   const router = React.useMemo(() => createBrowserRouter(routes), []);
   const queryClient = React.useMemo(() => new QueryClient({
     defaultOptions: {
-      queries: {  
+      queries: {
         staleTime: 1000 * 60 * 5,
         cacheTime: 1000 * 60 * 30,
         refetchOnWindowFocus: false,
@@ -36,7 +37,9 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <Suspense fallback={<div>Loading...</div>}>
           <UserProvider>
-            <RouterProvider router={router} />
+            <NotificationProvider>
+              <RouterProvider router={router} />
+            </NotificationProvider>
           </UserProvider>
         </Suspense>
       </QueryClientProvider>

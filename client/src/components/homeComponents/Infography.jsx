@@ -1,40 +1,35 @@
 import { useState, useEffect, useRef } from "react";
 import { FaDotCircle, FaInfoCircle, FaUsers } from "react-icons/fa";
-
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
 import { Link } from "react-router-dom";
 import { FaArrowUpRightDots, FaArrowUpRightFromSquare } from "react-icons/fa6";
 import SectionTitle from "../sharedComponents/SectionTitle";
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+// Import Highcharts directly as a script in the HTML
+// This avoids module loading issues in production
+import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
 
 function Infography() {
   const [timeRange, setTimeRange] = useState("5year");
   const [activeTab, setActiveTab] = useState("anxiety");
   const chartRef = useRef(null);
 
-  // State to manage animation progress
-  const [animationProgress, setAnimationProgress] = useState(0);
-  const animationRef = useRef(null);
+  // Initialize Highcharts 3D module
+  useEffect(() => {
+    // Load the 3D module after Highcharts is initialized
+    if (typeof Highcharts === 'object') {
+      // This dynamic import works better in production
+      import('highcharts/highcharts-3d')
+        .then(module => {
+          module.default(Highcharts);
+          // If we have a chart already, redraw it
+          if (chartRef.current && chartRef.current.chart) {
+            chartRef.current.chart.redraw();
+          }
+        })
+        .catch(err => console.error("Failed to load 3D module:", err));
+    }
+  }, []);
 
   // Mental health statistics data with projections through 2025
   const anxietyData = {
@@ -125,48 +120,34 @@ function Infography() {
     ],
   };
 
-  // Reset animation when tab or time range changes
+  // Animate the chart when tab or time range changes
   useEffect(() => {
-    // Restart the animation when tab or time range changes
-    triggerAnimation();
-
-    // Clean up animation frame on unmount or changes
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+    const timer = setTimeout(() => {
+      if (chartRef.current && chartRef.current.chart) {
+        const chart = chartRef.current.chart;
+        
+        // Animated rotation for 3D effect
+        let alpha = 0;
+        const intervalId = setInterval(() => {
+          alpha += 2;
+          if (alpha > 15) {
+            clearInterval(intervalId);
+            return;
+          }
+          
+          chart.update({
+            chart: {
+              options3d: {
+                alpha: alpha
+              }
+            }
+          }, true, false);
+        }, 30);
       }
-    };
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [activeTab, timeRange]);
-
-  // Function to trigger the progressive animation with requestAnimationFrame
-  const triggerAnimation = () => {
-    // Cancel any existing animation
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-
-    // Reset animation progress
-    setAnimationProgress(0);
-
-    const startTime = performance.now();
-    const duration = 2000; // Animation duration in ms
-
-    const animate = (currentTime) => {
-      const elapsedTime = currentTime - startTime;
-      const progress = Math.min(elapsedTime / duration, 1);
-
-      // Use easeOutCubic easing function for smoother motion
-      const easedProgress = 1 - Math.pow(1 - progress, 3);
-
-      setAnimationProgress(easedProgress);
-
-      if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
-      }
-    };
-
-    animationRef.current = requestAnimationFrame(animate);
-  };
 
   const getActiveData = () => {
     switch (activeTab) {
@@ -252,7 +233,6 @@ function Infography() {
           "Projected to reach 150 cases per 100,000 by 2025",
           "Shows dramatic increase following the global pandemic",
           "2024 shows anomalous dip before sharp increase in 2025",
-          "10-year data reveals consistent upward trend with periodic spikes"
         ];
       case "depression":
         return [
@@ -260,7 +240,6 @@ function Infography() {
           "Cases expected to nearly triple from 2021 to 2025",
           "Dramatic rise of 49% between 2023 and 2024",
           "10-year data shows more gradual increase before 2020",
-          "Acceleration appears more pronounced than for anxiety disorders"
         ];
       case "ptsd":
         return [
@@ -268,7 +247,6 @@ function Infography() {
           "Projected 5-fold increase from 2021 to 2025",
           "Sharpest acceleration among all mental health conditions",
           "10-year data shows stability until recent years",
-          "Indicates possible link to collective trauma events"
         ];
       case "youth":
         return [
@@ -276,7 +254,6 @@ function Infography() {
           "20% increase projected from 2021 to 2025",
           "Less dramatic spikes compared to adult mental health conditions",
           "10-year data shows steady, concerning upward trajectory",
-          "Suggests ongoing systemic issues affecting youth mental health"
         ];
       default:
         return [
@@ -284,147 +261,135 @@ function Infography() {
           "Significant acceleration in recent years",
           "Projected continued increase through 2025",
           "Youth mental health shows steadier but persistent growth",
-          "Data suggests need for increased mental health resources"
         ];
     }
   };
 
-  // Smoothly animate line chart data points
-  const getCurrentDataPoints = () => {
-    const fullData = getActiveData();
-    const result = [];
-
-    // For each data point in the full dataset
-    for (let i = 0; i < fullData.length; i++) {
-      // If this is the first point or we've passed this point's position in the animation
-      if (i === 0 || i <= (fullData.length - 1) * animationProgress) {
-        result.push(fullData[i]);
-      } else {
-        // This is a point we're currently animating toward
-        // Calculate the previous point we've already reached
-        const prevIndex = i - 1;
-        const prevPoint = fullData[prevIndex];
-
-        // Calculate how far we are between the previous point and this point
-        const segmentProgress = (animationProgress * (fullData.length - 1) - prevIndex) / 1;
-
-        // If we haven't started moving to this point yet, don't include it
-        if (segmentProgress <= 0) break;
-
-        // If we're interpolating between points
-        if (segmentProgress > 0 && segmentProgress < 1) {
-          // Interpolate the value
-          const currentPoint = fullData[i];
-          const interpolatedValue = prevPoint.value + segmentProgress * (currentPoint.value - prevPoint.value);
-
-          // Add the interpolated point and stop
-          result.push({ year: currentPoint.year, value: interpolatedValue });
-          break;
-        } else {
-          // We've reached this point completely
-          result.push(fullData[i]);
-        }
+  // Get alternative colors for bars based on year
+  const getBarColors = () => {
+    const baseColor = getChartColor();
+    const data = getActiveData();
+    
+    // Generate a different color for each year's bar
+    return data.map((item, index) => {
+      // Create color variations based on position in array
+      const position = index / (data.length - 1); // 0 to 1
+      
+      // Different color strategies for different mental health categories
+      switch (activeTab) {
+        case "anxiety":
+          // Red gradient from light to dark
+          return `rgba(239, ${Math.floor(100 - position * 50)}, ${Math.floor(100 - position * 60)}, 0.9)`;
+        case "depression":
+          // Blue gradient
+          return `rgba(${Math.floor(99 + position * 20)}, ${Math.floor(102 - position * 20)}, ${Math.floor(241 - position * 40)}, 0.9)`;
+        case "ptsd":
+          // Purple gradient
+          return `rgba(${Math.floor(168 + position * 30)}, ${Math.floor(85 - position * 20)}, ${Math.floor(247 - position * 40)}, 0.9)`;
+        case "youth":
+          // Orange to red gradient
+          return `rgba(${Math.floor(239 - position * 0)}, ${Math.floor(130 - position * 80)}, ${Math.floor(44 + position * 25)}, 0.9)`;
+        default:
+          return baseColor;
       }
-    }
-
-    return result;
+    });
   };
 
-  // Prepare Chart.js data with smooth animation
-  const chartData = {
-    labels: getActiveData().map(item => item.year.toString()),
-    datasets: [
-      {
-        label: getCardTitle(),
-        data: getCurrentDataPoints().map(item => item.value),
-        borderColor: getChartColor(),
-        backgroundColor: getChartColor(),
-        pointRadius: (context) => {
-          // Only show points for completed segments
-          const index = context.dataIndex;
-          const fullData = getActiveData();
-          return index < getCurrentDataPoints().length - 1 ||
-            index === fullData.length - 1 && animationProgress === 1 ? 6 : 0;
+  // Prepare chart options for Highcharts
+  const getChartOptions = () => {
+    const data = getActiveData();
+    const years = data.map(item => item.year.toString());
+    const values = data.map(item => item.value);
+    const colors = getBarColors();
+    
+    return {
+      chart: {
+        type: 'column',
+        options3d: {
+          enabled: true,
+          alpha: 15,
+          beta: 15,
+          depth: 50,
+          viewDistance: 25
         },
-        pointHoverRadius: 10,
-        borderWidth: 3,
-        tension: 0.3, // Increased for smoother curve
-        fill: false,
+        backgroundColor: '#1f2937', // Dark background
+        style: {
+          fontFamily: 'Inter, system-ui, sans-serif'
+        }
       },
-    ],
-  };
-
-  // Enhanced Chart.js options
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: {
-          display: false,
+      title: {
+        text: `${getCardTitle()} Statistics`,
+        style: {
+          color: '#ffffff',
+          fontWeight: 'bold'
+        }
+      },
+      xAxis: {
+        categories: years,
+        labels: {
+          style: {
+            color: '#d1d5db'
+          }
         },
-        ticks: {
-          font: {
-            weight: 'bold',
+        title: {
+          text: 'Year',
+          style: {
+            color: '#ffffff'
           }
         }
       },
-      y: {
-        grid: {
-          color: "rgba(200, 200, 200, 0.1)",
-        },
-        ticks: {
-          font: {
-            weight: 'bold',
+      yAxis: {
+        title: {
+          text: 'Cases per 100,000',
+          style: {
+            color: '#ffffff'
           }
         },
-        // Keep a consistent scale even during animation
-        min: 0,
-        max: Math.max(...getActiveData().map(item => item.value)) * 1.1
-      },
-    },
-    plugins: {
-      legend: {
-        display: false,
+        labels: {
+          style: {
+            color: '#d1d5db'
+          }
+        },
+        gridLineColor: 'rgba(255, 255, 255, 0.1)'
       },
       tooltip: {
+        headerFormat: '<b>{point.key}</b><br>',
+        pointFormat: 'Cases: {point.y} per 100,000',
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleFont: {
-          size: 14,
-          weight: 'bold',
-        },
-        bodyFont: {
-          size: 13,
-        },
-        padding: 12,
-        cornerRadius: 6,
-        displayColors: false,
+        style: {
+          color: '#ffffff'
+        }
       },
-    },
-    // Disable default Chart.js animations as we're handling it ourselves
-    animation: false,
-    elements: {
-      point: {
-        radius: 6,
-        borderWidth: 3,
-        hoverRadius: 10,
-        hoverBorderWidth: 4,
+      plotOptions: {
+        column: {
+          depth: 25,
+          colorByPoint: true,
+          dataLabels: {
+            enabled: true,
+            color: '#ffffff',
+            style: {
+              textOutline: '1px contrast'
+            }
+          },
+          edgeColor: 'rgba(0,0,0,0.2)',
+          edgeWidth: 1
+        }
       },
-      line: {
-        tension: 0.3, // Increased for smoother curve
-        borderWidth: 3,
-        capBezierPoints: true
+      colors: colors,
+      series: [{
+        name: getCardTitle(),
+        data: values,
+        showInLegend: false
+      }],
+      credits: {
+        enabled: false
       }
-    },
-    interaction: {
-      mode: 'index',
-      intersect: false,
-    },
+    };
   };
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto">
-      <SectionTitle title={"Mental health Stats"} />
+    <div className="min-h-screen">
+      <SectionTitle title={"Mental Health Statistics"} />
       <main className="container mx-auto px-4 py-8">
         <section className="mb-12">
           <div className="flex flex-col gap-6 justify-center items-center max-w-7xl mx-auto relative text-center">
@@ -564,18 +529,17 @@ function Infography() {
                 </div>
                 <div className="h-96 px-4 relative">
                   <div className="w-full h-full">
-                    <Line
-                      data={chartData}
-                      options={chartOptions}
+                    <HighchartsReact
+                      highcharts={Highcharts}
+                      options={getChartOptions()}
                       ref={chartRef}
-                      key={`${activeTab}-${timeRange}`}
+                      containerProps={{ className: 'w-full h-full' }}
                     />
                   </div>
                 </div>
                 <div className="p-4 text-sm text-gray-500 dark:text-gray-400 border-t dark:border-gray-700">
                   {getCardFooter()}
                 </div>
-
               </div>
 
               {/* Right Column - Bullet Points */}

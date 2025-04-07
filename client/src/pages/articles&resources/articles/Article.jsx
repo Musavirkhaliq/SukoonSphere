@@ -10,6 +10,8 @@ import {
   FaFemale,
   FaRegCommentAlt,
   FaExclamationCircle,
+  FaEdit,
+  FaTrash,
 } from "react-icons/fa";
 import { LuTableOfContents } from "react-icons/lu";
 import { FaArrowTrendDown } from "react-icons/fa6";
@@ -17,6 +19,7 @@ import "./Article.css";
 
 import SimilarArticles from "../../../components/articleComponents/SimilarArticles";
 import CommentPopup from "@/components/articleComponents/CommentPopup";
+import DeleteModal from "@/components/shared/DeleteModal";
 import { toast } from "react-toastify";
 import { BiUpvote } from "react-icons/bi";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
@@ -26,7 +29,8 @@ const Article = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [utterance, setUtterance] = useState(null);
+  // Using utterance in speech synthesis
+  const [utterance] = useState(null);
   const [voiceGender, setVoiceGender] = useState("female");
   const { id } = useParams();
   const [toc, setToc] = useState([]);
@@ -37,6 +41,9 @@ const Article = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
   const generateSlug = (text) => {
@@ -45,6 +52,37 @@ const Article = () => {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
       .trim();
+  };
+
+  // Handle article deletion
+  const handleDeleteArticle = async () => {
+    if (isDeleting) return;
+
+    try {
+      setIsDeleting(true);
+      await customFetch.delete(`/articles/${id}`);
+      toast.success("Article deleted successfully");
+      navigate("/articles");
+    } catch (error) {
+      console.error("Error deleting article:", error);
+      toast.error(error?.response?.data?.message || "Failed to delete article");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  // Navigate to edit article page
+  const handleEditArticle = () => {
+    // Get the current user ID from localStorage
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    if (currentUser && currentUser._id) {
+      // Redirect to the user profile articles section where editing is implemented
+      navigate(`/about/user/${currentUser._id}/articles?editArticle=${id}`);
+      toast.info("Redirecting to the article editor");
+    } else {
+      toast.error("You need to be logged in to edit articles");
+    }
   };
 
   useEffect(() => {
@@ -57,10 +95,22 @@ const Article = () => {
         setSimilarArticles(response.data.similarArticles);
         setLikeCount(articleData.likes?.length || 0);
 
-        // Check if the current user has liked the article
+        // Check if the current user has liked the article and if they are the owner
         const currentUser = JSON.parse(localStorage.getItem("user"));
-        if (currentUser && articleData.likes) {
-          setIsLiked(articleData.likes.includes(currentUser._id));
+        if (currentUser) {
+          if (articleData.likes) {
+            setIsLiked(articleData.likes.includes(currentUser._id));
+          }
+
+          // Check if current user is the article author
+          // The author field might be an ID string or an object with _id
+          const authorId = typeof articleData.author === 'object'
+            ? articleData.author?._id
+            : articleData.author;
+
+          if (authorId && currentUser._id === authorId) {
+            setIsOwner(true);
+          }
         }
 
         setError(null);
@@ -325,6 +375,16 @@ const Article = () => {
 
   return (
     <div className="relative bg-white">
+      {/* Delete Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDelete={handleDeleteArticle}
+        title="Delete Article"
+        message="Are you sure you want to delete this article? This action cannot be undone."
+        itemType="article"
+        isLoading={isDeleting}
+      />
       {/* Mobile TOC Navbar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-[60] bg-white shadow-sm">
         <div className="flex items-center justify-between p-6">
@@ -401,10 +461,31 @@ const Article = () => {
         <div className="grid grid-cols-12 gap-6 lg:gap-12">
           <article className="col-span-12 lg:col-span-8 order-2 lg:order-1 mt-4 lg:mt-8">
             <header className="max-w-4xl mx-auto px-4 py-4 space-y-3 border-b-2 border-gray-200">
-              {/* Title */}
-              <h2 className="text-3xl font-bold leading-tight text-gray-900">
-                {article.title || "Every book I read in 2024, with commentary"}
-              </h2>
+              {/* Title with Edit/Delete buttons for owner */}
+              <div className="flex justify-between items-start gap-4">
+                <h2 className="text-3xl font-bold leading-tight text-gray-900">
+                  {article.title || "Every book I read in 2024, with commentary"}
+                </h2>
+
+                {isOwner && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleEditArticle}
+                      className="p-2 text-gray-600 hover:text-blue-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                      title="Edit article"
+                    >
+                      <FaEdit className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteModal(true)}
+                      className="p-2 text-gray-600 hover:text-red-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                      title="Delete article"
+                    >
+                      <FaTrash className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* Author and Meta Info Bar */}
               <div className="flex flex-col md:flex-row justify-between py-4 space-y-6 md:space-y-0">
@@ -542,16 +623,34 @@ const Article = () => {
               </div>
             </header>
 
+            {/* Reading Progress Bar */}
             <div
               className="progress-bar"
               style={{ width: `${scrollProgress}%` }}
             ></div>
-            <div
-              className="article-body prose prose-lg max-w-none"
-              dangerouslySetInnerHTML={{
-                __html: cleanContent(article.content),
-              }}
-            />
+
+            {/* Article Cover Image */}
+            {article.imageUrl && (
+              <div className="max-w-4xl mx-auto px-4 py-6">
+                <div className="rounded-xl overflow-hidden shadow-lg">
+                  <img
+                    src={article.imageUrl}
+                    alt={article.title}
+                    className="w-full h-auto max-h-[500px] object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Article Content */}
+            <div className="max-w-4xl mx-auto px-4 py-8">
+              <div
+                className="article-body prose prose-lg max-w-none"
+                dangerouslySetInnerHTML={{
+                  __html: cleanContent(article.content),
+                }}
+              />
+            </div>
           </article>
 
           {/* Desktop Table of Contents */}

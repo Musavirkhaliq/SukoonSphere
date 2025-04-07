@@ -5,6 +5,13 @@ import "./index.css";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// Import notification styles
+import './components/notifications/NotificationButton.css';
+import './components/notifications/EnhancedNotificationDropdown.css';
+
+// Import chat component styles
+import './components/chatsComponents/VoiceRecorder.css';
+
 // Create root once and store it
 const root = ReactDOM.createRoot(document.getElementById("root"));
 

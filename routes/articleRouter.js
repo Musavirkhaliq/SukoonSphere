@@ -1,12 +1,12 @@
 import express from "express";
-import { 
-  getAllArticles, 
-  createArticle, 
-  updateArticle, 
+import {
+  getAllArticles,
+  createArticle,
+  updateArticle,
   deleteArticle,
   getSingleArticle,
   getArticlesByUserId,
-  likeArticle, 
+  likeArticle,
   GetMostLikedArticles
 } from "../controllers/articleControllers.js";
 import {
@@ -21,7 +21,8 @@ import {
   updateArticleComment,
   updateArticleReply
 } from "../controllers/articleCommentControllers.js";
-import { authenticateUser } from "../middleware/authMiddleware.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middleware/authMiddleware.js";
+import { trackContentView } from "../middleware/activityTrackingMiddleware.js";
 import upload from "../middleware/multerMiddleware.js";
 
 const router = express.Router();
@@ -30,7 +31,7 @@ const router = express.Router();
 router.get("/", getAllArticles);
 router.get("/most-liked", GetMostLikedArticles);
 router.get("/user/:userId", getArticlesByUserId);
-router.get("/:id", getSingleArticle);
+router.get("/:id", optionalAuthenticateUser, trackContentView, getSingleArticle);
 router.get("/:articleId/comments", getAllCommentsByArticleId);
 router.get("/comments/:commentId/replies", getAllRepliesByCommentId);
 

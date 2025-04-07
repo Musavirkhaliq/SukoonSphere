@@ -13,7 +13,7 @@ export const updateUserPoints = async (userId, action) => {
       like: 2,
       unlike: -2
     };
-    
+
     if (!pointValues[action]) {
         throw new Error("Invalid action");
     }
@@ -50,30 +50,30 @@ export const updateUserPoints = async (userId, action) => {
     }
 
     const badgeMilestones = {
-        post: { 
-            first: "Trailblazer - First Post", 
-            milestones: [10, 25, 50, 100, 200, 500], 
-            milestoneBadges: ["Rising Writer - 10 Posts", "Storyteller - 25 Posts", "Content Creator - 50 Posts", "Master Blogger - 100 Posts", "Elite Contributor - 200 Posts", "Legendary Writer - 500 Posts"] 
+        post: {
+            first: "Trailblazer - First Post",
+            milestones: [10, 25, 50, 100, 200, 500],
+            milestoneBadges: ["Rising Writer - 10 Posts", "Storyteller - 25 Posts", "Content Creator - 50 Posts", "Master Blogger - 100 Posts", "Elite Contributor - 200 Posts", "Legendary Writer - 500 Posts"]
         },
-        answer: { 
-            first: "Helper - First Answer", 
-            milestones: [10, 25, 50, 100, 250, 500], 
-            milestoneBadges: ["Problem Solver - 10 Answers", "Knowledge Giver - 25 Answers", "Community Expert - 50 Answers", "Wisdom Seeker - 100 Answers", "Elite Mentor - 250 Answers", "Grandmaster - 500 Answers"] 
+        answer: {
+            first: "Helper - First Answer",
+            milestones: [10, 25, 50, 100, 250, 500],
+            milestoneBadges: ["Problem Solver - 10 Answers", "Knowledge Giver - 25 Answers", "Community Expert - 50 Answers", "Wisdom Seeker - 100 Answers", "Elite Mentor - 250 Answers", "Grandmaster - 500 Answers"]
         },
-        question: { 
-            first: "Curious Mind - First Question", 
-            milestones: [5, 15, 30, 50, 100, 250], 
-            milestoneBadges: ["Explorer - 5 Questions", "Deep Thinker - 15 Questions", "Inquisitive Mind - 30 Questions", "Philosopher - 50 Questions", "Seeker of Truth - 100 Questions", "Visionary - 250 Questions"] 
+        question: {
+            first: "Curious Mind - First Question",
+            milestones: [5, 15, 30, 50, 100, 250],
+            milestoneBadges: ["Explorer - 5 Questions", "Deep Thinker - 15 Questions", "Inquisitive Mind - 30 Questions", "Philosopher - 50 Questions", "Seeker of Truth - 100 Questions", "Visionary - 250 Questions"]
         },
-        comment: { 
-            first: "Engager - First Comment", 
-            milestones: [20, 50, 100, 200, 500], 
-            milestoneBadges: ["Conversationalist - 20 Comments", "Discussion Starter - 50 Comments", "Debater - 100 Comments", "Community Voice - 200 Comments", "Ultimate Commentator - 500 Comments"] 
+        comment: {
+            first: "Engager - First Comment",
+            milestones: [20, 50, 100, 200, 500],
+            milestoneBadges: ["Conversationalist - 20 Comments", "Discussion Starter - 50 Comments", "Debater - 100 Comments", "Community Voice - 200 Comments", "Ultimate Commentator - 500 Comments"]
         },
-        like: { 
-            first: "Supporter - First Like Given", 
-            milestones: [50, 100, 250, 500, 1000], 
-            milestoneBadges: ["Encourager - 50 Likes", "Kind Soul - 100 Likes", "Super Supporter - 250 Likes", "Community Hero - 500 Likes", "Champion of Kindness - 1000 Likes"] 
+        like: {
+            first: "Supporter - First Like Given",
+            milestones: [50, 100, 250, 500, 1000],
+            milestoneBadges: ["Encourager - 50 Likes", "Kind Soul - 100 Likes", "Super Supporter - 250 Likes", "Community Hero - 500 Likes", "Champion of Kindness - 1000 Likes"]
         }
     };
 
@@ -110,36 +110,36 @@ export const updateUserPoints = async (userId, action) => {
 
   export const getUserProgress = (user) => {
     const badgeMilestones = {
-        post: { 
-          milestones: [10, 25, 50, 100, 200, 500], 
-          milestoneBadges: ["Rising Writer - 10 Posts", "Storyteller - 25 Posts", "Content Creator - 50 Posts", "Master Blogger - 100 Posts", "Elite Contributor - 200 Posts", "Legendary Writer - 500 Posts"] 
+        post: {
+          milestones: [10, 25, 50, 100, 200, 500],
+          milestoneBadges: ["Rising Writer - 10 Posts", "Storyteller - 25 Posts", "Content Creator - 50 Posts", "Master Blogger - 100 Posts", "Elite Contributor - 200 Posts", "Legendary Writer - 500 Posts"]
         },
-        answer: { 
-          milestones: [10, 25, 50, 100, 250, 500], 
-          milestoneBadges: ["Problem Solver - 10 Answers", "Knowledge Giver - 25 Answers", "Community Expert - 50 Answers", "Wisdom Seeker - 100 Answers", "Elite Mentor - 250 Answers", "Grandmaster - 500 Answers"] 
+        answer: {
+          milestones: [10, 25, 50, 100, 250, 500],
+          milestoneBadges: ["Problem Solver - 10 Answers", "Knowledge Giver - 25 Answers", "Community Expert - 50 Answers", "Wisdom Seeker - 100 Answers", "Elite Mentor - 250 Answers", "Grandmaster - 500 Answers"]
         },
-        question: { 
-          milestones: [5, 15, 30, 50, 100, 250], 
-          milestoneBadges: ["Explorer - 5 Questions", "Deep Thinker - 15 Questions", "Inquisitive Mind - 30 Questions", "Philosopher - 50 Questions", "Seeker of Truth - 100 Questions", "Visionary - 250 Questions"] 
+        question: {
+          milestones: [5, 15, 30, 50, 100, 250],
+          milestoneBadges: ["Explorer - 5 Questions", "Deep Thinker - 15 Questions", "Inquisitive Mind - 30 Questions", "Philosopher - 50 Questions", "Seeker of Truth - 100 Questions", "Visionary - 250 Questions"]
         },
-        comment: { 
-          milestones: [20, 50, 100, 200, 500], 
-          milestoneBadges: ["Conversationalist - 20 Comments", "Discussion Starter - 50 Comments", "Debater - 100 Comments", "Community Voice - 200 Comments", "Ultimate Commentator - 500 Comments"] 
+        comment: {
+          milestones: [20, 50, 100, 200, 500],
+          milestoneBadges: ["Conversationalist - 20 Comments", "Discussion Starter - 50 Comments", "Debater - 100 Comments", "Community Voice - 200 Comments", "Ultimate Commentator - 500 Comments"]
         },
-        like: { 
-          milestones: [50, 100, 250, 500, 1000], 
-          milestoneBadges: ["Encourager - 50 Likes", "Kind Soul - 100 Likes", "Super Supporter - 250 Likes", "Community Hero - 500 Likes", "Champion of Kindness - 1000 Likes"] 
+        like: {
+          milestones: [50, 100, 250, 500, 1000],
+          milestoneBadges: ["Encourager - 50 Likes", "Kind Soul - 100 Likes", "Super Supporter - 250 Likes", "Community Hero - 500 Likes", "Champion of Kindness - 1000 Likes"]
         }
       };
-  
+
     let completed = [...user.badges]; // Start with all badges from user's profile
-  
+
     let pending = [];
-  
+
     Object.keys(badgeMilestones).forEach((action) => {
       const { milestones, milestoneBadges } = badgeMilestones[action];
       const countField = `${action}Count`;
-  
+
       milestones.forEach((milestone, index) => {
         const badgeToCheck = milestoneBadges[index];
         if (user[countField] >= milestone && !completed.includes(badgeToCheck)) {
@@ -155,14 +155,14 @@ export const updateUserPoints = async (userId, action) => {
         }
       });
     });
-  
+
     return { completed, pending };
 };
 
 export const updateUserStreak = async (userId) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Remove time from the date
-    
+
     try {
         const user = await User.findById(userId);
         if (!user) {
@@ -178,9 +178,9 @@ export const updateUserStreak = async (userId) => {
         } else {
             const lastVisit = new Date(user.lastVisitDate);
             lastVisit.setHours(0, 0, 0, 0);
-            
+
             const diffDays = Math.floor((today - lastVisit) / (1000 * 60 * 60 * 24));
-            
+
 
             if (diffDays === 1) {
                 // Consecutive day visit

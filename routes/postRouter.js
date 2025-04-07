@@ -5,7 +5,8 @@ import {
   validateIdParam,
   validatePostInput,
 } from "../middleware/validationMiddleware.js";
-import { authenticateUser } from "../middleware/authMiddleware.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middleware/authMiddleware.js";
+import { trackContentView } from "../middleware/activityTrackingMiddleware.js";
 import upload from "../middleware/multer.js";
 import {
   createPost,
@@ -37,7 +38,7 @@ router.post(
 );
 router.get("/", getAllPosts);
 router.get("/most-liked", mostLikedPosts);
-router.get("/:id", validateIdParam, getPostById);
+router.get("/:id", optionalAuthenticateUser, validateIdParam, trackContentView, getPostById);
 router.patch(
   "/:id",
   authenticateUser,

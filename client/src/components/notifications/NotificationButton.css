@@ -1,0 +1,67 @@
+/* Notification Button Styles */
+
+.notification-button-container {
+  position: relative;
+}
+
+.notification-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notification-button:hover {
+  background-color: #f1f5f9;
+  color: #3b82f6;
+}
+
+.notification-button.active {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.notification-icon {
+  font-size: 1.5rem;
+}
+
+.notification-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode styles */
+.dark-mode .notification-button {
+  color: #e2e8f0;
+}
+
+.dark-mode .notification-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #60a5fa;
+}
+
+.dark-mode .notification-button.active {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}

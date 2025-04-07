@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { OurTeam } from "..";
 import img_2 from "../../assets/images/About-usPage-img.png";
 import { Link } from "react-router-dom";
 import { AiOutlineArrowRight } from "react-icons/ai";
 import { FaLongArrowAltRight } from "react-icons/fa";
+import CoreMission from "../../components/aboutComponents/CoreMission";
+import TeamMembers from "../../components/aboutComponents/TeamMembers";
 function AboutUs() {
   const [activeIndex, setActiveIndex] = useState(null);
 
@@ -80,12 +81,12 @@ function AboutUs() {
           {/* Text Content */}
           <div className="w-full lg:w-1/2 px-4 flex flex-col items-center">
             <h2 className="text-4xl font-bold text-[var(--grey--900)]  mb-4 text-[1.6rem] md:text-[3.5rem] sm:text-[3.5rem] sm:leading-[3.5rem]">
-              A Safe Place to Nurture Your Mind.
+              Where You Discover Yourself, We Help You
             </h2>
             <p className="text-lg text-[--grey--800] mb-8">
-              Our mission is to offer a safe, nurturing space where individuals
-              can explore their mental health and find the support they need to
-              grow.
+              Our mission is to enable open communication, foster a culture of discussion,
+              and use modern technology to better connect people. We help develop resilience
+              and show people how to navigate toward happiness in a world whose design cannot be changed.
             </p>
             <Link to={"/contact-us"} className="btn-1">
               Contact Us
@@ -100,9 +101,9 @@ function AboutUs() {
             </h2>
             <hr />
             <p className="text-[var(--grey--800)] text-justify lg:text-center text-sm md:text-base">
-              We provide a safe space for individuals to access mental health
-              resources, join supportive communities, and connect with
-              professional guidance.
+              We create spaces for open communication, foster meaningful discussions, and use
+              modern technology to connect people at deeper levels. Our platform enables
+              self-discovery and personal growth through supportive community interaction.
             </p>
           </div>
           <div
@@ -115,10 +116,9 @@ function AboutUs() {
             </h2>
             <hr />
             <p className="text-[var(--grey--800)] text-justify lg:text-center text-sm md:text-base">
-              {" "}
-              Mental health is as essential as physical health, yet it often
-              goes unnoticed. We believe everyone deserves to prioritize their
-              well-being and feel supported on their journey.
+              We believe in the power of human connection and open dialogue to transform lives.
+              While the design of the world cannot be changed, we can help people develop the
+              resilience to navigate it successfully and discover their true selves along the way.
             </p>
           </div>
         </div>
@@ -134,9 +134,9 @@ function AboutUs() {
               <span className="bg-[#01427a] text-white rounded-full w-6 h-6 flex items-center justify-center mr-3 text-xs">
                 N
               </span>
-              <Link 
-                to="https://www.nhm.gov.in/index1.php?lang=1&level=2&sublinkid=1043&lid=359" 
-                target="_blank" 
+              <Link
+                to="https://www.nhm.gov.in/index1.php?lang=1&level=2&sublinkid=1043&lid=359"
+                target="_blank"
                 className="hover:text-[var(--ternery)] transition-colors"
               >
                 NMHP: National Mental Health Programme
@@ -159,9 +159,9 @@ function AboutUs() {
           {/* Image Column */}
           <div className="flex justify-center items-center">
             <div className="w-full max-w-md">
-              <img 
-                src={img_2} 
-                alt="Mental Health Support" 
+              <img
+                src={img_2}
+                alt="Mental Health Support"
                 className="w-full h-auto object-contain rounded-2xl shadow-lg transform transition-transform hover:scale-105"
               />
             </div>
@@ -171,13 +171,13 @@ function AboutUs() {
         {/* Mission Details Section */}
         <div className="mt-12 space-y-6">
           <h2 className="text-xl md:text-5xl font-bold text-[var(--white-color)] mb-6">
-            Our mission is to help you prioritize your mental health and find balance
+            Our mission is to help you discover yourself through open communication
           </h2>
 
           <ol className="space-y-4 text-[var(--grey--600)]">
             {points.map((point, index) => (
-              <li 
-                key={index} 
+              <li
+                key={index}
                 className="flex items-center text-start gap-3 text-base transition-all duration-300 hover:translate-x-2"
               >
                 <AiOutlineArrowRight className="text-[var(--ternery)] flex-shrink-0" />
@@ -265,7 +265,15 @@ function AboutUs() {
             </div>
           </div>
         </div>
-        {/* <OurTeam></OurTeam> */}
+        {/* Core Mission Section */}
+        <div className="my-12">
+          <CoreMission />
+        </div>
+
+        {/* Team Members Section */}
+        <div className="my-12">
+          <TeamMembers />
+        </div>
       </div>
     </>
   );
