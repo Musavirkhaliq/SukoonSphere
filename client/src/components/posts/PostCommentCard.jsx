@@ -118,7 +118,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
 
   return (
     <>
-      <div className="bg-white p-4 rounded-lg shadow-sm border">
+      <div className="bg-white p-4 rounded-lg shadow-1 border-1">
         {/* Comment Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -141,7 +141,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
+              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--secondary)] focus:border-transparent resize-none text-gray-700"
               rows="3"
             />
             <div className="flex items-center justify-between mt-2">
@@ -150,10 +150,10 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
                   type="checkbox"
                   checked={isEditAnonymous}
                   onChange={() => setIsEditAnonymous(!isEditAnonymous)}
-                  className="form-checkbox h-3 w-3 text-blue-600 rounded focus:ring-blue-500"
+                  className="form-checkbox h-3 w-3 text-[var(--secondary)] rounded focus:ring-[var(--secondary)]"
                 />
                 <span className="text-xs flex items-center gap-1 text-gray-600">
-                  <FaUserSecret className={isEditAnonymous ? "text-blue-600" : "text-gray-400"} size={12} />
+                  <FaUserSecret className={isEditAnonymous ? "text-[var(--secondary)]" : "text-gray-400"} size={12} />
                   Post anonymously
                 </span>
               </label>
@@ -164,11 +164,11 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
                     setEditContent(comment.content);
                     setIsEditAnonymous(comment.isAnonymous || false);
                   }}
-                  className="btn-red !py-1"
+                  className="btn-red !py-1 !px-4"
                 >
                   Cancel
                 </button>
-                <button onClick={handleSaveEdit} className="btn-2 !py-1">
+                <button onClick={handleSaveEdit} className="btn-2 !py-1 !px-4">
                   Save
                 </button>
               </div>
@@ -184,16 +184,16 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
             onClick={handleLike}
             className={`flex items-center gap-1 ${
               user && comment.likes.includes(user._id)
-                ? "text-primary"
+                ? "text-[var(--secondary)]"
                 : "text-gray-500"
-            }`}
+            } hover:text-[var(--secondary-hover)] transition-colors duration-200`}
           >
             <FaThumbsUp />
             <span>{comment.likes.length}</span>
           </button>
           <button
             onClick={() => setShowReplyForm(!showReplyForm)}
-            className="flex items-center gap-1 text-gray-500 hover:text-primary"
+            className="flex items-center gap-1 text-gray-500 hover:text-[var(--secondary)] transition-colors duration-200"
           >
             <FaReply />
             Reply
@@ -215,7 +215,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               placeholder="Write your reply..."
-              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
+              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--secondary)] focus:border-transparent resize-none text-gray-700"
               rows="2"
             />
             <div className="flex gap-2 mt-2">
@@ -224,11 +224,11 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
                   setShowReplyForm(false);
                   setReplyContent("");
                 }}
-                className="btn-red !py-1"
+                className="btn-red !py-1 !px-4"
               >
                 Cancel
               </button>
-              <button onClick={handleSubmitReply} className="btn-2 !py-1">
+              <button onClick={handleSubmitReply} className="btn-2 !py-1 !px-4">
                 Reply
               </button>
             </div>
@@ -240,7 +240,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
           <div className="">
             <button
               onClick={() => setShowReplies(!showReplies)}
-              className="text-primary text-sm mt-2"
+              className="text-[var(--secondary)] text-sm mt-2 hover:text-[var(--secondary-hover)] transition-colors duration-200"
             >
               {showReplies
                 ? "Hide Replies"

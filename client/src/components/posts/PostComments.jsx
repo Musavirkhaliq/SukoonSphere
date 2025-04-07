@@ -101,18 +101,18 @@ const PostComments = ({ postId }) => {
   return (
     <div>
       {/* Comment Form */}
-      <form onSubmit={handleSubmitComment} className="mb-4 bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden">
+      <form onSubmit={handleSubmitComment} className="mb-4">
         <textarea
           value={commentContent}
           onChange={(e) => setCommentContent(e.target.value)}
           placeholder={
             user ? "Write your comment..." : "Please login to comment"
           }
-          className="w-full p-3 border-b border-gray-100 focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-none text-gray-700 transition-all duration-200"
+          className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--secondary)] focus:border-transparent resize-none text-gray-700"
           rows="2"
           disabled={!user}
         />
-        <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
+        <div className="flex items-center justify-between mt-2">
           {!user ? (
             <p className="text-xs text-gray-500">Login to comment</p>
           ) : (
@@ -121,20 +121,20 @@ const PostComments = ({ postId }) => {
                 type="checkbox"
                 checked={isAnonymous}
                 onChange={() => setIsAnonymous(!isAnonymous)}
-                className="form-checkbox h-3 w-3 text-blue-600 rounded focus:ring-blue-500"
+                className="form-checkbox h-3 w-3 text-[var(--secondary)] rounded focus:ring-[var(--secondary)]"
                 disabled={!user}
               />
               <span className="text-xs flex items-center gap-1 text-gray-600">
-                <FaUserSecret className={isAnonymous ? "text-blue-600" : "text-gray-400"} size={12} />
+                <FaUserSecret className={isAnonymous ? "text-[var(--secondary)]" : "text-gray-400"} size={12} />
                 Post anonymously
               </span>
             </label>
           )}
-          <div className="ml-auto">
+          <div className="flex gap-2">
             <button
               type="submit"
               disabled={!user || !commentContent.trim()}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 ${!user || !commentContent.trim() ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[var(--primary)] text-white hover:bg-[var(--primary-dark)]'}`}
+              className={`btn-2 !py-1 !px-4 text-sm font-medium transition-all duration-200 ${!user || !commentContent.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Post
             </button>
