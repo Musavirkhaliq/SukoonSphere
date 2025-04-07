@@ -325,7 +325,11 @@ const Video = () => {
                                                     <div className="flex items-center">
                                                         <FaThumbsUp className="mr-2 text-[var(--primary)]" />
                                                         <span className="font-medium">Reactions</span>
-                                                        <span className="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">4</span>
+                                                        {video.likes && video.likes.length > 0 && (
+                                                            <span className="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">
+                                                                {video.likes.length}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     {showReactions ? <FaChevronUp /> : <FaChevronDown />}
                                                 </button>

@@ -260,7 +260,7 @@ const PlaylistDetails = () => {
                   <div className="flex items-center">
                     <FaCheck className="mr-2 text-green-500" />
                     <span>
-                      {playlist.videos.filter(video => watchHistory[video._id] && watchHistory[video._id] >= 90).length} completed
+                      {playlist.videos.filter(video => watchHistory[video._id] && (watchHistory[video._id].percentage >= 90 || watchHistory[video._id].completed)).length} completed
                     </span>
                   </div>
                 )}

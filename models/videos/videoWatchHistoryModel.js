@@ -54,6 +54,8 @@ videoWatchHistorySchema.statics.updateWatchHistory = async function(
   status = null // Optional status parameter
 ) {
   try {
+    console.log('updateWatchHistory called with:', { userId, videoId, watchPercentage, status });
+
     // Ensure watchPercentage is a valid number
     const percentage = parseFloat(watchPercentage);
     if (isNaN(percentage)) {
@@ -91,21 +93,37 @@ videoWatchHistorySchema.statics.updateWatchHistory = async function(
       }
 
       // Find and update or create if not exists
-      const result = await this.findOneAndUpdate(
-        { userId, videoId },
-        {
-          watchPercentage,
-          completedWatching,
-          lastWatchedAt: new Date(),
-          // If this is first time completion, mark the time
-          ...(isFirstTimeCompletion ? { firstCompletedAt: new Date() } : {}),
-          // Add status field (use provided status or calculate it)
-          status: status || (completedWatching ? 'completed' : watchPercentage > 0 ? 'in-progress' : 'not-started')
-        },
-        { upsert: true, new: true }
-      );
+      console.log('Attempting to update watch history with:', {
+        userId,
+        videoId,
+        watchPercentage,
+        completedWatching,
+        status: status || (completedWatching ? 'completed' : watchPercentage > 0 ? 'in-progress' : 'not-started')
+      });
 
-      return result;
+      try {
+        const result = await this.findOneAndUpdate(
+          { userId, videoId },
+          {
+            watchPercentage,
+            completedWatching,
+            lastWatchedAt: new Date(),
+            // If this is first time completion, mark the time
+            ...(isFirstTimeCompletion ? { firstCompletedAt: new Date() } : {}),
+            // Add status field (use provided status or calculate it)
+            status: status || (completedWatching ? 'completed' : watchPercentage > 0 ? 'in-progress' : 'not-started')
+          },
+          { upsert: true, new: true }
+        );
+
+        console.log('Watch history update successful:', result);
+        return result;
+      } catch (dbError) {
+        console.error('Database error in findOneAndUpdate:', dbError);
+        console.error('Error details:', dbError.message);
+        console.error('Error stack:', dbError.stack);
+        throw dbError; // Re-throw to be caught by the outer catch block
+      }
     } catch (updateError) {
       console.error('Error in findOneAndUpdate for watch history:', updateError);
       // Handle CastError (invalid ObjectId)

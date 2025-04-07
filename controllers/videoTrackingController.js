@@ -9,23 +9,26 @@ import UserPreference from "../models/analytics/userPreferenceModel.js";
 // Track video progress
 export const trackVideoProgress = async (req, res) => {
   try {
+    console.log('Request body:', req.body);
+    console.log('User info:', req.user);
+
     const { userId } = req.user;
-    const { videoId, watchPercentage, status } = req.body;
+    const { videoId, watchPercentage: rawWatchPercentage, status } = req.body;
 
     // Validate required fields
-    if (!videoId || watchPercentage === undefined) {
+    if (!videoId || rawWatchPercentage === undefined) {
       throw new BadRequestError("Missing required fields");
     }
 
     // Ensure watchPercentage is a valid number
-    const percentage = parseFloat(watchPercentage);
-    if (isNaN(percentage)) {
-      console.warn(`Invalid watchPercentage value: ${watchPercentage}`);
+    let validatedPercentage = parseFloat(rawWatchPercentage);
+    if (isNaN(validatedPercentage)) {
+      console.warn(`Invalid watchPercentage value: ${rawWatchPercentage}`);
       // Use 0 as a fallback
-      watchPercentage = 0;
+      validatedPercentage = 0;
     } else {
       // Ensure percentage is between 0 and 100
-      watchPercentage = Math.max(0, Math.min(100, percentage));
+      validatedPercentage = Math.max(0, Math.min(100, validatedPercentage));
     }
 
     try {
@@ -42,32 +45,32 @@ export const trackVideoProgress = async (req, res) => {
       throw error;
     }
 
-    console.log(`Tracking progress for user ${userId}, video ${videoId}: ${watchPercentage}% (${status})`);
+    console.log(`Tracking progress for user ${userId}, video ${videoId}: ${validatedPercentage}% (${status})`);
 
     // Update watch history
     const watchHistory = await VideoWatchHistory.updateWatchHistory(
       userId,
       videoId,
-      watchPercentage,
+      validatedPercentage,
       status // Pass the status to the model
     );
 
     // Log the status based on watch percentage
-    if (status === 'in-progress' && watchPercentage < 90) {
+    if (status === 'in-progress' && validatedPercentage < 90) {
       console.log(`Video ${videoId} marked as 'in progress' for user ${userId}`);
-    } else if (status === 'completed' || watchPercentage >= 90) {
+    } else if (status === 'completed' || validatedPercentage >= 90) {
       console.log(`Video ${videoId} marked as 'completed' for user ${userId}`);
     }
 
     // Track completion if watched more than 90%
-    if (watchPercentage >= 90) {
+    if (validatedPercentage >= 90) {
       await UserActivity.logActivity(
         userId,
         'complete',
         'video',
         videoId,
         'Video',
-        { completionPercentage: watchPercentage },
+        { completionPercentage: validatedPercentage },
         req.body.sessionId
       );
 
@@ -76,17 +79,17 @@ export const trackVideoProgress = async (req, res) => {
         activityType: 'complete',
         contentType: 'video',
         contentId: videoId,
-        metadata: { completionPercentage: watchPercentage }
+        metadata: { completionPercentage: validatedPercentage }
       });
     }
 
     // Increment view count if this is a new view or first time reaching 10%
-    if (watchPercentage >= 10 && (!watchHistory || watchHistory.watchPercentage < 10)) {
+    if (validatedPercentage >= 10 && (!watchHistory || watchHistory.watchPercentage < 10)) {
       await Video.findByIdAndUpdate(videoId, { $inc: { viewCount: 1 } });
     }
 
     // Determine the final status (use the provided status or calculate it)
-    const finalStatus = status || (watchPercentage >= 90 ? 'completed' : watchPercentage > 0 ? 'in-progress' : 'not-started');
+    const finalStatus = status || (validatedPercentage >= 90 ? 'completed' : validatedPercentage > 0 ? 'in-progress' : 'not-started');
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -95,7 +98,12 @@ export const trackVideoProgress = async (req, res) => {
     });
   } catch (error) {
     console.error("Error tracking video progress:", error);
-    throw error;
+    // Send a more detailed error response instead of throwing
+    return res.status(500).json({
+      success: false,
+      message: "Failed to track video progress",
+      error: error.message
+    });
   }
 };
 
@@ -128,7 +136,11 @@ export const getUserVideoHistory = async (req, res) => {
     });
   } catch (error) {
     console.error("Error getting user video history:", error);
-    throw error;
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get video history",
+      error: error.message
+    });
   }
 };
 
@@ -149,7 +161,11 @@ export const getInProgressVideos = async (req, res) => {
     });
   } catch (error) {
     console.error("Error getting in-progress videos:", error);
-    throw error;
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get in-progress videos",
+      error: error.message
+    });
   }
 };
 
@@ -252,6 +268,10 @@ export const getVideoRecommendations = async (req, res) => {
     });
   } catch (error) {
     console.error("Error getting video recommendations:", error);
-    throw error;
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get video recommendations",
+      error: error.message
+    });
   }
 };

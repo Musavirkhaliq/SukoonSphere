@@ -20,7 +20,7 @@ import ArticleRouter from "./routes/articleRouter.js";
 import VideoRouter from "./routes/videoRouter.js";
 import VideoPlaylistRouter from "./routes/videoPlaylistRouter.js";
 import VideoCommentRouter from "./routes/videoCommentRouter.js";
-import VideoReactionRouter from "./routes/videoReactionRouter.js";
+
 import VideoAchievementRouter from "./routes/videoAchievementRouter.js";
 import PodcastRouter from "./routes/podcastRouter.js";
 import GalleryRouter from "./routes/galleryRouter.js";
@@ -87,7 +87,7 @@ app.use("/api/v1/gallery", GalleryRouter);
 app.use("/api/v1/videos", VideoRouter);
 app.use("/api/v1/video-playlists", VideoPlaylistRouter);
 app.use("/api/v1/video-comments", VideoCommentRouter);
-app.use("/api/v1/video-reactions", VideoReactionRouter);
+
 app.use("/api/v1/video-achievements", VideoAchievementRouter);
 app.use("/api/v1/podcasts", PodcastRouter);
 app.use("/api/v1/notifications", NotificationRouter);

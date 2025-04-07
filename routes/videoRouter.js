@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { authenticateUser, optionalAuthenticateUser } from "../middleware/authMiddleware.js";
-import { trackContentView } from "../middleware/activityTrackingMiddleware.js";
 import upload from "../middleware/multer.js";
 
 import { getUserVideos,
@@ -10,7 +9,9 @@ import { getUserVideos,
     createVideo,
     getAllVideos,
     getSingleVideos,
-    getPlaylistVideos }
+    getPlaylistVideos,
+    likeVideo,
+    trackContentView }
      from "../controllers/videoController.js";
 
 import {
@@ -31,6 +32,7 @@ router.delete("/delete-video/:id", authenticateUser, deleteVideo);
 router.get("/all-videos", getAllVideos);
 router.get("/single-videos", getSingleVideos);
 router.get("/playlist-videos", getPlaylistVideos);
+router.patch("/video/:id/like", authenticateUser, likeVideo);
 
 // Video tracking and recommendations
 router.post("/track-progress", authenticateUser, trackVideoProgress);

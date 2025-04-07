@@ -1,60 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { FaThumbsUp, FaHeart, FaLightbulb, FaHandsHelping, FaShare } from 'react-icons/fa';
+import { FaThumbsUp, FaShare } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useUser } from '@/context/UserContext';
 import customFetch from '@/utils/customFetch';
 
 const VideoReactions = ({ videoId, videoTitle }) => {
   const { user } = useUser();
-  const [reactions, setReactions] = useState({
-    like: 0,
-    love: 0,
-    helpful: 0,
-    insightful: 0,
-    total: 0
-  });
-  const [userReaction, setUserReaction] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
 
-  // Fetch reactions
-  const fetchReactions = async () => {
+  // Fetch video data including likes
+  const fetchVideoData = async () => {
     try {
-      setIsLoading(true);
-      const { data } = await customFetch.get(`/video-reactions/${videoId}`);
-      setReactions(data.reactionCounts);
-      setUserReaction(data.userReaction);
+      const { data } = await customFetch.get(`/videos/video/${videoId}`);
+      if (data.video) {
+        setLikeCount(data.video.likes?.length || 0);
+        setIsLiked(user && data.video.likes?.includes(user._id));
+      }
     } catch (error) {
-      console.error('Error fetching reactions:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Error fetching video data:', error);
     }
   };
 
   useEffect(() => {
     if (videoId) {
-      fetchReactions();
+      fetchVideoData();
     }
-  }, [videoId]);
+  }, [videoId, user]);
 
-  // Handle reaction
-  const handleReaction = async (type) => {
+  // Handle like
+  const handleLike = async () => {
     if (!user) {
-      toast.info('Please log in to react to videos');
+      toast.info('Please log in to like videos');
       return;
     }
-    
+
+    if (isLoading) return;
+
+    setIsLoading(true);
     try {
-      const { data } = await customFetch.post(`/video-reactions/${videoId}`, { type });
-      setReactions(data.reactionCounts);
-      setUserReaction(data.userReaction);
-      
-      if (data.userReaction) {
-        toast.success(`You ${data.userReaction}d this video!`);
-      }
+      const { data } = await customFetch.patch(`/videos/video/${videoId}/like`);
+      setIsLiked(!isLiked);
+      setLikeCount(data.likes.length);
+
+      toast.success(isLiked ? 'Video unliked' : 'Video liked');
     } catch (error) {
-      console.error('Error reacting to video:', error);
-      toast.error('Failed to react to video');
+      console.error('Error liking video:', error);
+      toast.error('Failed to like video');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,7 +58,7 @@ const VideoReactions = ({ videoId, videoTitle }) => {
   const handleShare = async (platform) => {
     const videoUrl = `${window.location.origin}/all-videos/video/${videoId}`;
     let shareUrl = '';
-    
+
     switch (platform) {
       case 'facebook':
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(videoUrl)}`;
@@ -86,63 +82,28 @@ const VideoReactions = ({ videoId, videoTitle }) => {
       default:
         return;
     }
-    
+
     window.open(shareUrl, '_blank', 'width=600,height=400');
     setShowShareOptions(false);
-  };
-
-  // Reaction button component
-  const ReactionButton = ({ type, icon, label, count }) => {
-    const isActive = userReaction === type;
-    
-    return (
-      <button
-        onClick={() => handleReaction(type)}
-        className={`flex flex-col items-center px-3 py-2 rounded-lg transition-colors ${
-          isActive 
-            ? 'bg-blue-100 text-blue-600' 
-            : 'text-gray-600 hover:bg-gray-100'
-        }`}
-      >
-        {icon}
-        <span className="text-xs mt-1">{count > 0 ? count : ''} {label}</span>
-      </button>
-    );
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4">
       <div className="flex flex-wrap justify-between items-center">
         <div className="flex space-x-2">
-          <ReactionButton
-            type="like"
-            icon={<FaThumbsUp className="text-xl" />}
-            label="Like"
-            count={reactions.like}
-          />
-          
-          <ReactionButton
-            type="love"
-            icon={<FaHeart className="text-xl" />}
-            label="Love"
-            count={reactions.love}
-          />
-          
-          <ReactionButton
-            type="helpful"
-            icon={<FaHandsHelping className="text-xl" />}
-            label="Helpful"
-            count={reactions.helpful}
-          />
-          
-          <ReactionButton
-            type="insightful"
-            icon={<FaLightbulb className="text-xl" />}
-            label="Insightful"
-            count={reactions.insightful}
-          />
+          <button
+            onClick={handleLike}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              isLiked
+                ? 'bg-blue-100 text-blue-600'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <FaThumbsUp className="text-xl" />
+            <span>{likeCount > 0 ? likeCount : ''} Like{likeCount !== 1 ? 's' : ''}</span>
+          </button>
         </div>
-        
+
         {/* Share Button */}
         <div className="relative">
           <button
@@ -152,7 +113,7 @@ const VideoReactions = ({ videoId, videoTitle }) => {
             <FaShare className="mr-2" />
             Share
           </button>
-          
+
           {/* Share Options Dropdown */}
           {showShareOptions && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 border">
@@ -166,7 +127,7 @@ const VideoReactions = ({ videoId, videoTitle }) => {
                   </span>
                   Facebook
                 </button>
-                
+
                 <button
                   onClick={() => handleShare('twitter')}
                   className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center"
@@ -176,7 +137,7 @@ const VideoReactions = ({ videoId, videoTitle }) => {
                   </span>
                   Twitter
                 </button>
-                
+
                 <button
                   onClick={() => handleShare('whatsapp')}
                   className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center"
@@ -186,7 +147,7 @@ const VideoReactions = ({ videoId, videoTitle }) => {
                   </span>
                   WhatsApp
                 </button>
-                
+
                 <button
                   onClick={() => handleShare('copy')}
                   className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center"
@@ -201,11 +162,11 @@ const VideoReactions = ({ videoId, videoTitle }) => {
           )}
         </div>
       </div>
-      
-      {/* Total Reactions */}
-      {reactions.total > 0 && (
+
+      {/* Total Likes */}
+      {likeCount > 0 && (
         <div className="mt-3 text-sm text-gray-500 border-t pt-2">
-          {reactions.total} {reactions.total === 1 ? 'person has' : 'people have'} reacted to this video
+          {likeCount} {likeCount === 1 ? 'person has' : 'people have'} liked this video
         </div>
       )}
     </div>

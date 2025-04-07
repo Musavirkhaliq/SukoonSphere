@@ -141,6 +141,13 @@ const useVideoProgress = (videoId, videoRef, options = {}) => {
     try {
       const result = await VideoTracker.trackProgress(videoId, currentProgress);
 
+      // Check if there was an error in the result
+      if (result.error) {
+        console.error('Error from video tracker:', result.error);
+        // Don't set error state to avoid disrupting user experience
+        return [];
+      }
+
       // Return any new badges earned
       if (result && result.newBadges && result.newBadges.length > 0) {
         return result.newBadges;

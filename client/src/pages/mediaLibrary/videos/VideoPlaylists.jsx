@@ -35,9 +35,36 @@ const VideoPlaylists = () => {
 
 
             historyResponse.data.watchHistory.forEach(item => {
-              // Check if videoId is an object (populated) or a string
-              const videoId = typeof item.videoId === 'object' ? item.videoId._id : item.videoId;
-              historyMap[videoId] = item.watchPercentage;
+              // Skip items with null or undefined videoId
+              if (!item || !item.videoId) {
+                console.warn('Skipping watch history item with missing videoId:', item);
+                return;
+              }
+
+              try {
+                // Check if videoId is an object (populated) or a string
+                const videoId = typeof item.videoId === 'object' ?
+                  (item.videoId._id || null) : // Handle potential null _id
+                  item.videoId;
+
+                // Skip if we couldn't extract a valid videoId
+                if (!videoId) {
+                  console.warn('Skipping watch history item with invalid videoId:', item);
+                  return;
+                }
+
+                // Store complete watch history information
+                historyMap[videoId] = {
+                  percentage: item.watchPercentage || 0,
+                  completed: item.completedWatching || false,
+                  status: item.status || 'not-started'
+                };
+
+                // Log for debugging
+                console.log(`Processed watch history for video ${videoId}: ${item.watchPercentage}% (${item.status})`);
+              } catch (err) {
+                console.error('Error processing watch history item:', err, item);
+              }
             });
 
             setWatchHistory(historyMap);
@@ -191,12 +218,12 @@ const VideoPlaylists = () => {
             if (playlist.videos && playlist.videos.length > 0) {
               playlist.videos.forEach(video => {
                 const videoId = video._id;
-                const progress = watchHistory[videoId];
+                const videoProgress = watchHistory[videoId] || { percentage: 0, completed: false, status: 'not-started' };
 
-
-                if (progress >= 90) {
+                // Check video status
+                if (videoProgress.completed || videoProgress.percentage >= 90) {
                   completedVideos++;
-                } else if (progress > 0) {
+                } else if (videoProgress.percentage > 0) {
                   inProgressVideos++;
                 } else {
                   notStartedVideos++;
