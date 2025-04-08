@@ -53,6 +53,10 @@ const postSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    realCreator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     timestamps: true,

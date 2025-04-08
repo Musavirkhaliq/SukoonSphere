@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { BsKey, BsDatabase, BsPencil } from "react-icons/bs";
+import { FaUserSecret } from "react-icons/fa";
 import { MdPrivateConnectivity } from "react-icons/md";
 import { CiMedal } from "react-icons/ci";
 import { useUser } from "@/context/UserContext";
@@ -58,6 +59,17 @@ function UserMenu({ user, miniMenu, handleLogout }) {
 
 const UserActionButtons = ({ loggedInUser }) => (
   <>
+    <div className="relative group">
+      <Link to="/about/user/anonymous">
+        <button className="bg-gray-800 hover:bg-gray-900 text-white rounded-full p-2">
+          <FaUserSecret className="text-lg" />
+        </button>
+      </Link>
+      <div className="absolute left-1/2 transform -translate-x-1/2 -top-10 bg-gray-800 text-white text-sm rounded py-1 px-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300">
+        Anonymous Posts
+        <div className="absolute left-1/2 transform -translate-x-1/2 button-4 w-2 h-2 bg-gray-800 rotate-45"></div>
+      </div>
+    </div>
     <div className="relative group">
       <Link to="/user/change-passowrd">
         <button className="bg-gray-800 hover:bg-gray-900 text-white rounded-full p-2">

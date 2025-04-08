@@ -43,12 +43,14 @@ const UserAvatar = ({ createdBy, username, userAvatar, createdAt, size = "medium
       />
       <div className="cursor-pointer">
         {username === "Anonymous" ? (
-          <div className="flex items-center gap-1">
-            <p className={`font-semibold text-[var(--grey--900)] ${sizeClasses[size].text} m-0 flex items-center gap-1`}>
-              <FaUserSecret className="text-gray-500" />
-              {username}
-            </p>
-          </div>
+          <Link className="hover:text-blue-400" to={`/about/user/${createdBy}`}>
+            <div className="flex items-center gap-1">
+              <p className={`font-semibold text-[var(--grey--900)] ${sizeClasses[size].text} m-0 flex items-center gap-1 hover:underline`}>
+                <FaUserSecret className="text-gray-500" />
+                {username}
+              </p>
+            </div>
+          </Link>
         ) : (
           <Link className="hover:text-blue-400" to={`/about/user/${createdBy}`}>
             <p className={`font-semibold text-[var(--grey--900)] capitalize ${sizeClasses[size].text} m-0 hover:underline`}>

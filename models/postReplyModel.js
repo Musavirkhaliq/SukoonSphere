@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const replySchema = new mongoose.Schema(
   {
-    
+
     parentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Comment",
@@ -40,6 +40,14 @@ const replySchema = new mongoose.Schema(
     deleted: {
       type: Boolean,
       default: false,
+    },
+    isAnonymous: {
+      type: Boolean,
+      default: false,
+    },
+    realCreator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     replies: [
       {

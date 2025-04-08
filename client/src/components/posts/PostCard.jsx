@@ -97,11 +97,17 @@ const PostCard = ({
           {console.log('User auth check:', {
             userId: user?._id,
             postCreatedBy: currentPost.createdBy,
-            isMatch: user?._id === currentPost.createdBy,
+            postRealCreator: currentPost.realCreator,
+            isCreator: String(user?._id) === String(currentPost.createdBy),
+            isRealCreator: String(user?._id) === String(currentPost.realCreator),
             isAnonymous: currentPost.isAnonymous
           })}
 
-          {user?._id && currentPost.createdBy && String(user._id) === String(currentPost.createdBy) && (
+          {user?._id && (
+            // Show edit/delete options if user is the creator OR the real creator of an anonymous post
+            (currentPost.createdBy && String(user._id) === String(currentPost.createdBy)) ||
+            (currentPost.isAnonymous && currentPost.realCreator && String(user._id) === String(currentPost.realCreator))
+          ) && (
             <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
           )}
         </div>

@@ -3,7 +3,7 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
-import { FaReply, FaThumbsUp } from "react-icons/fa";
+import { FaReply, FaThumbsUp, FaUserSecret } from "react-icons/fa";
 import DeleteModal from "../shared/DeleteModal";
 import PostActions from "../shared/PostActions";
 import UserAvatar from "../shared/UserAvatar";
@@ -13,10 +13,12 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
   const { user } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.content);
+  const [isEditAnonymous, setIsEditAnonymous] = useState(reply.isAnonymous || false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   const handleSubmitReply = async () => {
     if (!user) {
@@ -32,6 +34,7 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
         content: replyContent,
         postId,
         replyToUserId: reply.createdBy._id,
+        isAnonymous,
       });
       setReplyContent("");
       setShowReplyForm(false);
@@ -73,6 +76,7 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
     try {
       await customFetch.patch(`/posts/comments/replies/${reply._id}`, {
         content: editContent,
+        isAnonymous: isEditAnonymous,
       });
       setIsEditing(false);
       onReplyUpdate();
@@ -116,7 +120,21 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
             />
           </div>
 
-          {user && user._id === reply.createdBy && (
+          {/* Debug info */}
+          {console.log('Reply auth check:', {
+            userId: user?._id,
+            replyCreatedBy: reply.createdBy,
+            replyRealCreator: reply.realCreator,
+            isCreator: String(user?._id) === String(reply.createdBy),
+            isRealCreator: String(user?._id) === String(reply.realCreator),
+            isAnonymous: reply.isAnonymous
+          })}
+
+          {user && (
+            // Show edit/delete options if user is the creator OR the real creator of an anonymous reply
+            (String(user._id) === String(reply.createdBy)) ||
+            (reply.isAnonymous && reply.realCreator && String(user._id) === String(reply.realCreator))
+          ) && (
             <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
           )}
         </div>
@@ -127,22 +145,37 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
+              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--secondary)] focus:border-transparent resize-none text-gray-700"
               rows="2"
             />
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditContent(reply.content);
-                }}
-                className="btn-red !py-1 text-sm"
-              >
-                Cancel
-              </button>
-              <button onClick={handleSaveEdit} className="btn-2 !py-1 text-sm">
-                Save
-              </button>
+            <div className="flex items-center justify-between mt-2">
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isEditAnonymous}
+                  onChange={() => setIsEditAnonymous(!isEditAnonymous)}
+                  className="form-checkbox h-3 w-3 text-[var(--secondary)] rounded focus:ring-[var(--secondary)]"
+                />
+                <span className="text-xs flex items-center gap-1 text-gray-600">
+                  <FaUserSecret className={isEditAnonymous ? "text-[var(--secondary)]" : "text-gray-400"} size={12} />
+                  Post anonymously
+                </span>
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditContent(reply.content);
+                    setIsEditAnonymous(reply.isAnonymous || false);
+                  }}
+                  className="btn-red !py-1 !px-4 text-sm"
+                >
+                  Cancel
+                </button>
+                <button onClick={handleSaveEdit} className="btn-2 !py-1 !px-4 text-sm">
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -189,19 +222,34 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
               className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
               rows="2"
             />
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => {
-                  setShowReplyForm(false);
-                  setReplyContent("");
-                }}
-                className="btn-red !py-1"
-              >
-                Cancel
-              </button>
-              <button onClick={handleSubmitReply} className="btn-2 !py-1">
-                Reply
-              </button>
+            <div className="flex items-center justify-between mt-2">
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={() => setIsAnonymous(!isAnonymous)}
+                  className="form-checkbox h-3 w-3 text-[var(--secondary)] rounded focus:ring-[var(--secondary)]"
+                />
+                <span className="text-xs flex items-center gap-1 text-gray-600">
+                  <FaUserSecret className={isAnonymous ? "text-[var(--secondary)]" : "text-gray-400"} size={12} />
+                  Post anonymously
+                </span>
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setShowReplyForm(false);
+                    setReplyContent("");
+                    setIsAnonymous(false);
+                  }}
+                  className="btn-red !py-1 !px-4"
+                >
+                  Cancel
+                </button>
+                <button onClick={handleSubmitReply} className="btn-2 !py-1 !px-4">
+                  Reply
+                </button>
+              </div>
             </div>
           </div>
         )}

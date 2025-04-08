@@ -10,15 +10,30 @@ import { deleteFile } from "../utils/fileUtils.js";
 import { updateUserPoints, awardBadges } from "../utils/gamification.js";
 import { io } from "../server.js";
 
+import { getAnonymousUserId } from '../utils/anonymousUser.js';
+
 export const createPost = async (req, res) => {
   const newPost = {
-    createdBy: req.user.userId, // Always store user ID for database relations
     ...req.body,
   };
 
   // Convert isAnonymous from string to boolean if needed
   if (typeof newPost.isAnonymous === 'string') {
     newPost.isAnonymous = newPost.isAnonymous === 'true';
+  }
+
+  // If post is anonymous, use the Anonymous user ID as the creator
+  if (newPost.isAnonymous) {
+    const anonymousUserId = await getAnonymousUserId();
+    if (!anonymousUserId) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ msg: 'Failed to create anonymous post' });
+    }
+    newPost.createdBy = anonymousUserId;
+    // Store the real user ID in a separate field for tracking purposes
+    newPost.realCreator = req.user.userId;
+  } else {
+    // For non-anonymous posts, use the actual user ID
+    newPost.createdBy = req.user.userId;
   }
 
   if (req.file) {
@@ -142,23 +157,63 @@ export const getAllPosts = async (req, res) => {
 export const getAllPostsByUserId = async (req, res) => {
   const { id: userId } = req.params;
 
+  // Check if this is the Anonymous user profile
+  const anonymousUserId = await getAnonymousUserId();
+  const isAnonymousProfile = String(userId) === String(anonymousUserId);
+
   // Get pagination parameters from query with defaults
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
+  // Build the query based on whether this is the anonymous profile or a regular user profile
+  let query;
+  if (isAnonymousProfile) {
+    // For the anonymous profile, show only anonymous posts
+    query = {
+      createdBy: new mongoose.Types.ObjectId(userId),
+      deleted: { $ne: true },
+      isAnonymous: true,
+    };
+  } else {
+    // For regular user profiles, exclude anonymous posts
+    // But include posts where the user is the realCreator (for edit/delete access)
+    const isLoggedInUser = req.user && String(req.user.userId) === String(userId);
+
+    if (isLoggedInUser) {
+      // If viewing own profile, show non-anonymous posts and allow access to anonymous posts via realCreator
+      query = {
+        $or: [
+          // Regular posts created by this user
+          {
+            createdBy: new mongoose.Types.ObjectId(userId),
+            deleted: { $ne: true },
+            isAnonymous: { $ne: true },
+          },
+          // Anonymous posts where this user is the real creator (for edit/delete access)
+          {
+            realCreator: new mongoose.Types.ObjectId(userId),
+            deleted: { $ne: true },
+            isAnonymous: true,
+          }
+        ]
+      };
+    } else {
+      // If viewing someone else's profile, only show their non-anonymous posts
+      query = {
+        createdBy: new mongoose.Types.ObjectId(userId),
+        deleted: { $ne: true },
+        isAnonymous: { $ne: true },
+      };
+    }
+  }
+
   // Get total count for pagination info
-  const totalCount = await Post.countDocuments({
-    createdBy: new mongoose.Types.ObjectId(userId),
-    deleted: { $ne: true },
-  });
+  const totalCount = await Post.countDocuments(query);
 
   const posts = await Post.aggregate([
     {
-      $match: {
-        createdBy: new mongoose.Types.ObjectId(userId),
-        deleted: { $ne: true },
-      },
+      $match: query,
     },
     {
       $lookup: {
@@ -337,12 +392,28 @@ export const createPostComment = async (req, res) => {
       ? isAnonymous === 'true'
       : Boolean(isAnonymous);
 
-    const comment = await PostComments.create({
+    // Create comment object
+    const commentData = {
       postId,
-      createdBy: req.user.userId, // Always store user ID for database relations
       content,
       isAnonymous: isAnonymousValue,
-    });
+    };
+
+    // If comment is anonymous, use the Anonymous user ID as the creator
+    if (isAnonymousValue) {
+      const anonymousUserId = await getAnonymousUserId();
+      if (!anonymousUserId) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ msg: 'Failed to create anonymous comment' });
+      }
+      commentData.createdBy = anonymousUserId;
+      // Store the real user ID in a separate field for tracking purposes
+      commentData.realCreator = req.user.userId;
+    } else {
+      // For non-anonymous comments, use the actual user ID
+      commentData.createdBy = req.user.userId;
+    }
+
+    const comment = await PostComments.create(commentData);
 
     const post = await Post.findById(postId);
     post.comments.push(comment._id);
@@ -464,7 +535,7 @@ export const getAllCommentsByPostId = async (req, res) => {
 };
 
 export const createReply = async (req, res) => {
-  const { content, postId } = req.body;
+  const { content, postId, isAnonymous } = req.body;
   const { id: parentId } = req.params;
 
   try {
@@ -475,9 +546,14 @@ export const createReply = async (req, res) => {
       throw new BadRequestError("Comment or reply not found");
     }
 
-    const reply = await PostReplies.create({
+    // Convert isAnonymous from string to boolean if needed
+    const isAnonymousValue = typeof isAnonymous === 'string'
+      ? isAnonymous === 'true'
+      : Boolean(isAnonymous);
+
+    // Create reply object
+    const replyData = {
       content,
-      createdBy: req.user.userId,
       parentId,
       commentId: comment
         ? comment._id
@@ -489,7 +565,24 @@ export const createReply = async (req, res) => {
         : parentReply
         ? parentReply.createdBy
         : null,
-    });
+      isAnonymous: isAnonymousValue,
+    };
+
+    // If reply is anonymous, use the Anonymous user ID as the creator
+    if (isAnonymousValue) {
+      const anonymousUserId = await getAnonymousUserId();
+      if (!anonymousUserId) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ msg: 'Failed to create anonymous reply' });
+      }
+      replyData.createdBy = anonymousUserId;
+      // Store the real user ID in a separate field for tracking purposes
+      replyData.realCreator = req.user.userId;
+    } else {
+      // For non-anonymous replies, use the actual user ID
+      replyData.createdBy = req.user.userId;
+    }
+
+    const reply = await PostReplies.create(replyData);
 
     if (comment) {
       comment.replies.push(reply._id);
@@ -646,10 +739,17 @@ export const deletePost = async (req, res) => {
       postCreatedBy: post.createdBy.toString(),
       userId: req.user.userId,
       isMatch: post.createdBy.toString() === req.user.userId,
-      isAnonymous: post.isAnonymous
+      isAnonymous: post.isAnonymous,
+      realCreator: post.realCreator?.toString(),
+      isRealCreator: post.realCreator?.toString() === req.user.userId
     });
 
-    if (post.createdBy.toString() !== req.user.userId) {
+    // Check if user is authorized to delete this post
+    // User can delete if they are the creator OR if they are the real creator of an anonymous post
+    const isCreator = post.createdBy.toString() === req.user.userId;
+    const isRealCreator = post.isAnonymous && post.realCreator && post.realCreator.toString() === req.user.userId;
+
+    if (!isCreator && !isRealCreator) {
       throw new UnauthorizedError("Not authorized to delete this post");
     }
 
@@ -685,7 +785,11 @@ export const deletePostComment = async (req, res) => {
   }
 
   // Check if user is authorized to delete the comment
-  if (comment.createdBy.toString() !== req.user.userId) {
+  // User can delete if they are the creator OR if they are the real creator of an anonymous comment
+  const isCreator = comment.createdBy.toString() === req.user.userId;
+  const isRealCreator = comment.isAnonymous && comment.realCreator && comment.realCreator.toString() === req.user.userId;
+
+  if (!isCreator && !isRealCreator) {
     throw new UnauthorizedError(
       "You are not authorized to delete this comment"
     );
@@ -710,7 +814,12 @@ export const deletePostCommentReply = async (req, res) => {
   if (!reply) {
     throw new BadRequestError("Reply not found");
   }
-  if (reply.createdBy.toString() !== req.user.userId) {
+  // Check if user is authorized to delete the reply
+  // User can delete if they are the creator OR if they are the real creator of an anonymous reply
+  const isCreator = reply.createdBy.toString() === req.user.userId;
+  const isRealCreator = reply.isAnonymous && reply.realCreator && reply.realCreator.toString() === req.user.userId;
+
+  if (!isCreator && !isRealCreator) {
     throw new UnauthorizedError("You are not authorized to delete this reply");
   }
 
@@ -842,7 +951,12 @@ export const updatePost = async (req, res) => {
     throw new BadRequestError("Post not found");
   }
 
-  if (post.createdBy.toString() !== userId) {
+  // Check if user is authorized to edit this post
+  // User can edit if they are the creator OR if they are the real creator of an anonymous post
+  const isCreator = post.createdBy.toString() === userId;
+  const isRealCreator = post.isAnonymous && post.realCreator && post.realCreator.toString() === userId;
+
+  if (!isCreator && !isRealCreator) {
     throw new UnauthorizedError("Not authorized to edit this post");
   }
 
@@ -918,7 +1032,12 @@ export const updatePostComment = async (req, res) => {
     throw new BadRequestError("Comment not found");
   }
 
-  if (comment.createdBy.toString() !== userId) {
+  // Check if user is authorized to edit this comment
+  // User can edit if they are the creator OR if they are the real creator of an anonymous comment
+  const isCreator = comment.createdBy.toString() === userId;
+  const isRealCreator = comment.isAnonymous && comment.realCreator && comment.realCreator.toString() === userId;
+
+  if (!isCreator && !isRealCreator) {
     throw new UnauthorizedError("Not authorized to edit this comment");
   }
 
@@ -962,7 +1081,12 @@ export const updatePostCommentReply = async (req, res) => {
     throw new BadRequestError("Reply not found");
   }
 
-  if (reply.createdBy._id.toString() !== userId) {
+  // Check if user is authorized to edit this reply
+  // User can edit if they are the creator OR if they are the real creator of an anonymous reply
+  const isCreator = reply.createdBy._id.toString() === userId;
+  const isRealCreator = reply.isAnonymous && reply.realCreator && reply.realCreator.toString() === userId;
+
+  if (!isCreator && !isRealCreator) {
     throw new UnauthorizedError("Not authorized to edit this reply");
   }
 

@@ -130,7 +130,21 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
               size="verySmall"
             />
           </div>
-          {user && String(user._id) === String(comment.createdBy) && (
+          {/* Debug info */}
+          {console.log('Comment auth check:', {
+            userId: user?._id,
+            commentCreatedBy: comment.createdBy,
+            commentRealCreator: comment.realCreator,
+            isCreator: String(user?._id) === String(comment.createdBy),
+            isRealCreator: String(user?._id) === String(comment.realCreator),
+            isAnonymous: comment.isAnonymous
+          })}
+
+          {user && (
+            // Show edit/delete options if user is the creator OR the real creator of an anonymous comment
+            (String(user._id) === String(comment.createdBy)) ||
+            (comment.isAnonymous && comment.realCreator && String(user._id) === String(comment.realCreator))
+          ) && (
             <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
           )}
         </div>

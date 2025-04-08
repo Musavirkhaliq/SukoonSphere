@@ -3,7 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { RxCross2 } from "react-icons/rx";
 import { BsChatDots, BsThreeDotsVertical } from "react-icons/bs";
 import { FaArrowRightLong } from "react-icons/fa6";
-import { FaRobot } from "react-icons/fa";
+import { FaRobot, FaUserSecret } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import CompanyLogo from "../../../assets/images/SukoonSphere_Logo.png";
 import links from "@/utils/SharedComp/PageLinks";
@@ -250,6 +250,11 @@ function NavMenu({ showMobile = true }) {
                 <Link to="/sukoonai">
                   <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
                     <FaRobot className="text-white text-lg" />
+                  </div>
+                </Link>
+                <Link to="/about/user/anonymous">
+                  <div className="flex items-center justify-center w-8 h-8 bg-gray-800 rounded-full">
+                    <FaUserSecret className="text-white text-lg" />
                   </div>
                 </Link>
                 <Link to="/auth/sign-in">

@@ -28,6 +28,10 @@ const commentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    realCreator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
