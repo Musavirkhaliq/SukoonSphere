@@ -68,7 +68,7 @@ const postNotificationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -82,7 +82,7 @@ const postNotificationSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-);  
+);
 
 const PostNotification = mongoose.model("PostNotification", postNotificationSchema);
 
