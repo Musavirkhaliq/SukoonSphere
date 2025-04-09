@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaPaperPlane, FaSpinner, FaCheck, FaClipboardList } from 'react-icons/fa';
+import { FaPaperPlane, FaSpinner, FaCheck, FaClipboardList, FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import './TherapyComponents.css';
 
@@ -16,6 +16,7 @@ const TherapyChat = ({
   const [moodRating, setMoodRating] = useState(5);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -50,6 +51,63 @@ const TherapyChat = ({
       if (sessionStatus !== 'active') {
         toast.error('Cannot send messages to a completed session');
       }
+    }
+  };
+
+  // Speech recognition setup
+  useEffect(() => {
+    // Initialize speech recognition if available
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+
+        setInput(transcript);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        setIsListening(false);
+        toast.error('Speech recognition failed. Please try again or type your message.');
+      };
+
+      // Store the recognition instance in a ref
+      window.speechRecognition = recognition;
+    }
+
+    // Cleanup
+    return () => {
+      if (window.speechRecognition) {
+        window.speechRecognition.abort();
+      }
+    };
+  }, []);
+
+  const toggleListening = () => {
+    if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+      toast.error('Speech recognition is not supported in your browser.');
+      return;
+    }
+
+    if (isListening) {
+      window.speechRecognition.stop();
+      setIsListening(false);
+    } else {
+      setInput('');
+      window.speechRecognition.start();
+      setIsListening(true);
     }
   };
 
@@ -121,27 +179,39 @@ const TherapyChat = ({
 
         {sessionStatus === 'active' ? (
           <div className="therapy-chat-input">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
-              disabled={isLoading}
-            />
-            <div className="therapy-chat-actions">
+            <div className="therapy-chat-input-container">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={isListening ? "Listening... (speak now)" : "Type your message..."}
+                disabled={isLoading || isListening}
+                className={isListening ? 'listening' : ''}
+              />
               <button
-                className="therapy-complete-button"
-                onClick={() => setShowCompletionModal(true)}
+                className={`therapy-mic-button ${isListening ? 'listening' : ''}`}
+                onClick={toggleListening}
+                disabled={isLoading}
+                title={isListening ? "Stop listening" : "Speak your message"}
               >
-                Complete Session
+                {isListening ? <FaMicrophoneSlash /> : <FaMicrophone />}
               </button>
+            </div>
+            <div className="therapy-chat-actions">
               <button
                 className="therapy-send-button"
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
               >
                 {isLoading ? <FaSpinner className="spin" /> : <FaPaperPlane />}
+              </button>
+              <button
+                className="therapy-complete-button"
+                onClick={() => setShowCompletionModal(true)}
+              >
+                Complete Session
               </button>
             </div>
           </div>
