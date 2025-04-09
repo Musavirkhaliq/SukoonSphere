@@ -65,7 +65,7 @@ const RoomHeader = ({ room, onMenuClick, isAdmin, fetchRoom, pendingRequestsCoun
   };
 
   return (
-    <div className="flex items-center justify-between p-3 bg-white border-b">
+    <div className="flex items-center justify-between p-3 bg-white border-b shadow-md">
       <div className="flex items-center">
         <div className="flex items-center">
           <button
@@ -78,7 +78,7 @@ const RoomHeader = ({ room, onMenuClick, isAdmin, fetchRoom, pendingRequestsCoun
 
           <button
             onClick={onMenuClick}
-            className="p-2 ml-1 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200 flex items-center justify-center relative"
+            className="p-2 ml-1 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200 flex items-center justify-center relative lg:hidden"
             aria-label="Menu"
           >
             <FaUsers size={16} />

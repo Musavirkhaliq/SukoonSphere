@@ -32,7 +32,7 @@ const ChatHeader = ({ activeUser, onMenuClick, totalMessages, setMessages, unrea
 
   return (
     <>
-      <div className="px-4 py-3 flex items-center justify-between bg-white">
+      <div className="px-4 py-3 flex items-center justify-between bg-white shadow-md">
         <div className="flex items-center space-x-3">
           <div className="flex items-center">
             <button
@@ -45,7 +45,7 @@ const ChatHeader = ({ activeUser, onMenuClick, totalMessages, setMessages, unrea
 
             <button
               onClick={onMenuClick}
-              className="p-2 ml-1 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200 flex items-center justify-center relative"
+              className="p-2 ml-1 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200 flex items-center justify-center relative lg:hidden"
               aria-label="Open sidebar"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
