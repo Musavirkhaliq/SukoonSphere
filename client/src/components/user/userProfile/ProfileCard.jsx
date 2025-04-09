@@ -34,7 +34,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
 
   const followMutation = useMutation({
     mutationFn: async () => {
-      const { data } = await customFetch.patch(`user/follow/${user?._id}`);
+      const { data } = await customFetch.post(`user/follow/${user?._id}`);
       return data;
     },
     onSuccess: (data) => {

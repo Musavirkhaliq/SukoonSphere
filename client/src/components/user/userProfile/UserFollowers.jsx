@@ -4,6 +4,7 @@ import { useLoaderData, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useUser } from "@/context/UserContext";
 import { FaUserPlus, FaSearch } from "react-icons/fa";
+import customFetch from "@/utils/customFetch";
 
 const UserFollowers = () => {
   // const data = useLoaderData();
@@ -16,7 +17,7 @@ const UserFollowers = () => {
 
     try {
       setIsLoading((prev) => ({ ...prev, [followerId]: true }));
-      const { data } = await customFetch.patch(`user/follow/${followerId}`);
+      const { data } = await customFetch.post(`user/follow/${followerId}`);
       if (data.success) {
         toast.success(
           data.isFollowing ? "Followed successfully" : "Unfollowed successfully"
