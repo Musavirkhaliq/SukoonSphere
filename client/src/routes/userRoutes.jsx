@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
-import { UserAnswers } from "@/components";
+import { UserAnswers, UserAchievements } from "@/components";
 import Articles from "@/pages/contributors/Articles";
 const UserProfile = lazy(() => import("../pages/about/UserProfile"));
 const UserPosts = lazy(
@@ -68,6 +68,14 @@ export const userRoutes = [
           </Suspense>
         ),
         loader: userFollowersLoader,
+      },
+      {
+        path: "achievements",
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <UserAchievements />
+          </Suspense>
+        ),
       },
       {
         path: "following",

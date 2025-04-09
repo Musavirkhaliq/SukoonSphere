@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
+import { FaFire } from "react-icons/fa";
 
 const ProfileCard = ({ user, fetchUserById }) => {
   const { updateUser, user: currentUser } = useUser();
@@ -84,20 +85,50 @@ const ProfileCard = ({ user, fetchUserById }) => {
       <div className="flex flex-col md:flex-row gap-8">
         {/* Left Side - Profile Image and Basic Info */}
         <div className="flex flex-col items-center md:items-start">
-          <img
-            src={
-              user?.avatar ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || "Anonymous")}`
-            }
-            alt="Profile"
-            className="w-24 h-24 rounded-full object-cover ring-2 ring-gray-100"
-          />
+          <div className="relative">
+            <img
+              src={
+                user?.avatar ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || "Anonymous")}`
+              }
+              alt="Profile"
+              className="w-24 h-24 rounded-full object-cover ring-2 ring-gray-100"
+            />
+            {user?.rank && (
+              <div className={`absolute -bottom-2 -right-2 ${user.rank === 1 ? 'bg-yellow-500' : user.rank <= 3 ? 'bg-yellow-400' : user.rank <= 10 ? 'bg-blue-400' : 'bg-gray-300'} text-gray-900 rounded-full px-2 py-1 text-xs font-bold shadow-md`}>
+                #{user.rank} {user.rank === 1 && '🏆'}
+              </div>
+            )}
+          </div>
           <div className="mt-4 text-center md:text-left">
             <h1 className="text-xl font-semibold text-gray-900">
               {user?.name}
             </h1>
             {user?.role === "contributor" && (
               <p className="text-sm text-gray-600">Mental Health Expert</p>
+            )}
+            {user?.rank && (
+              <p className="text-sm text-gray-600 flex items-center gap-1">
+                {user.rank === 1 ? (
+                  <span className="text-yellow-600 font-medium">Community Leader 🏆</span>
+                ) : user.rank <= 3 ? (
+                  <span className="text-yellow-600 font-medium">Top Contributor 🥇</span>
+                ) : user.rank <= 10 ? (
+                  <span className="text-blue-600 font-medium">Elite Member 🌟</span>
+                ) : user.rank <= 50 ? (
+                  <span className="text-purple-600 font-medium">Active Member</span>
+                ) : (
+                  <span>Community Member</span>
+                )}
+              </p>
+            )}
+
+            {/* Streak Badge */}
+            {user?.streakCount > 0 && (
+              <p className="text-sm text-orange-600 flex items-center gap-1 mt-1">
+                <FaFire className="text-orange-500" />
+                <span className="font-medium">{user.streakCount} Day Streak</span>
+              </p>
             )}
           </div>
         </div>
@@ -163,15 +194,13 @@ const ProfileCard = ({ user, fetchUserById }) => {
                   Give Prescription
                 </Link>
               )}
-            {user?.role === "user" &&
-              user?._id == currentUser?._id && (
-                <Link
-                  to={`/gamifiedDashboard`}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  View Achievements
-                </Link>
-              )}
+            {/* Show View Achievements button for all users */}
+            <Link
+              to={`/about/user/${user?._id}/achievements`}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              View Achievements
+            </Link>
             {user._id === currentUser?._id &&
               currentUser?.role !== "contributor" && (
                 <Link

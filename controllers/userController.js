@@ -26,37 +26,47 @@ export const getUserDetailsById = async (req, res) => {
   const totalQuestions = await Question.find({ createdBy: userId }).countDocuments();
   const totalAnswers = await Answer.find({ createdBy: userId }).countDocuments();
   const totalArticles = await ArticleModel.find({ author: userId }).countDocuments();
+
+  // Calculate user's rank based on total points
+  const userRank = await User.countDocuments({
+    totalPoints: { $gt: user.totalPoints }
+  }) + 1;
+
   user.counts = {
     totalPosts,
     totalQuestions,
     totalAnswers,
     totalArticles
   };
+
+  // Add rank to user object
+  user.rank = userRank;
+
   res.status(StatusCodes.OK).json(user);
 };
 
 export const changeUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
-    
+
     if (req.file) {
       // Delete old avatar file if it exists
       if (user.avatar) {
         const oldAvatarPath = user.avatar.replace(`${process.env.BACKEND_URL}/public/uploads/`, '');
         await deleteFile(oldAvatarPath);
       }
-      
+
       // Set new avatar path
-      const filepath = `${process.env.BACKEND_URL}/public/uploads/${req.file.filename}`; 
+      const filepath = `${process.env.BACKEND_URL}/public/uploads/${req.file.filename}`;
       user.avatar = filepath;
     }
-    
+
     if (req.body.name) {
       user.name = req.body.name;
     }
-    
+
     await user.save();
-    res.status(StatusCodes.OK).json({ 
+    res.status(StatusCodes.OK).json({
       message: "Profile updated successfully",
       user: {
         _id: user._id,
@@ -81,8 +91,8 @@ export const followOrUnfollowUser = async (req, res) => {
 
     // Prevent self-following
     if (targetUserId === currentUserId) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ 
-        msg: "You cannot follow yourself" 
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        msg: "You cannot follow yourself"
       });
     }
 
@@ -90,8 +100,8 @@ export const followOrUnfollowUser = async (req, res) => {
     const targetUser = await User.findById(targetUserId);
 
     if (!targetUser) {
-      return res.status(StatusCodes.NOT_FOUND).json({ 
-        msg: "User not found" 
+      return res.status(StatusCodes.NOT_FOUND).json({
+        msg: "User not found"
       });
     }
 
@@ -169,9 +179,9 @@ export const getAllFollowers = async (req, res) => {
       isFollowing: follower.followers.includes(userId)
     }));
 
-    res.status(StatusCodes.OK).json({ 
+    res.status(StatusCodes.OK).json({
       success: true,
-      followers: followersWithCounts 
+      followers: followersWithCounts
     });
   } catch (error) {
     console.error('Get Followers Error:', error);
@@ -207,9 +217,9 @@ export const getAllFollowing = async (req, res) => {
       isFollowing: followed.followers.includes(userId)
     }));
 
-    res.status(StatusCodes.OK).json({ 
+    res.status(StatusCodes.OK).json({
       success: true,
-      following: followingWithCounts 
+      following: followingWithCounts
     });
   } catch (error) {
     console.error('Get Following Error:', error);
@@ -220,7 +230,7 @@ export const getAllFollowing = async (req, res) => {
 };
 
 export const requestContributor = async (req, res) => {
-  const { userId } = req.user; 
+  const { userId } = req.user;
   const { key } = req.body;
 
   try {
@@ -261,15 +271,15 @@ export const requestContributor = async (req, res) => {
 
 export const verifyContributor = async (req, res) => {
   const { fullname,  message } = req.body;
-  const { userId , email} = req.user; 
+  const { userId , email} = req.user;
 
   try {
     // Check if user already has any request in the system
     const existingRequest = await RequestContribute.findOne({ userId });
 
     if (existingRequest) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ 
-        error: "You have already submitted a request. You cannot submit multiple requests." 
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        error: "You have already submitted a request. You cannot submit multiple requests."
       });
     }
 
@@ -281,14 +291,14 @@ export const verifyContributor = async (req, res) => {
       userId,
       status: 'pending'
     };
-    
+
     const requestContribute = new RequestContribute(request);
     await requestContribute.save();
-    
-    res.status(StatusCodes.OK).json({ 
-      msg: "Your request has been submitted successfully. We will review it and get back to you soon." 
+
+    res.status(StatusCodes.OK).json({
+      msg: "Your request has been submitted successfully. We will review it and get back to you soon."
     });
-    
+
   } catch (error) {
     console.error('Error in verifyContributor:', error);
     res
@@ -330,7 +340,7 @@ export const deleteContributorsRequest = async (req, res) => {
 }
 export const AcceptContributorsRequest = async (req, res) => {
   const { id: requestId } = req.params;
-  
+
   if (req.user.role !== "admin") {
     return res
       .status(StatusCodes.FORBIDDEN)
@@ -373,8 +383,8 @@ export const AcceptContributorsRequest = async (req, res) => {
     request.status = 'accepted';
     await request.save();
 
-    res.status(StatusCodes.OK).json({ 
-      msg: "Request accepted successfully and email sent to contributor" 
+    res.status(StatusCodes.OK).json({
+      msg: "Request accepted successfully and email sent to contributor"
     });
 
   } catch (error) {
@@ -401,9 +411,9 @@ export const  getAllContributors = async (req, res) => {
 export const  getMostLikedContent = async (req, res) => {
   try {
     // Get 4 most liked articles (based on views)
-    const mostLikedArticles = await ArticleModel.find({ 
+    const mostLikedArticles = await ArticleModel.find({
       deleted: false,
-      status: "published" 
+      status: "published"
     })
       .sort({ views: -1 })
       .limit(4)
@@ -684,6 +694,68 @@ export const updateSuggestionStatus = async (req, res) => {
         });
     }
 };
+export const getUserAchievementsById = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+
+    // Find the user with specific fields
+    const user = await User.findById(userId).select(
+      "name email avatar _id role totalPoints badges postCount answerCount questionCount commentCount likeCount streakCount longestStreak"
+    );
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "User not found"
+      });
+    }
+
+    // Calculate user's progress and badges
+    const progress = getUserProgress(user);
+
+    // Calculate user's rank
+    const userRank = await User.countDocuments({
+      totalPoints: { $gt: user.totalPoints }
+    }) + 1;
+
+    // Define streak milestones
+    const streakMilestones = [3, 7, 14, 30, 60, 90, 180, 365];
+
+    // Calculate streak progress
+    const streakProgress = {
+      current: user.streakCount || 0,
+      longest: user.longestStreak || 0,
+      lastVisit: user.lastVisitDate,
+      nextMilestone: streakMilestones.find(milestone => milestone > (user.streakCount || 0)) || streakMilestones[streakMilestones.length - 1],
+      milestones: streakMilestones.map(milestone => ({
+        days: milestone,
+        achieved: (user.streakCount || 0) >= milestone,
+        badge: `${milestone}-Day Streak`
+      }))
+    };
+
+    // Respond with user achievements
+    res.status(StatusCodes.OK).json({
+      user: {
+        name: user.name,
+        avatar: user.avatar,
+        _id: user._id,
+        role: user.role,
+        totalPoints: user.totalPoints,
+        rank: userRank,
+        streakCount: user.streakCount || 0,
+        longestStreak: user.longestStreak || 0
+      },
+      progress,
+      streakProgress
+    });
+  } catch (error) {
+    console.error("Error in getUserAchievementsById:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred while fetching user achievements"
+    });
+  }
+};
+
 export const getUserGamification = async (req, res) => {
   try {
     // Find the logged-in user with specific fields
@@ -692,8 +764,8 @@ export const getUserGamification = async (req, res) => {
     );
 
     if (!user) {
-      return res.status(StatusCodes.NOT_FOUND).json({ 
-        message: "User not found" 
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "User not found"
       });
     }
 
@@ -701,8 +773,8 @@ export const getUserGamification = async (req, res) => {
     const progress = getUserProgress(user);
 
     // Calculate user's rank
-    const userRank = await User.countDocuments({ 
-      totalPoints: { $gt: user.totalPoints } 
+    const userRank = await User.countDocuments({
+      totalPoints: { $gt: user.totalPoints }
     }) + 1;
 
     // Retrieve top 20 users
@@ -755,8 +827,8 @@ export const getUserGamification = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in getUserGamification:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
-      message: "An error occurred while fetching user gamification details" 
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred while fetching user gamification details"
     });
   }
 };

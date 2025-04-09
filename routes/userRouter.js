@@ -19,7 +19,8 @@ import {
   deleteSuggestion,
   updateSuggestionStatus,
   userSuggestions,
-  getUserGamification
+  getUserGamification,
+  getUserAchievementsById
 } from "../controllers/userController.js";
 import { searchUsers, checkFollowing } from "../controllers/userSearchController.js";
 import upload from "../middleware/multer.js";
@@ -58,6 +59,7 @@ router.patch('/suggestions/:suggestionId/status', authenticateUser, profileMiddl
 
 // Gamification routes
 router.get('/gamification', authenticateUser, getUserGamification);
+router.get('/achievements/:id', getUserAchievementsById);
 
 // User search routes
 router.get('/search', searchUsers);

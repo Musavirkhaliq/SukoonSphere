@@ -144,6 +144,9 @@ export const UserFollowers = createOptimizedComponent(
 export const UserFollowing = createOptimizedComponent(
   () => import("./user/userProfile/UserFollowing")
 );
+export const UserAchievements = createOptimizedComponent(
+  () => import("./user/userProfile/UserAchievements")
+);
 
 // Media Library
 export const YoutubeEmbed = createOptimizedComponent(
