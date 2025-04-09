@@ -51,9 +51,21 @@ export const createRoom = async (req, res) => {
 export const getUserRooms = async (req, res) => {
   try {
     const { userId } = req.user;
+    const { search } = req.query;
+
+    // Create base query
+    let query = { "members.user": userId };
+
+    // Add search filter if provided
+    if (search && search.trim()) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } }
+      ];
+    }
 
     // Find all rooms where user is a member
-    const rooms = await Room.find({ "members.user": userId })
+    const rooms = await Room.find(query)
       .populate("members.user", "name avatar")
       .populate("createdBy", "name avatar")
       .populate("lastMessageSender", "name avatar")
@@ -447,12 +459,24 @@ export const inviteToRoom = async (req, res) => {
 export const getPublicRooms = async (req, res) => {
   try {
     const { userId } = req.user;
+    const { search } = req.query;
 
-    // Find all public rooms where user is not a member
-    const publicRooms = await Room.find({
+    // Create base query
+    let query = {
       isPublic: true,
       "members.user": { $ne: userId }
-    })
+    };
+
+    // Add search filter if provided
+    if (search && search.trim()) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    // Find all public rooms where user is not a member
+    const publicRooms = await Room.find(query)
       .populate("members.user", "name avatar")
       .populate("createdBy", "name avatar")
       .sort({ updatedAt: -1 });

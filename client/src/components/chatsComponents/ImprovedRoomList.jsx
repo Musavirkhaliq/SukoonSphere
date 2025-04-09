@@ -1,22 +1,26 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { format, isToday, isYesterday } from "date-fns";
-import { 
-  FaUsers, FaMicrophone, FaPaperclip, FaImage, 
+import {
+  FaUsers, FaMicrophone, FaPaperclip, FaImage,
   FaLock, FaGlobe, FaUserPlus, FaSpinner, FaEllipsisH,
   FaInfoCircle, FaSignOutAlt, FaUserCog
 } from "react-icons/fa";
 
 const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin }) => {
+  // Return null if room is undefined
+  if (!room || !room._id) {
+    return null;
+  }
   const [isJoining, setIsJoining] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  
+
   // Format time for last message
   const getFormattedTime = (timestamp) => {
     if (!timestamp) return "";
-    
+
     const date = new Date(timestamp);
-    
+
     if (isToday(date)) {
       return format(date, "h:mm a");
     } else if (isYesterday(date)) {
@@ -25,11 +29,11 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
       return format(date, "MMM d");
     }
   };
-  
+
   // Get appropriate icon for message type
   const getMessageIcon = (message) => {
     if (!message) return null;
-    
+
     if (message.includes('🎤') || message.includes('voice message')) {
       return <FaMicrophone className="mr-1 text-blue-500 flex-shrink-0" size={12} />;
     } else if (message.includes('image') || message.includes('photo')) {
@@ -37,10 +41,10 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
     } else if (message === 'Attachment' || message.includes('file')) {
       return <FaPaperclip className="mr-1 text-gray-500 flex-shrink-0" size={12} />;
     }
-    
+
     return null;
   };
-  
+
   // Handle joining a room
   const handleJoin = async (e) => {
     e.preventDefault();
@@ -52,7 +56,7 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
       setIsJoining(false);
     }
   };
-  
+
   // For public rooms that the user hasn't joined yet
   if (isPublic) {
     return (
@@ -62,13 +66,13 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
           {room?.image ? (
             <img
               src={room.image}
-              alt={room.name}
+              alt={room?.name || "Room"}
               className="w-12 h-12 rounded-full object-cover border border-gray-200"
             />
           ) : (
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center">
               <span className="text-white font-medium text-lg">
-                {room?.name?.[0]?.toUpperCase()}
+                {room?.name?.[0]?.toUpperCase() || "R"}
               </span>
             </div>
           )}
@@ -76,21 +80,21 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
             <FaGlobe className="text-green-500" size={10} />
           </div>
         </div>
-        
+
         {/* Room Info */}
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center">
-            <h3 className="font-medium text-gray-900 truncate">{room?.name}</h3>
+            <h3 className="font-medium text-gray-900 truncate">{room?.name || "Unnamed Room"}</h3>
             <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
               {getFormattedTime(room?.updatedAt)}
             </span>
           </div>
-          
+
           <div className="flex justify-between items-center mt-1">
             <div className="flex items-center text-sm text-gray-600 truncate max-w-[80%]">
               <FaUsers className="mr-1 text-gray-500" size={12} />
               <span className="text-gray-500 truncate">
-                {room.members?.length || 0} members
+                {room?.members?.length || 0} members
               </span>
             </div>
 
@@ -134,18 +138,18 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
           {room?.image ? (
             <img
               src={room.image}
-              alt={room.name}
+              alt={room?.name || "Room"}
               className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm"
             />
           ) : (
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center shadow-sm">
               <span className="text-white font-medium text-lg">
-                {room?.name?.[0]?.toUpperCase()}
+                {room?.name?.[0]?.toUpperCase() || "R"}
               </span>
             </div>
           )}
           <div className="absolute bottom-0 right-0 p-1 bg-white rounded-full">
-            {room.isPublic ? (
+            {room?.isPublic ? (
               <FaGlobe className="text-green-500" size={10} />
             ) : (
               <FaLock className="text-gray-500" size={10} />
@@ -155,12 +159,12 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
 
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center">
-            <h3 className="font-medium text-gray-900 truncate">{room?.name}</h3>
+            <h3 className="font-medium text-gray-900 truncate">{room?.name || "Unnamed Room"}</h3>
             <div className="flex items-center">
               <span className="text-xs text-gray-500 whitespace-nowrap">
                 {getFormattedTime(room?.lastMessageTime || room?.updatedAt)}
               </span>
-              <button 
+              <button
                 className="ml-2 text-gray-400 hover:text-gray-600 p-1"
                 onClick={(e) => {
                   e.preventDefault();
@@ -179,20 +183,20 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
               {room?.lastMessageSender ? (
                 <span className="truncate">
                   <span className="font-medium mr-1">
-                    {room.lastMessageSender._id === room.createdBy._id
-                      ? `${room.lastMessageSender.name} (Admin):`
-                      : `${room.lastMessageSender.name}:`}
+                    {room?.lastMessageSender?._id === room?.createdBy?._id
+                      ? `${room?.lastMessageSender?.name || 'User'} (Admin):`
+                      : `${room?.lastMessageSender?.name || 'User'}:`}
                   </span>
-                  <span className="text-gray-500">{room.lastMessage}</span>
+                  <span className="text-gray-500">{room?.lastMessage || ""}</span>
                 </span>
               ) : (
-                <span className="truncate text-gray-500 italic">{room.lastMessage || "No messages yet"}</span>
+                <span className="truncate text-gray-500 italic">{room?.lastMessage || "No messages yet"}</span>
               )}
             </div>
 
             <div className="flex items-center">
               <FaUsers className="text-gray-400 mr-1" size={12} />
-              <span className="text-xs text-gray-500">{room.members?.length || 0}</span>
+              <span className="text-xs text-gray-500">{room?.members?.length || 0}</span>
             </div>
           </div>
         </div>
@@ -212,7 +216,7 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
             >
               <FaInfoCircle className="mr-2 text-blue-500" /> Room Info
             </button>
-            
+
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -223,7 +227,7 @@ const ImprovedRoomList = ({ room, isActive, onClose, isPublic = false, onJoin })
             >
               <FaUserCog className="mr-2 text-blue-500" /> Manage Members
             </button>
-            
+
             <button
               onClick={(e) => {
                 e.stopPropagation();

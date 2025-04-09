@@ -5,9 +5,9 @@ import customFetch from "@/utils/customFetch";
 import socket from "@/utils/socket/socket";
 import { debounce } from "lodash";
 import {
-  FaEye, FaEyeSlash, FaFilter, FaUsers, FaComments, FaPlus,
-  FaSearch, FaTimes, FaGlobe, FaLock, FaBell, FaUserPlus,
-  FaChevronDown, FaChevronUp, FaEllipsisH, FaSort, FaSortAmountDown, FaSortAmountUp
+  FaEye, FaEyeSlash, FaUsers, FaComments, FaPlus,
+  FaSearch, FaTimes, FaGlobe, FaBell,
+  FaChevronDown, FaChevronUp, FaSortAmountDown, FaSortAmountUp
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -51,9 +51,14 @@ const ImprovedChatSidebar = ({ onClose }) => {
       const { data } = await customFetch.get("/chats", {
         params: { search },
       });
-      setChats(data.chats);
-      updateFilteredChats(data.chats);
-      setSearchChatResults(data.users);
+
+      // Ensure we have valid data before updating state
+      const chatsArray = Array.isArray(data?.chats) ? data.chats : [];
+      const usersArray = Array.isArray(data?.users) ? data.users : [];
+
+      setChats(chatsArray);
+      updateFilteredChats(chatsArray);
+      setSearchChatResults(usersArray);
     } catch (error) {
       console.error("Error fetching chats:", error);
       toast.error("Failed to load chats");
@@ -67,7 +72,9 @@ const ImprovedChatSidebar = ({ onClose }) => {
     try {
       setIsLoading(prev => ({ ...prev, rooms: true }));
       const { data } = await customFetch.get("/rooms");
-      setRooms(data);
+      // Ensure we have valid data
+      const roomsArray = Array.isArray(data) ? data : [];
+      setRooms(roomsArray);
     } catch (error) {
       console.error("Error fetching rooms:", error);
       toast.error("Failed to load rooms");
@@ -81,12 +88,44 @@ const ImprovedChatSidebar = ({ onClose }) => {
     try {
       setIsLoading(prev => ({ ...prev, publicRooms: true }));
       const { data } = await customFetch.get("/rooms/public");
-      setPublicRooms(data);
+      // Ensure we have valid data
+      const publicRoomsArray = Array.isArray(data) ? data : [];
+      setPublicRooms(publicRoomsArray);
     } catch (error) {
       console.error("Error fetching public rooms:", error);
       toast.error("Failed to load public rooms");
     } finally {
       setIsLoading(prev => ({ ...prev, publicRooms: false }));
+    }
+  };
+
+  // Function to search rooms
+  const searchRooms = async (searchQuery) => {
+    try {
+      setIsLoading(prev => ({ ...prev, rooms: true, publicRooms: true }));
+
+      // Search user's rooms
+      const userRoomsResponse = await customFetch.get("/rooms", {
+        params: { search: searchQuery }
+      });
+
+      // Ensure we have valid data
+      const userRoomsArray = Array.isArray(userRoomsResponse?.data) ? userRoomsResponse.data : [];
+      setRooms(userRoomsArray);
+
+      // Search public rooms
+      const publicRoomsResponse = await customFetch.get("/rooms/public", {
+        params: { search: searchQuery }
+      });
+
+      // Ensure we have valid data
+      const publicRoomsArray = Array.isArray(publicRoomsResponse?.data) ? publicRoomsResponse.data : [];
+      setPublicRooms(publicRoomsArray);
+    } catch (error) {
+      console.error("Error searching rooms:", error);
+      toast.error("Failed to search rooms");
+    } finally {
+      setIsLoading(prev => ({ ...prev, rooms: false, publicRooms: false }));
     }
   };
 
@@ -96,7 +135,9 @@ const ImprovedChatSidebar = ({ onClose }) => {
       setIsLoading(prev => ({ ...prev, joinRequests: true }));
       // This endpoint would need to be implemented in the backend
       const { data } = await customFetch.get("/rooms/join-requests/pending");
-      setPendingJoinRequests(data || []);
+      // Ensure we have valid data
+      const pendingRequestsArray = Array.isArray(data) ? data : [];
+      setPendingJoinRequests(pendingRequestsArray);
     } catch (error) {
       console.error("Error fetching pending join requests:", error);
       // Don't show error toast as this might not be implemented yet
@@ -235,7 +276,20 @@ const ImprovedChatSidebar = ({ onClose }) => {
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    debouncedFetchChats(value);
+
+    if (activeTab === "chats") {
+      debouncedFetchChats(value);
+    } else if (activeTab === "rooms") {
+      // If in rooms tab, search rooms
+      if (value.trim().length > 0) {
+        // Search both user rooms and public rooms
+        searchRooms(value);
+      } else {
+        // If search is cleared, fetch all rooms again
+        fetchRooms();
+        fetchPublicRooms();
+      }
+    }
   };
 
   // Calculate unread counts
@@ -377,6 +431,14 @@ const ImprovedChatSidebar = ({ onClose }) => {
               </div>
             )}
 
+            {/* No Results Message */}
+            {searchTerm && chats.length === 0 && searchChatResults?.length === 0 && (
+              <div className="p-6 text-center text-gray-500">
+                <p className="mb-2">No results found for "{searchTerm}"</p>
+                <p className="text-sm">Try a different search term or check your spelling</p>
+              </div>
+            )}
+
             {/* Chats List */}
             <div className="divide-y divide-gray-100">
               {isLoading.chats ? (
@@ -426,6 +488,14 @@ const ImprovedChatSidebar = ({ onClose }) => {
           </>
         ) : (
           <>
+            {/* No Results Message for Rooms */}
+            {searchTerm && rooms.length === 0 && publicRooms.length === 0 && (
+              <div className="p-6 text-center text-gray-500">
+                <p className="mb-2">No rooms found for "{searchTerm}"</p>
+                <p className="text-sm">Try a different search term or check your spelling</p>
+              </div>
+            )}
+
             {/* Rooms Section */}
             <div className="bg-gray-50 border-b">
               <div className="p-3 flex justify-between items-center cursor-pointer" onClick={() => toggleSection("yourRooms")}>
