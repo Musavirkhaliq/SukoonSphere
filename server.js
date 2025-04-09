@@ -32,6 +32,8 @@ import PrescriptionRouter from "./routes/prescriptionRouter.js";
 import ChatbotRouter from "./routes/chatbotRouter.js";
 import TherapyRouter from "./routes/therapyRouter.js";
 import AnalyticsRouter from "./routes/analyticsRouter.js";
+import RoomRouter from "./routes/roomRouter.js";
+import RoomMessageRouter from "./routes/roomMessageRouter.js";
 
 // models
 import Notification from "./models/notifications/postNotificationModel.js";
@@ -99,6 +101,8 @@ app.use("/api/v1/prescriptions", PrescriptionRouter);
 app.use("/api/v1/chatbot", ChatbotRouter);
 app.use("/api/v1/therapy", TherapyRouter);
 app.use("/api/v1/analytics", AnalyticsRouter);
+app.use("/api/v1/rooms", RoomRouter);
+app.use("/api/v1/room-messages", RoomMessageRouter);
 
 // Serve Static Files
 app.use("/public", express.static(path.resolve(__dirname, "./public")));
@@ -116,8 +120,9 @@ app.use("*", (req, res) => {
 // Error Handling Middleware
 app.use(errorHandlerMiddleware);
 
-// Track open chats to prevent sending notifications
+// Track open chats and rooms to prevent sending notifications
 const openChats = new Map(); // Map of userId -> Set of chatIds
+const openRooms = new Map(); // Map of userId -> Set of roomIds
 
 // Socket.IO Connection
 io.on('connection', (socket) => {
@@ -146,6 +151,23 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Track when a user opens a room
+  socket.on('roomOpen', ({ roomId, userId }) => {
+    if (!openRooms.has(userId)) {
+      openRooms.set(userId, new Set());
+    }
+    openRooms.get(userId).add(roomId);
+    console.log(`User ${userId} opened room ${roomId}`);
+  });
+
+  // Track when a user closes a room
+  socket.on('roomClosed', ({ roomId, userId }) => {
+    if (openRooms.has(userId)) {
+      openRooms.get(userId).delete(roomId);
+      console.log(`User ${userId} closed room ${roomId}`);
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });
@@ -165,4 +187,4 @@ const PORT = process.env.PORT || 5100; // Default to 5100 if PORT is not set
   }
 })();
 
-export { io, openChats }; // Export the io instance and openChats map for use in controllers
+export { io, openChats, openRooms }; // Export the io instance, openChats and openRooms maps for use in controllers

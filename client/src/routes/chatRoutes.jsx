@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
 import { Chat } from "@/pages";
 import ChatOutlet from "@/pages/chats/ChatOutlet";
+import RoomOutlet from "@/pages/chats/RoomOutlet";
 import { DefaultChat } from "@/components";
 
 export const chatRoutes = [
@@ -15,11 +16,15 @@ export const chatRoutes = [
     children: [
       {
         index: true,
-        element: <DefaultChat />, 
+        element: <DefaultChat />,
       },
       {
         path: ":id",
         element: <ChatOutlet />,
+      },
+      {
+        path: "room/:id",
+        element: <RoomOutlet />,
       },
     ],
   },

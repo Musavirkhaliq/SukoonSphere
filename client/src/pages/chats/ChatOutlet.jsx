@@ -13,10 +13,20 @@ const ChatOutlet = () => {
   const [activeUser, setActiveUser] = useState({});
   const [chat, setChat] = useState({});
   const [isInitialFetch, setIsInitialFetch] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread message count
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const { data } = await customFetch.get('/messages/total-unseen');
+      setUnreadCount(data.count || 0);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  }, []);
 
   // Fetch chat messages
- // In ChatOutlet.jsx
-const fetchChatMessages = useCallback(async () => {
+  const fetchChatMessages = useCallback(async () => {
   try {
     const { data } = await customFetch.get(`/messages/${id}`);
     console.log({ data });
@@ -46,10 +56,11 @@ const seenMessages = useCallback(async () => {
     console.error("Error marking messages as seen:", error);
   }
 }, [id, user?.userId]);
-  // Initial fetch of messages
+  // Initial fetch of messages and unread count
   useEffect(() => {
     fetchChatMessages();
-  }, [id]);
+    fetchUnreadCount();
+  }, [id, fetchChatMessages, fetchUnreadCount]);
 
   // Handle real-time updates and seen status
   useEffect(() => {
@@ -107,6 +118,9 @@ const seenMessages = useCallback(async () => {
       socket.off("messageSent", handleMessageSent);
       socket.off("messagesSeen", handleMessagesSeen);
 
+      // Update unread count when leaving the chat
+      fetchUnreadCount();
+
       // Inform server that chat is no longer open
       socket.emit('chatClosed', { chatId: id, userId: user?.userId });
       clearInterval(interval);
@@ -121,6 +135,7 @@ const seenMessages = useCallback(async () => {
           onMenuClick={toggleSidebar}
           totalMessages={messages?.length}
           setMessages={setMessages}
+          unreadCount={unreadCount}
         />
       </div>
 

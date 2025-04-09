@@ -11,10 +11,10 @@ const DefaultChat = () => {
             <img src={logo} alt="logo" />
           </div>
         </div>
-        
+
         {/* Title */}
         <h1 className="text-2xl font-medium mb-4">SukoonSphere</h1>
-        
+
         {/* Description */}
         <div className="text-center max-w-md px-4">
           <p className="mb-2">Send and receive wellness messages without keeping your phone online.</p>

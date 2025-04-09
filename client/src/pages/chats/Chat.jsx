@@ -1,18 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useParams, useLocation } from "react-router-dom";
-import { ChatSidebar } from "@/components";
+// Import the improved sidebar component
+import ImprovedChatSidebar from "@/components/chatsComponents/ImprovedChatSidebar";
 
 const Chat = () => {
   const { id } = useParams();
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(id ? false : true);
+  // Always keep sidebar closed on mobile by default
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
 
-  // Close sidebar on mobile when navigating to a chat
+  // Close sidebar on mobile when navigating to a chat or location changes
   useEffect(() => {
-    if (window.innerWidth < 1024 && id) {
+    if (window.innerWidth < 1024) {
       setIsSidebarOpen(false);
     }
   }, [id, location]);
+
+  // Listen for window resize to handle responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div
@@ -37,15 +53,15 @@ const Chat = () => {
             className={`
               fixed inset-y-0 left-0 z-30 w-full sm:w-96 md:w-80 bg-white transform transition-transform duration-300 ease-in-out
               lg:relative lg:transform-none lg:transition-none lg:h-full lg:min-h-0
-              shadow-lg lg:shadow-none
+              shadow-lg lg:shadow-md lg:border-r border-gray-200
               ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             `}
           >
-            <ChatSidebar onClose={() => setIsSidebarOpen(false)} />
+            <ImprovedChatSidebar onClose={() => setIsSidebarOpen(false)} />
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 w-full bg-white lg:border-l overflow-hidden">
+          <div className="flex-1 w-full bg-white overflow-hidden">
             <Outlet
               context={{
                 toggleSidebar: () => setIsSidebarOpen(!isSidebarOpen),

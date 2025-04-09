@@ -1,11 +1,8 @@
-// components/chat/FileAttachment.jsx
 import { useState, useRef, useEffect } from "react";
-import { IoDownload, IoPlay, IoPause, IoVolumeMedium, IoVolumeMute } from "react-icons/io5";
-import { BsFileEarmarkText, BsImage, BsFileEarmarkMusic } from "react-icons/bs";
-import { FaMicrophone } from "react-icons/fa";
-import "./VoiceMessagePlayer.css";
+import { FaDownload, FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaFile, FaImage, FaFileAudio, FaMicrophone } from "react-icons/fa";
 
-const baseUrl =  "http://localhost:5100";
+// Use the correct base URL for your environment
+const baseUrl = ""; // Empty string means relative to current domain
 
 const DownloadButton = ({ filePath, fileName, className = "" }) => (
   <a
@@ -14,7 +11,7 @@ const DownloadButton = ({ filePath, fileName, className = "" }) => (
     className={`group flex items-center gap-2 px-2 py-1 bg-gray-800 bg-opacity-70 rounded hover:bg-opacity-90 transition-all ${className}`}
     onClick={(e) => e.stopPropagation()}
   >
-    <IoDownload className="text-white text-sm" />
+    <FaDownload className="text-white text-sm" />
     <span className="text-white text-xs">Download</span>
   </a>
 );
@@ -29,13 +26,14 @@ const FileInfo = ({ fileName, fileSize, className = "" }) => (
 const FileAttachment = ({ attachment }) => {
   const [imageError, setImageError] = useState(false);
 
-  switch (attachment.fileType) {
+  // Handle different types of attachments
+  switch (attachment.type || attachment.fileType) {
     case 'image':
       return (
         <div className="relative group">
           {imageError ? (
             <div className="w-64 h-64 bg-gray-800 rounded flex flex-col items-center justify-center p-4">
-              <BsImage className="text-gray-400 text-4xl mb-2" />
+              <FaImage className="text-gray-400 text-4xl mb-2" />
               <span className="text-gray-400 text-sm text-center">Failed to load image</span>
               <FileInfo fileName={attachment.fileName} fileSize={attachment.fileSize} className="mt-2 text-center" />
             </div>
@@ -86,7 +84,7 @@ const FileAttachment = ({ attachment }) => {
       return (
         <div className="bg-gray-800 rounded-lg p-3 max-w-64">
           <div className="flex items-center gap-3 mb-2">
-            <BsFileEarmarkMusic className="text-gray-400 text-2xl" />
+            <FaFileAudio className="text-gray-400 text-2xl" />
             <FileInfo fileName={attachment.fileName} fileSize={attachment.fileSize} />
           </div>
           <audio
@@ -105,7 +103,7 @@ const FileAttachment = ({ attachment }) => {
       return (
         <div className="bg-gray-800 rounded-lg p-3 max-w-64">
           <div className="flex items-center gap-3 mb-2">
-            <BsFileEarmarkText className="text-gray-400 text-2xl" />
+            <FaFile className="text-gray-400 text-2xl" />
             <FileInfo fileName={attachment.fileName} fileSize={attachment.fileSize} />
           </div>
           <div className="flex justify-end">
@@ -276,7 +274,7 @@ const VoiceMessagePlayer = ({ attachment, baseUrl }) => {
             className="voice-play-button"
             onClick={togglePlay}
           >
-            {isPlaying ? <IoPause size={18} /> : <IoPlay size={18} className="ml-1" />}
+            {isPlaying ? <FaPause size={18} /> : <FaPlay size={18} className="ml-1" />}
           </button>
 
           <div className="voice-volume-controls">
@@ -284,7 +282,7 @@ const VoiceMessagePlayer = ({ attachment, baseUrl }) => {
               className="voice-volume-button"
               onClick={toggleMute}
             >
-              {isMuted ? <IoVolumeMute size={20} /> : <IoVolumeMedium size={20} />}
+              {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
             </button>
 
             <input

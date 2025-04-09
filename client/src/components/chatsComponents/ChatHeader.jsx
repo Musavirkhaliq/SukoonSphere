@@ -5,7 +5,7 @@ import DeleteModal from '../shared/DeleteModal';
 import { toast } from 'react-toastify';
 import customFetch from '@/utils/customFetch';
 
-const ChatHeader = ({ activeUser, onMenuClick, totalMessages, setMessages }) => {
+const ChatHeader = ({ activeUser, onMenuClick, totalMessages, setMessages, unreadCount = 0 }) => {
   const {id:chatId} = useParams();
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -34,23 +34,30 @@ const ChatHeader = ({ activeUser, onMenuClick, totalMessages, setMessages }) => 
     <>
       <div className="px-4 py-3 flex items-center justify-between bg-white">
         <div className="flex items-center space-x-3">
-          <button
-            onClick={goBack}
-            className="md:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-200"
-            aria-label="Go back"
-          >
-            <MdArrowBack className="w-5 h-5" />
-          </button>
+          <div className="flex items-center">
+            <button
+              onClick={goBack}
+              className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-200"
+              aria-label="Go back"
+            >
+              <MdArrowBack className="w-5 h-5" />
+            </button>
 
-          <button
-            onClick={onMenuClick}
-            className="hidden md:block lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-200"
-            aria-label="Open sidebar"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+            <button
+              onClick={onMenuClick}
+              className="p-2 ml-1 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200 flex items-center justify-center relative"
+              aria-label="Open sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
 
           <div className="relative">
             {activeUser?.avatar ? (

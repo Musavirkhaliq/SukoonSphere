@@ -20,7 +20,7 @@ const MessageContent = ({ message, isOwnMessage }) => {
         <div className="break-words mb-1 leading-relaxed">{message.content}</div>
       )}
 
-      {message.hasAttachment && (
+      {message.attachments && message.attachments.length > 0 && (
         <div className="space-y-2 mt-2">
           {message.attachments.map((attachment, index) => (
             <div key={index} className="rounded-lg overflow-hidden">
@@ -32,11 +32,11 @@ const MessageContent = ({ message, isOwnMessage }) => {
 
       <div className={`flex items-center gap-1 mt-1 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
         <span className={`block text-[10px] ${isOwnMessage ? 'text-gray-200' : 'text-gray-500'}`}>
-          {timeAgo(message?.updatedAt)}
+          {timeAgo(message?.createdAt)}
         </span>
         {isOwnMessage && (
           <span className="block text-[10px] ml-1">
-            {message?.seen ? (
+            {message?.seenBy?.some(seen => seen.user !== message.sender._id) ? (
               <span className="text-green-300">✓✓</span>
             ) : (
               <span className="text-gray-200">✓</span>
