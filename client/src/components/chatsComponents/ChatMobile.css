@@ -76,4 +76,16 @@
     z-index: 15 !important;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
   }
+
+  /* Fix for search input on mobile */
+  .chat-search-input:focus {
+    position: relative !important;
+    z-index: 40 !important;
+  }
+
+  /* Ensure sidebar stays visible when search is focused */
+  /* Using a class that will be added via JS for better browser compatibility */
+  .sidebar-search-focused {
+    transform: translateX(0) !important;
+  }
 }

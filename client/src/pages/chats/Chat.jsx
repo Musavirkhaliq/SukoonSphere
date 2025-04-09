@@ -12,27 +12,29 @@ const Chat = () => {
   const location = useLocation();
   // Always keep sidebar closed on mobile by default
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
+  // Flag to prevent sidebar from closing when search is focused
+  const [preventSidebarClose, setPreventSidebarClose] = useState(false);
 
   // Close sidebar on mobile when navigating to a chat or location changes
   useEffect(() => {
-    if (window.innerWidth < 1024) {
+    if (window.innerWidth < 1024 && !preventSidebarClose) {
       setIsSidebarOpen(false);
     }
-  }, [id, location]);
+  }, [id, location, preventSidebarClose]);
 
   // Listen for window resize to handle responsive behavior
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         setIsSidebarOpen(true);
-      } else {
+      } else if (!preventSidebarClose) {
         setIsSidebarOpen(false);
       }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [preventSidebarClose]);
 
   return (
     <div
@@ -62,7 +64,11 @@ const Chat = () => {
             `}
             style={{ top: '65px', height: 'calc(100% - 65px)' }}
           >
-            <ImprovedChatSidebar onClose={() => setIsSidebarOpen(false)} />
+            <ImprovedChatSidebar
+              onClose={() => setIsSidebarOpen(false)}
+              setPreventSidebarClose={setPreventSidebarClose}
+              keepSidebarOpen={() => setIsSidebarOpen(true)}
+            />
           </div>
 
           {/* Main Content */}

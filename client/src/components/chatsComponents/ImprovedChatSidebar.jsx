@@ -16,7 +16,7 @@ import ImprovedRoomList from "./ImprovedRoomList";
 import SearchChatPersons from "./SearchChatPersons";
 import CreateRoomModal from "./CreateRoomModal";
 
-const ImprovedChatSidebar = ({ onClose }) => {
+const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen }) => {
   const { user } = useUser();
   const [chats, setChats] = useState([]);
   const [rooms, setRooms] = useState([]);
@@ -398,14 +398,32 @@ const ImprovedChatSidebar = ({ onClose }) => {
             type="text"
             value={searchTerm}
             onChange={handleSearchChange}
+            onFocus={() => {
+              // Prevent sidebar from closing when search is focused
+              if (setPreventSidebarClose) {
+                setPreventSidebarClose(true);
+                // Make sure sidebar is open when search is focused
+                if (keepSidebarOpen) keepSidebarOpen();
+                // Add class for CSS selector compatibility
+                document.querySelector('.chat-sidebar')?.classList.add('sidebar-search-focused');
+              }
+            }}
+            onBlur={() => {
+              // Allow sidebar to close again when search loses focus
+              if (setPreventSidebarClose) setPreventSidebarClose(false);
+              // Remove the class when focus is lost
+              document.querySelector('.chat-sidebar')?.classList.remove('sidebar-search-focused');
+            }}
             placeholder={activeTab === "chats" ? "Search chats or users..." : "Search rooms..."}
-            className="pl-10 pr-10 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="pl-10 pr-10 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent chat-search-input"
           />
           {searchTerm && (
             <button
               onClick={() => {
                 setSearchTerm("");
                 fetchChats();
+                // Keep focus on the search input after clearing
+                document.querySelector('.chat-search-input')?.focus();
               }}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
               aria-label="Clear search"
