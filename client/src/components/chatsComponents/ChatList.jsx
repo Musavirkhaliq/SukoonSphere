@@ -87,9 +87,9 @@ const ChatList = ({ chat, person, isActive, user, onClose }) => {
             )}
           </div>
 
-          {chat.hasUnreadMessages && !isActive && (
+          {chat.hasUnreadMessages && !isLastMessageFromMe && !isActive && (
             <span className="ml-auto flex-shrink-0 w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm">
-              {chat.totalUnreadMessages > 0 ? (chat.totalUnreadMessages > 99 ? '99+' : chat.totalUnreadMessages) : ''}
+              {chat.totalUnreadMessages > 0 ? (chat.totalUnreadMessages > 99 ? '99+' : chat.totalUnreadMessages) : '1'}
             </span>
           )}
         </div>

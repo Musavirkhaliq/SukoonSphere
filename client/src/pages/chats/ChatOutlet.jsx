@@ -29,19 +29,30 @@ const ChatOutlet = () => {
   const fetchChatMessages = useCallback(async () => {
   try {
     const { data } = await customFetch.get(`/messages/${id}`);
-    console.log({ data });
     setMessages(data?.messages || []);
     setActiveUser(data?.receiver);
     setChat(data?.chat);
     setIsInitialFetch(false);
 
     // Mark messages as seen immediately after fetching them
-    const unseenMessages = data?.messages?.some(
+    // Check if there are any unseen messages from the other user
+    const hasUnseenMessages = data?.messages?.some(
       (msg) => !msg.seen && msg.sender._id !== user?.userId
     );
 
-    if (unseenMessages) {
-      await customFetch.patch(`/messages/mark-as-seen/${id}`);
+    if (hasUnseenMessages) {
+      try {
+        await customFetch.patch(`/messages/mark-as-seen/${id}`);
+        // Update the messages to show they're seen
+        setMessages(prev =>
+          prev.map(msg => ({
+            ...msg,
+            seen: msg.sender._id !== user?.userId ? true : msg.seen
+          }))
+        );
+      } catch (markError) {
+        console.error("Error marking messages as seen:", markError);
+      }
     }
   } catch (error) {
     console.error("Error fetching chat messages:", error);
@@ -50,8 +61,16 @@ const ChatOutlet = () => {
   // Mark messages as seen
 const seenMessages = useCallback(async () => {
   try {
-    // Just make the API call directly without checking messages
+    // Make the API call to mark messages as seen
     await customFetch.patch(`/messages/mark-as-seen/${id}`);
+
+    // Update local state to show messages as seen
+    setMessages(prev =>
+      prev.map(msg => ({
+        ...msg,
+        seen: msg.sender._id !== user?.userId ? true : msg.seen
+      }))
+    );
   } catch (error) {
     console.error("Error marking messages as seen:", error);
   }
@@ -100,14 +119,18 @@ const seenMessages = useCallback(async () => {
     };
 
     // Inform the server that this chat is currently open
-    // This will prevent sending notifications for this chat
+    // This will prevent sending notifications for this chat and mark messages as seen
     const informChatIsOpen = () => {
-      socket.emit('chatOpen', { chatId: id, userId: user?.userId });
+      if (user?.userId && id) {
+        socket.emit('chatOpen', { chatId: id, userId: user?.userId });
+        // Also mark messages as seen when the chat is opened
+        seenMessages();
+      }
     };
 
     // Call immediately and set up interval
     informChatIsOpen();
-    const interval = setInterval(informChatIsOpen, 30000); // Every 30 seconds
+    const interval = setInterval(informChatIsOpen, 15000); // Every 15 seconds
 
     socket.on("newMessage", handleNewMessage);
     socket.on("messageSent", handleMessageSent); // Listen for messages sent by current user

@@ -36,7 +36,7 @@ const MessageContent = ({ message, isOwnMessage }) => {
         </span>
         {isOwnMessage && (
           <span className="block text-[10px] ml-1">
-            {message?.seenBy?.some(seen => seen.user !== message.sender._id) ? (
+            {message?.seen ? (
               <span className="text-green-300">✓✓</span>
             ) : (
               <span className="text-gray-200">✓</span>

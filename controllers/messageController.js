@@ -59,28 +59,36 @@ export const sendMessage = async (req, res) => {
     );
 
     // Update chat's lastMessage, lastMessageSender, and updatedAt
-    const chat = await Chat.findByIdAndUpdate(chatId, {
-      lastMessage: messageContent,
-      lastMessageSender: sender,
-      updatedAt: Date.now(),
-      // Set hasUnreadMessages to true for the receiver
-      hasUnreadMessages: true,
-      // Increment totalUnreadMessages
-      $inc: { totalUnreadMessages: 1 }
-    });
+    const chat = await Chat.findById(chatId);
+
+    // Check if the chat exists
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
 
     // Get receiver ID
     const receiverId = chat.participants.find(
       (id) => id.toString() !== sender.toString()
     );
 
-    // Emit to both sender and receiver, but only create notification for receiver
-    io.to(receiverId.toString()).emit("newMessage", populatedMessage);
-    io.to(sender.toString()).emit("messageSent", populatedMessage); // Different event for sender
-
     // Check if the receiver has the chat open
     const isChatOpen = openChats.has(receiverId.toString()) &&
                       openChats.get(receiverId.toString()).has(chatId.toString());
+
+    // Update chat with new message info
+    await Chat.findByIdAndUpdate(chatId, {
+      lastMessage: messageContent,
+      lastMessageSender: sender,
+      updatedAt: Date.now(),
+      // Set hasUnreadMessages to true only if the chat is not open for the receiver
+      hasUnreadMessages: !isChatOpen,
+      // Increment totalUnreadMessages only if the chat is not open for the receiver
+      $inc: { totalUnreadMessages: isChatOpen ? 0 : 1 }
+    });
+
+    // Emit to both sender and receiver, but only create notification for receiver
+    io.to(receiverId.toString()).emit("newMessage", populatedMessage);
+    io.to(sender.toString()).emit("messageSent", populatedMessage); // Different event for sender
 
     // Only create a notification if the chat is not open
     if (!isChatOpen) {
@@ -151,6 +159,17 @@ export const markMessagesAsSeen = async (req, res) => {
     const { chatId } = req.params;
     const { userId } = req.user;
 
+    // Find the chat to verify it exists and the user is a participant
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    // Verify user is a participant in the chat
+    if (!chat.participants.some(id => id.toString() === userId)) {
+      return res.status(403).json({ message: "You are not a participant in this chat" });
+    }
+
     // Mark messages as seen
     const updatedMessages = await Message.updateMany(
       { chatId, seen: false, sender: { $ne: userId } },
@@ -174,22 +193,25 @@ export const markMessagesAsSeen = async (req, res) => {
       totalUnreadMessages: 0
     });
 
-    if (updatedMessages.modifiedCount > 0) {
-      const chat = await Chat.findById(chatId);
-      const senderId = chat.participants.find(
-        (id) => id.toString() !== userId.toString()
-      );
-      io.to(senderId.toString()).emit("messagesSeen", { chatId });
+    // Get the other participant's ID
+    const otherParticipantId = chat.participants.find(
+      (id) => id.toString() !== userId.toString()
+    );
 
-      // Update notification count for the user
-      const unreadCount = await PostNotification.countDocuments({
-        userId: userId,
-        seen: false
-      });
-
-      // Emit the updated count
-      io.to(userId.toString()).emit('notificationCount', unreadCount);
+    // Emit messagesSeen event even if no messages were updated
+    // This ensures the UI is updated correctly
+    if (otherParticipantId) {
+      io.to(otherParticipantId.toString()).emit("messagesSeen", { chatId });
     }
+
+    // Update notification count for the user
+    const unreadCount = await PostNotification.countDocuments({
+      userId: userId,
+      seen: false
+    });
+
+    // Emit the updated count
+    io.to(userId.toString()).emit('notificationCount', unreadCount);
 
     res.status(200).json({ success: true });
   } catch (error) {
