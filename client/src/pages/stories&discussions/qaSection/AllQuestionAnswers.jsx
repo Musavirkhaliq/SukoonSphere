@@ -10,6 +10,8 @@ import AnswerFilter from "@/components/qa/AnswerFilter";
 import { toast } from "react-toastify";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
+import { FiEdit } from "react-icons/fi";
+import { IoCloseOutline } from "react-icons/io5";
 
 const AllQuestionAnswers = () => {
   const { user } = useUser();
@@ -18,6 +20,11 @@ const AllQuestionAnswers = () => {
   const [activeFilter, setActiveFilter] = useState("newest");
   const { id } = useParams();
   const { ref, inView } = useInView();
+  const [showAnswerForm, setShowAnswerForm] = useState(false);
+  const [answerText, setAnswerText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAllAnswers, setShowAllAnswers] = useState(false);
+  const INITIAL_ANSWERS_TO_SHOW = 2; // Number of answers to show initially
 
   // Set up infinite query for answers
   const {
@@ -67,6 +74,42 @@ const AllQuestionAnswers = () => {
     } catch (error) {
       console.log(error);
       toast.error("Failed to delete question");
+    }
+  };
+
+  const handleAnswerButtonClick = () => {
+    if (!user) {
+      toast.error("Please login to answer questions");
+      return;
+    }
+    setShowAnswerForm(prev => !prev);
+    setAnswerText("");
+  };
+
+  const handleSubmitAnswer = async (e) => {
+    e.preventDefault();
+
+    if (!answerText.trim()) {
+      toast.error("Answer cannot be empty");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const response = await customFetch.post(
+        `/qa-section/question/${id}/add-answer`,
+        { context: answerText }
+      );
+
+      toast.success("Answer submitted successfully");
+      setShowAnswerForm(false);
+      setAnswerText("");
+      refetch();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.msg || "Failed to submit answer");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -121,6 +164,52 @@ const AllQuestionAnswers = () => {
             </span>
           ))}
         </div>
+
+        <div className="flex flex-wrap gap-2 mt-4 mb-2">
+          <button
+            onClick={handleAnswerButtonClick}
+            className={`inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+              showAnswerForm
+                ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                : "btn-2 shadow-sm hover:shadow-md"
+            }`}
+          >
+            {showAnswerForm ? (
+              <>
+                <IoCloseOutline className="h-5 w-5" />
+                Cancel
+              </>
+            ) : (
+              <>
+                <FiEdit className="h-5 w-5" />
+                Answer this question
+              </>
+            )}
+          </button>
+        </div>
+
+        {showAnswerForm && (
+          <form onSubmit={handleSubmitAnswer} className="mt-4 mb-4">
+            <div className="mb-4">
+              <textarea
+                value={answerText}
+                onChange={(e) => setAnswerText(e.target.value)}
+                placeholder="Write your answer here..."
+                className="w-full px-4 py-3 bg-[var(--pure)] rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all duration-300 placeholder-gray-400 min-h-[100px] resize-none"
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="btn-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting || !answerText.trim()}
+              >
+                {isSubmitting ? "Submitting..." : "Submit Answer"}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Answer Filter */}
@@ -131,7 +220,8 @@ const AllQuestionAnswers = () => {
 
       {/* Answers List */}
       <div className="space-y-4">
-        {allAnswers.map((answer) => (
+        {/* Show limited answers initially or all answers when expanded */}
+        {(showAllAnswers ? allAnswers : allAnswers.slice(0, INITIAL_ANSWERS_TO_SHOW)).map((answer) => (
           <Answer
             key={answer._id}
             answer={answer}
@@ -139,6 +229,22 @@ const AllQuestionAnswers = () => {
             answerCount={pagination?.totalAnswers || 0}
           />
         ))}
+
+        {/* Show/Hide answers button */}
+        {allAnswers.length > INITIAL_ANSWERS_TO_SHOW && (
+          <div className="text-center py-3">
+            <button
+              onClick={() => setShowAllAnswers(!showAllAnswers)}
+              className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-all duration-300"
+            >
+              {showAllAnswers ? (
+                <>Show less answers ({INITIAL_ANSWERS_TO_SHOW} of {allAnswers.length})</>
+              ) : (
+                <>Show all answers ({allAnswers.length - INITIAL_ANSWERS_TO_SHOW} more)</>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Loading indicator */}
         <div ref={ref} className="py-4 text-center">

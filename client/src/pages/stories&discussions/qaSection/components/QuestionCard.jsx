@@ -2,13 +2,16 @@ import { useState } from "react";
 import UserAvatar from "@/components/shared/UserAvatar";
 import PostActions from "@/components/shared/PostActions";
 import { FaUserMinus, FaUserPlus } from "react-icons/fa";
+import { FiEdit } from "react-icons/fi";
+import { IoCloseOutline } from "react-icons/io5";
 import { useUser } from "@/context/UserContext";
 import DeleteModal from "@/components/shared/DeleteModal";
 import customFetch from "@/utils/customFetch";
 import Answer from "./Answer";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
-const QuestionCard = ({ question }) => {
+const QuestionCard = ({ question, onAnswerSubmitted }) => {
   const { user } = useUser();
   const {
     _id,
@@ -18,9 +21,19 @@ const QuestionCard = ({ question }) => {
     createdAt,
     totalAnswers,
     mostLikedAnswer,
+    answers,
     author,
   } = question;
+
+  // Get a few answers to display (up to 3)
+  const previewAnswers = answers?.slice(0, 2) || [];
+  const hasMoreAnswers = totalAnswers > previewAnswers.length;
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAnswerForm, setShowAnswerForm] = useState(false);
+  const [answerText, setAnswerText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAnswerPreviews, setShowAnswerPreviews] = useState(false);
 
   const handleDeleteQuestion = async () => {
     try {
@@ -29,6 +42,50 @@ const QuestionCard = ({ question }) => {
       window.location.reload();
     } catch (error) {
       console.log(error);
+      toast.error("Failed to delete question");
+    }
+  };
+
+  const handleAnswerButtonClick = () => {
+    if (!user) {
+      toast.error("Please login to answer questions");
+      return;
+    }
+    setShowAnswerForm(prev => !prev);
+    setAnswerText("");
+  };
+
+  const handleSubmitAnswer = async (e) => {
+    e.preventDefault();
+
+    if (!answerText.trim()) {
+      toast.error("Answer cannot be empty");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const response = await customFetch.post(
+        `/qa-section/question/${_id}/add-answer`,
+        { context: answerText }
+      );
+
+      toast.success("Answer submitted successfully");
+      setShowAnswerForm(false);
+      setAnswerText("");
+
+      // Refresh the question data if callback provided
+      if (typeof onAnswerSubmitted === 'function') {
+        onAnswerSubmitted();
+      } else {
+        // Fallback to reload if no callback
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.msg || "Failed to submit answer");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -70,17 +127,100 @@ const QuestionCard = ({ question }) => {
         </div>
       </div>
 
-      {mostLikedAnswer && (
-        <div className=" mt-1">
-          <Answer answer={mostLikedAnswer} user={user} mostLikedAnswer={true} />
+      <div className="flex flex-wrap gap-2 mt-4">
+        <button
+          onClick={handleAnswerButtonClick}
+          className={`inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+            showAnswerForm
+              ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+              : "btn-2 shadow-sm hover:shadow-md"
+          }`}
+        >
+          {showAnswerForm ? (
+            <>
+              <IoCloseOutline className="h-5 w-5" />
+              Cancel
+            </>
+          ) : (
+            <>
+              <FiEdit className="h-5 w-5" />
+              Answer
+            </>
+          )}
+        </button>
+
+        <Link
+          to={`/QA-section/question/${_id}`}
+          className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 transition-all duration-300"
+        >
+          See more answers →
+        </Link>
+      </div>
+
+      {showAnswerForm && (
+        <form onSubmit={handleSubmitAnswer} className="mt-4">
+          <div className="mb-4">
+            <textarea
+              value={answerText}
+              onChange={(e) => setAnswerText(e.target.value)}
+              placeholder="Write your answer here..."
+              className="w-full px-4 py-3 bg-[var(--pure)] rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all duration-300 placeholder-gray-400 min-h-[100px] resize-none"
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="btn-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting || !answerText.trim()}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Answer"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Answer Previews Section */}
+      {totalAnswers > 0 && (
+        <div className="mt-4">
+          <div className="flex justify-between items-center mb-2">
+            <h4 className="text-sm font-medium text-gray-500">
+              {showAnswerPreviews ? "Answers:" : "Top Answer:"}
+            </h4>
+            {totalAnswers > 1 && (
+              <button
+                onClick={() => setShowAnswerPreviews(!showAnswerPreviews)}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+              >
+                {showAnswerPreviews ? "Show less" : `Show ${Math.min(previewAnswers.length, 2)} answers`}
+              </button>
+            )}
+          </div>
+
+          {/* Show only top answer when not expanded */}
+          {!showAnswerPreviews && mostLikedAnswer && (
+            <Answer answer={mostLikedAnswer} user={user} mostLikedAnswer={true} preview={true} />
+          )}
+
+          {/* Show preview answers when expanded */}
+          {showAnswerPreviews && previewAnswers.length > 0 && (
+            <div className="space-y-3">
+              {previewAnswers.map((answer) => (
+                <Answer key={answer._id} answer={answer} user={user} preview={true} />
+              ))}
+
+              {hasMoreAnswers && (
+                <Link
+                  to={`/QA-section/question/${_id}`}
+                  className="inline-block text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors mt-2"
+                >
+                  See {totalAnswers - previewAnswers.length} more answers
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       )}
-      <Link
-        to={`/QA-section/question/${_id}`}
-        className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
-      >
-        See more answers →
-      </Link>
 
       <DeleteModal
         isOpen={showDeleteModal}

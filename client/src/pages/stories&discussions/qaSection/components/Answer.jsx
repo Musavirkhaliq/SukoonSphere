@@ -4,12 +4,13 @@ import PostActions from "@/components/shared/PostActions";
 import UserAvatar from "@/components/shared/UserAvatar";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaRegComment, FaRegHeart } from "react-icons/fa";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const Answer = ({ answer: initialAnswer, user, answerCount }) => {
+const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, preview }) => {
   const navigate = useNavigate();
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [showAnswerDeleteModal, setShowAnswerDeleteModal] = useState(false);
@@ -21,6 +22,18 @@ const Answer = ({ answer: initialAnswer, user, answerCount }) => {
   const [answer, setAnswer] = useState(initialAnswer);
   const [editedContext, setEditedContext] = useState(answer.context);
   const [isEditing, setIsEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(!!mostLikedAnswer); // Auto-expand the most liked answer
+  const [shouldTruncate, setShouldTruncate] = useState(false);
+
+  // Use a shorter character limit for preview mode
+  const MAX_CHARS = preview ? 150 : 300;
+
+  // Check if the answer is long enough to truncate
+  useEffect(() => {
+    if (answer.context && answer.context.length > MAX_CHARS) {
+      setShouldTruncate(true);
+    }
+  }, [answer.context]);
 
   const handleDeleteAnswer = async () => {
     try {
@@ -79,15 +92,16 @@ const Answer = ({ answer: initialAnswer, user, answerCount }) => {
   };
 
   return (
-    <div className=" mt-2 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
+    <div className={`mt-2 ${preview ? 'p-3' : 'p-4'} bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 ${preview ? 'border-gray-50' : ''}`}>
       <div className="flex items-center justify-between mb-2">
         <UserAvatar
           createdBy={answer?.author?.userId}
           username={answer?.author?.username}
           userAvatar={answer?.author?.userAvatar}
           createdAt={answer?.createdAt}
+          compact={preview} // Use compact avatar for preview mode
         />
-        {user && answer.author?.userId === user?._id && (
+        {!preview && user && answer.author?.userId === user?._id && (
           <PostActions
             handleEdit={handleEdit}
             handleDelete={() => setShowAnswerDeleteModal(true)}
@@ -117,29 +131,61 @@ const Answer = ({ answer: initialAnswer, user, answerCount }) => {
             </div>
           </div>
         ) : (
-          <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">
-            {answer.context}
-          </p>
+          <div>
+            <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">
+              {shouldTruncate && !isExpanded
+                ? `${answer.context.substring(0, MAX_CHARS)}...`
+                : answer.context}
+            </p>
+
+            {shouldTruncate && (
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors mt-1"
+              >
+                {isExpanded ? (
+                  <>
+                    <FiChevronUp className="w-4 h-4" />
+                    Show less
+                  </>
+                ) : (
+                  <>
+                    <FiChevronDown className="w-4 h-4" />
+                    Read more
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         )}
       </div>
+      {/* Show interaction buttons in a more compact way for preview mode */}
       <div className="flex items-center gap-4 text-gray-500">
         <button
-          className={`flex items-center gap-2 ${
+          className={`flex items-center gap-1 ${
             isLiked ? "text-red-500" : ""
-          } hover:text-red-500 transition-colors`}
+          } hover:text-red-500 transition-colors ${preview ? 'text-sm' : ''}`}
           onClick={handleLikeAnswer}
+          disabled={preview} // Disable interactions in preview mode
         >
-          <FaRegHeart className={isLiked ? "fill-current" : ""} />
+          <FaRegHeart className={`${isLiked ? "fill-current" : ""} ${preview ? 'w-3 h-3' : ''}`} />
           <span>{likeCount}</span>
         </button>
-        <div
-          onClick={() => setShowCommentModal(true)}
-          className="flex items-center gap-2 hover:text-blue-500 transition-colors cursor-pointer"
-        >
-          <FaRegComment />
-          <span>{answer.totalComments}</span>
-        </div>
-        {answer.editedAt && (
+        {!preview ? (
+          <div
+            onClick={() => setShowCommentModal(true)}
+            className="flex items-center gap-2 hover:text-blue-500 transition-colors cursor-pointer"
+          >
+            <FaRegComment />
+            <span>{answer.totalComments}</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 text-sm">
+            <FaRegComment className="w-3 h-3" />
+            <span>{answer.totalComments}</span>
+          </div>
+        )}
+        {answer.editedAt && !preview && (
           <span className="text-xs text-gray-400 ml-auto">
             edited{" "}
             {formatDistanceToNow(new Date(answer.editedAt), {

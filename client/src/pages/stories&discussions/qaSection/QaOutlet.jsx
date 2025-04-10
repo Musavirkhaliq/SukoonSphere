@@ -11,12 +11,13 @@ const QaOutlet = () => {
   const { ref, inView } = useInView();
   const [activeFilter, setActiveFilter] = useState("newest");
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status, refetch } =
     useInfiniteQuery({
       queryKey: ["questions", activeFilter],
       queryFn: async ({ pageParam = 1 }) => {
+        // Use getAllQuestionsWithAnswer endpoint to get questions with their answers
         const response = await customFetch.get(
-          `/qa-section/all-questions?page=${pageParam}&limit=10&sortBy=${activeFilter}`
+          `/qa-section?page=${pageParam}&limit=10&sortBy=${activeFilter}`
         );
         return response.data;
       },
@@ -72,7 +73,11 @@ const QaOutlet = () => {
       {/* Questions List */}
       <div className="space-y-4">
         {allQuestions.map((question, index) => (
-          <QuestionCard key={`${question._id}-${index}`} question={question} />
+          <QuestionCard
+            key={`${question._id}-${index}`}
+            question={question}
+            onAnswerSubmitted={() => refetch()}
+          />
         ))}
 
         {/* Loading indicator */}

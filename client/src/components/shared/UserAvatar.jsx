@@ -3,7 +3,9 @@ import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 import { FaUserSecret } from "react-icons/fa";
 
-const UserAvatar = ({ createdBy, username, userAvatar, createdAt, size = "medium" }) => {
+const UserAvatar = ({ createdBy, username, userAvatar, createdAt, size = "medium", compact = false }) => {
+  // Use small size if compact mode is enabled
+  const effectiveSize = compact ? "small" : size;
   const sizeClasses = {
     small: {
       image: "w-5 h-5 sm:w-6 sm:h-6",
@@ -32,20 +34,20 @@ const UserAvatar = ({ createdBy, username, userAvatar, createdAt, size = "medium
   };
 
   return (
-    <div className={`flex ${sizeClasses[size].gap}`}>
+    <div className={`flex ${sizeClasses[effectiveSize].gap}`}>
       <img
         src={
           userAvatar ||
           `https://ui-avatars.com/api/?name=${encodeURIComponent(username || "Anonymous")}&background=random`
         }
         alt={username || "User"}
-        className={`${sizeClasses[size].image} rounded-full object-cover mt-1`}
+        className={`${sizeClasses[effectiveSize].image} rounded-full object-cover mt-1`}
       />
       <div className="cursor-pointer">
         {username === "Anonymous" ? (
           <Link className="hover:text-blue-400" to={`/about/user/${createdBy}`}>
             <div className="flex items-center gap-1">
-              <p className={`font-semibold text-[var(--grey--900)] ${sizeClasses[size].text} m-0 flex items-center gap-1 hover:underline`}>
+              <p className={`font-semibold text-[var(--grey--900)] ${sizeClasses[effectiveSize].text} m-0 flex items-center gap-1 hover:underline`}>
                 <FaUserSecret className="text-gray-500" />
                 {username}
               </p>
@@ -53,16 +55,19 @@ const UserAvatar = ({ createdBy, username, userAvatar, createdAt, size = "medium
           </Link>
         ) : (
           <Link className="hover:text-blue-400" to={`/about/user/${createdBy}`}>
-            <p className={`font-semibold text-[var(--grey--900)] capitalize ${sizeClasses[size].text} m-0 hover:underline`}>
+            <p className={`font-semibold text-[var(--grey--900)] capitalize ${sizeClasses[effectiveSize].text} m-0 hover:underline`}>
               {username}
             </p>
           </Link>
         )}
-        <p className={`${sizeClasses[size].date} text-gray-500 mb-0`}>
-          {createdAt
-            ? formatDistanceToNow(new Date(createdAt), { addSuffix: true })
-            : ""}
-        </p>
+        {/* Hide date in compact mode */}
+        {!compact && (
+          <p className={`${sizeClasses[effectiveSize].date} text-gray-500 mb-0`}>
+            {createdAt
+              ? formatDistanceToNow(new Date(createdAt), { addSuffix: true })
+              : ""}
+          </p>
+        )}
       </div>
     </div>
   );
