@@ -121,13 +121,18 @@ const SignIn = () => {
               <div className="flex-grow border-t border-gray-300"></div>
             </div>
 
-            <div className="flex justify-center space-x-4 mb-4">
+            <div className="flex justify-center mb-4">
               <a
                 href="/api/v1/auth/google"
-                className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-red-500 hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white text-gray-700 hover:bg-gray-100 transition-colors w-full max-w-[250px]"
               >
-                <FaGoogle size={20} />
+                <FaGoogle size={18} className="text-red-500" />
+                <span>Sign in with Google</span>
               </a>
+            </div>
+
+            {/* Disabled for now - will be enabled later
+            <div className="flex justify-center space-x-4 mb-4">
               <a
                 href="/api/v1/auth/facebook"
                 className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-blue-600 hover:bg-gray-100 transition-colors"
@@ -141,6 +146,7 @@ const SignIn = () => {
                 <FaTwitter size={20} />
               </a>
             </div>
+            */}
 
             <p className="text-[var(--white-color)] text-center">
               Create an account
