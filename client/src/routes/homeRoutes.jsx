@@ -156,8 +156,6 @@ export const homeRoutes = [
       </Suspense>
     ),
   },
-,
-  },
   {
     path: "/sukoonai",
     element: (
