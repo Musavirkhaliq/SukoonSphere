@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { Form, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Form, useNavigate, useSearchParams } from "react-router-dom";
 import img_bg from "../../assets/images/bg_login.png";
 import { Link } from "react-router-dom";
 import { GrLogin } from "react-icons/gr";
+import { FaGoogle, FaFacebook, FaTwitter } from "react-icons/fa";
 import { InputComponent } from "@/components/sharedComponents/FormRow";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
@@ -11,8 +12,34 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 const SignIn = () => {
   const { login, isLoading } = useUser();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // Handle social login redirects
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const error = searchParams.get('error');
+
+    if (success === 'true') {
+      toast.success('Login successful');
+      navigate('/posts');
+    } else if (error) {
+      switch (error) {
+        case 'authentication_failed':
+          toast.error('Authentication failed. Please try again.');
+          break;
+        case 'user_not_found':
+          toast.error('User not found. Please register first.');
+          break;
+        case 'server_error':
+          toast.error('Server error. Please try again later.');
+          break;
+        default:
+          toast.error('An error occurred during login.');
+      }
+    }
+  }, [searchParams, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -87,6 +114,34 @@ const SignIn = () => {
               {isLoading ? "Signing in..." : "Sign In"}
               <GrLogin />
             </button>
+
+            <div className="flex items-center my-4">
+              <div className="flex-grow border-t border-gray-300"></div>
+              <span className="px-3 text-[var(--white-color)] text-sm">Or continue with</span>
+              <div className="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <div className="flex justify-center space-x-4 mb-4">
+              <a
+                href="/api/v1/auth/google"
+                className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-red-500 hover:bg-gray-100 transition-colors"
+              >
+                <FaGoogle size={20} />
+              </a>
+              <a
+                href="/api/v1/auth/facebook"
+                className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-blue-600 hover:bg-gray-100 transition-colors"
+              >
+                <FaFacebook size={20} />
+              </a>
+              <a
+                href="/api/v1/auth/twitter"
+                className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-blue-400 hover:bg-gray-100 transition-colors"
+              >
+                <FaTwitter size={20} />
+              </a>
+            </div>
+
             <p className="text-[var(--white-color)] text-center">
               Create an account
               <Link

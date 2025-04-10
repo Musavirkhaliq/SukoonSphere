@@ -11,6 +11,7 @@ import { createJWT, attachCookiesToResponse, verifyJWT } from "../utils/tokenUti
 import crypto from "crypto";
 import sendVerificationEmail from "../utils/sendVerificationEmail.js";
 import sendResetPasswordEmail from "../utils/sendResetPasswordEmail.js";
+import passport from '../utils/passportConfig.js';
 
 // register
 export const register = async (req, res) => {
@@ -63,7 +64,7 @@ export const login = async (req, res) => {
 
   let refreshToken = "";
   const existingToken = await RefreshToken.findOne({ user: user._id });
-  
+
   if (existingToken) {
     const { isValid } = existingToken;
     if (!isValid) {
@@ -94,8 +95,8 @@ export const login = async (req, res) => {
     refreshToken,
   });
 
-  res.status(StatusCodes.OK).json({ 
-    msg: "user logged in", 
+  res.status(StatusCodes.OK).json({
+    msg: "user logged in",
     user: userProfile,
     isAuthenticated: true
   });
@@ -221,9 +222,104 @@ export const logout = async (req, res) => {
     secure: process.env.NODE_ENV === "production",
     signed: true
   });
-  
-  res.status(StatusCodes.OK).json({ 
+
+  res.status(StatusCodes.OK).json({
     msg: "user logged out!",
     isAuthenticated: false
   });
+};
+
+// Social Authentication Handlers
+
+// Google Authentication
+export const googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
+
+export const googleAuthCallback = (req, res, next) => {
+  passport.authenticate('google', { session: false }, async (err, user) => {
+    if (err) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=authentication_failed`);
+    }
+
+    if (!user) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=user_not_found`);
+    }
+
+    try {
+      // Create refresh token
+      const tokenUser = { userId: user._id, role: user.role };
+      const refreshToken = crypto.randomBytes(40).toString('hex');
+
+      const userToken = { refreshToken, ip: req.ip, userAgent: req.headers['user-agent'], user: user._id };
+      await RefreshToken.create(userToken);
+
+      attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+
+      // Redirect to frontend with success
+      return res.redirect(`${process.env.CLIENT_URL}/login?success=true`);
+    } catch (error) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
+    }
+  })(req, res, next);
+};
+
+// Facebook Authentication
+export const facebookAuth = passport.authenticate('facebook', { scope: ['email'] });
+
+export const facebookAuthCallback = (req, res, next) => {
+  passport.authenticate('facebook', { session: false }, async (err, user) => {
+    if (err) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=authentication_failed`);
+    }
+
+    if (!user) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=user_not_found`);
+    }
+
+    try {
+      // Create refresh token
+      const tokenUser = { userId: user._id, role: user.role };
+      const refreshToken = crypto.randomBytes(40).toString('hex');
+
+      const userToken = { refreshToken, ip: req.ip, userAgent: req.headers['user-agent'], user: user._id };
+      await RefreshToken.create(userToken);
+
+      attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+
+      // Redirect to frontend with success
+      return res.redirect(`${process.env.CLIENT_URL}/login?success=true`);
+    } catch (error) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
+    }
+  })(req, res, next);
+};
+
+// Twitter Authentication
+export const twitterAuth = passport.authenticate('twitter');
+
+export const twitterAuthCallback = (req, res, next) => {
+  passport.authenticate('twitter', { session: false }, async (err, user) => {
+    if (err) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=authentication_failed`);
+    }
+
+    if (!user) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=user_not_found`);
+    }
+
+    try {
+      // Create refresh token
+      const tokenUser = { userId: user._id, role: user.role };
+      const refreshToken = crypto.randomBytes(40).toString('hex');
+
+      const userToken = { refreshToken, ip: req.ip, userAgent: req.headers['user-agent'], user: user._id };
+      await RefreshToken.create(userToken);
+
+      attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+
+      // Redirect to frontend with success
+      return res.redirect(`${process.env.CLIENT_URL}/login?success=true`);
+    } catch (error) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
+    }
+  })(req, res, next);
 };

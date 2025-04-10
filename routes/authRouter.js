@@ -10,6 +10,12 @@ import {
   resetPassword,
   verifyEmail,
   refreshToken,
+  googleAuth,
+  googleAuthCallback,
+  facebookAuth,
+  facebookAuthCallback,
+  twitterAuth,
+  twitterAuthCallback
 } from "../controllers/authController.js";
 import {
   validateChangePasswordInput,
@@ -36,6 +42,19 @@ router.post(
 router.post("/forget-password", validateForgetPasswordInput, forgetPassword);
 
 router.post("/reset-password", validateResetPasswordInput, resetPassword);
+
+// Social Authentication Routes
+// Google
+router.get('/google', googleAuth);
+router.get('/google/callback', googleAuthCallback);
+
+// Facebook
+router.get('/facebook', facebookAuth);
+router.get('/facebook/callback', facebookAuthCallback);
+
+// Twitter
+router.get('/twitter', twitterAuth);
+router.get('/twitter/callback', twitterAuthCallback);
 
 // not in use yet
 

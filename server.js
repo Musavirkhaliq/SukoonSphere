@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 import cloudinary from "cloudinary";
 import cors from "cors";
 import { Server } from "socket.io"; // Import Socket.IO
+import passport from './utils/passportConfig.js';
 
 // Routers
 import AuthRouter from "./routes/authRouter.js";
@@ -78,8 +79,10 @@ app.use(cors({
   credentials: true,
   pingInterval: 25000, // Send ping every 25s
   pingTimeout: 60000,  // Disconnect if no response in 60s
-
 }));
+
+// Initialize Passport
+app.use(passport.initialize());
 
 // API Routes
 app.use("/api/v1/user", UserRouter);

@@ -3,7 +3,21 @@ import mongoose from "mongoose";
 const userSchema = mongoose.Schema({
   name: String,
   email: String,
-  password: String,
+  password: {
+    type: String,
+    required: function() {
+      // Password is required only if no social auth is used
+      return !this.googleId && !this.facebookId && !this.twitterId;
+    }
+  },
+  googleId: String,
+  facebookId: String,
+  twitterId: String,
+  socialProvider: {
+    type: String,
+    enum: ['google', 'facebook', 'twitter', null],
+    default: null
+  },
   role: {
     type: String,
     enum: ["user", "contributor", "admin"],
@@ -70,7 +84,7 @@ const userSchema = mongoose.Schema({
   currentPoints: { type: Number, default: 0 },
   totalPoints: { type: Number, default: 0 },
   // badges
-  badges: { type: [String], default: [] }, 
+  badges: { type: [String], default: [] },
   postCount: { type: Number, default: 0 },
   answerCount: { type: Number, default: 0 },
   questionCount: { type: Number, default: 0 },
