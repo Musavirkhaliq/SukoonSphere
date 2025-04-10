@@ -56,9 +56,9 @@ const CallToActionCard = () => {
 
 const QuestionCard = ({ question }) => {
   const { _id, questionText, context, tags, createdAt, author, answers } = question;
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="community-card question-card"
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
@@ -70,18 +70,18 @@ const QuestionCard = ({ question }) => {
           userAvatar={author?.userAvatar}
           createdAt={createdAt}
         />
-        
+
         <div className="question-badge">
           <span>{answers?.length || 0}</span>
           <span>{answers?.length === 1 ? "Answer" : "Answers"}</span>
         </div>
       </div>
-      
+
       <Link to={`/QA-section/question/${_id}`} className="card-content">
         <h3 className="question-title">{questionText}</h3>
         <p className="question-context">{context}</p>
       </Link>
-      
+
       <div className="card-tags">
         {tags?.slice(0, 3).map((tag, index) => (
           <span key={index} className="question-tag">
@@ -90,7 +90,7 @@ const QuestionCard = ({ question }) => {
           </span>
         ))}
       </div>
-      
+
       <div className="card-footer">
         <Link to={`/QA-section/question/${_id}`} className="question-link">
           <span>See answers</span>
@@ -127,7 +127,7 @@ export default function EnhancedQuestions() {
     perPage: 3,
     perMove: 1,
     pagination: true,
-    arrows: true,
+    arrows: false,
     gap: "2rem",
     breakpoints: {
       1024: { perPage: 2 },
@@ -155,21 +155,21 @@ export default function EnhancedQuestions() {
           View All Questions
         </Link>
       </div>
-      
+
       <div className="splide-container">
         <Splide options={splideOptions} className="enhanced-splide">
           {loading
             ? Array.from({ length: 3 }).map((_, index) => (
-                <SplideSlide key={`skeleton-${index}`}>
-                  <SkeletonQuestionCard />
-                </SplideSlide>
-              ))
+              <SplideSlide key={`skeleton-${index}`}>
+                <SkeletonQuestionCard />
+              </SplideSlide>
+            ))
             : questions?.map((question) => (
-                <SplideSlide key={question?._id}>
-                  <QuestionCard question={question} />
-                </SplideSlide>
-              ))}
-          
+              <SplideSlide key={question?._id}>
+                <QuestionCard question={question} />
+              </SplideSlide>
+            ))}
+
           {!loading && (
             <SplideSlide>
               <CallToActionCard />

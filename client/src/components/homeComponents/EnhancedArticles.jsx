@@ -92,16 +92,16 @@ const ArticleCard = ({ article }) => {
 
         <div className="article-stats">
           <div className="article-stat">
-            <BiUpvote />
-            <span>{article?.likes?.length || 0}</span>
+            <BiUpvote className="text-base" />
+            <span className="text-base">{article?.likes?.length || 0}</span>
           </div>
           <div className="article-stat">
-            <FaRegCommentAlt />
-            <span>{article?.comments?.length || 0}</span>
+            <FaRegCommentAlt className="text-base" />
+            <span className="text-base">{article?.comments?.length || 0}</span>
           </div>
           <div className="article-stat">
-            <FaClock />
-            <span>{getReadTime(article.content)}</span>
+            <FaClock className="text-base" />
+            <span className="text-base">{getReadTime(article.content)}</span>
           </div>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function EnhancedArticles() {
     perPage: 3,
     perMove: 1,
     pagination: true,
-    arrows: true,
+    arrows: false,
     gap: "2rem",
     breakpoints: {
       1024: { perPage: 2 },
@@ -177,15 +177,15 @@ export default function EnhancedArticles() {
         <Splide options={splideOptions} className="enhanced-splide">
           {loading
             ? Array.from({ length: 3 }).map((_, index) => (
-                <SplideSlide key={`skeleton-${index}`}>
-                  <SkeletonArticleCard />
-                </SplideSlide>
-              ))
+              <SplideSlide key={`skeleton-${index}`}>
+                <SkeletonArticleCard />
+              </SplideSlide>
+            ))
             : articles.map((article) => (
-                <SplideSlide key={article._id}>
-                  <ArticleCard article={article} />
-                </SplideSlide>
-              ))}
+              <SplideSlide key={article._id}>
+                <ArticleCard article={article} />
+              </SplideSlide>
+            ))}
         </Splide>
       </div>
     </section>

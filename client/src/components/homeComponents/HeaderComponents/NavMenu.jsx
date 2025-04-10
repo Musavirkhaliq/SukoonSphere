@@ -21,6 +21,8 @@ import NotificationButton from "../../notifications/NotificationButton";
 import socket from "@/utils/socket/socket";
 import customFetch from "@/utils/customFetch";
 import { toast } from "react-toastify";
+import { RiRobot3Line } from "react-icons/ri";
+import { LuMessageSquareMore } from "react-icons/lu";
 
 function NavMenu({ showMobile = true }) {
   const [activeSublink, setActiveSublink] = useState(null);
@@ -165,7 +167,7 @@ function NavMenu({ showMobile = true }) {
               <div className="relative flex items-center gap-4">
                 <NotificationButton />
                 <Link className="relative" to="/chats">
-                  <BsChatDots className="text-2xl" />
+                  <LuMessageSquareMore className="text-2xl text-black" />
                   {unseenMessages > 0 && (
                     <span className="absolute -top-3 right-0 bg-blue-600 text-white text-xs rounded-full p-1 w-4 h-fit">
                       {unseenMessages > 99 ? "99+" : unseenMessages}
@@ -176,7 +178,7 @@ function NavMenu({ showMobile = true }) {
                   to="/sukoonai"
                   className="relative group"
                 >
-                  <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
+                  <div className="flex items-center justify-center w-7 h-7 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
                     <FaRobot className="text-white text-lg" />
                   </div>
                   <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-[var(--grey--900)] text-[var(--white-color)] px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -209,43 +211,40 @@ function NavMenu({ showMobile = true }) {
               />
             </Link>
           </div>
-          <div className="flex items-center gap-4">
-            {user && (
+          <div className="flex items-center gap-4 justify-center">
+            {user ? (
               <>
+                <NotificationButton />
                 <Link className="relative" to="/chats">
-                  <BsChatDots className="text-2xl" />
+                  <LuMessageSquareMore className="text-2xl text-black" />
                   {unseenMessages > 0 && (
                     <span className="absolute -top-3 right-0 bg-blue-600 text-white text-xs rounded-full p-1 w-4 h-fit">
                       {unseenMessages > 99 ? "99+" : unseenMessages}
                     </span>
                   )}
                 </Link>
-                <Link to="/Posts">
-                  <BiMessageSquareAdd className="text-2xl" />
-                </Link>
                 <Link to="/sukoonai">
-                  <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
-                    <FaRobot className="text-white text-lg" />
+                  <div className="flex items-center justify-center w-7 h-7 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
+                    {/* <FaRobot className="text-white text-lg" /> */}
+                    <RiRobot3Line className="text-white text-lg" />
+                  </div>
+                </Link>
+                <Link to={`/about/user/${user._id}`} className="">
+                  <img
+                    className="w-7 h-7 object-cover rounded-full border-[3px] border-[var(--grey--600)] hover:border-[var(--ternery)]"
+                    src={
+                      user?.avatar ||
+                      "https://e7.pngegg.com/pngimages/81/570/png-clipart-profile-logo-computer-icons-user-user-blue-heroes-thumbnail.png"
+                    }
+                    alt={user?.name || "User"}
+                  />
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-[var(--grey--900)] text-[var(--white-color)] px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    View Profile
                   </div>
                 </Link>
               </>
-            )}
-            {user ? (
-              <>
-                <Link to={`/about/user/${user._id}`}>
-                  <img
-                    src={
-                      user?.avatar ||
-                      "https://cdn-icons-png.flaticon.com/512/147/147142.png"
-                    }
-                    alt="User"
-                    className="w-7 h-7 rounded-full object-cover"
-                  />
-                </Link>
-
-                <NotificationButton />
-              </>
             ) : (
+              // If user is not logged in
               <div className="flex items-center gap-4">
                 <Link to="/sukoonai">
                   <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
@@ -292,7 +291,6 @@ function NavMenu({ showMobile = true }) {
                       <div className="flex flex-col space-y-3">
                         {link.sublinks.map((sublink) => {
                           // Check if the sublink is for videos or podcasts
-
                           return (
                             <NavLink
                               key={sublink.name}

@@ -5,7 +5,9 @@ import { toast } from "react-toastify";
 import { useUser } from "../context/UserContext";
 import ChatbotAttention from "./ChatbotAttention";
 import FullScreenChatbot from "./FullScreenChatbot";
-import { FaExpandAlt } from "react-icons/fa";
+import { FaExpandAlt, FaMicrophone, FaMicrophoneAlt, FaPlus } from "react-icons/fa";
+import { BiSend } from "react-icons/bi";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
@@ -414,22 +416,25 @@ const Chatbot = () => {
       <ChatbotAttention onOpenChatbot={openChatbot} />
 
       {/* Chatbot toggle button */}
-      <button
-        className="chatbot-toggle"
-        onClick={toggleChatbot}
-        aria-label="Toggle chatbot"
-      >
-        {isChatbotOpen ? '✕' : '💬'}
-      </button>
+      {!isChatbotOpen && (
+        <button
+          className="chatbot-toggle"
+          onClick={toggleChatbot}
+          aria-label="Toggle chatbot"
+        >
+          {isChatbotOpen ? '✕' : '💬'}
+        </button>
+      )}
+
 
       {/* Chatbot window */}
       <div className={`chatbot ${isChatbotOpen ? 'open' : ''}`}>
         <div className="chat-header">
-          <span>Chat with SukoonSphere AI 🤖</span>
+          <span> SukoonSphere AI 🤖</span>
           <div className="header-controls">
             {user && (
               <button
-                className="new-chat-button"
+                className="button-gray"
                 onClick={async () => {
                   try {
                     await customFetch.post('/chatbot/new-conversation');
@@ -442,38 +447,38 @@ const Chatbot = () => {
                 }}
                 title="Start a new conversation"
               >
-                ➕
+                <FaPlus className="text-white" />
               </button>
             )}
             <button
-              className="voice-toggle"
+              className="button-gray"
               onClick={toggleVoiceGender}
               title={`Switch to ${voiceGender === "female" ? "male" : "female"} voice`}
             >
               {voiceGender === "female" ? '👩' : '👨'}
             </button>
             <button
-              className="fullscreen-button"
+              className="button-gray"
               onClick={toggleFullScreen}
               title="Open in full screen"
             >
               <FaExpandAlt />
             </button>
-            <button className="close-button" onClick={toggleChatbot}>✕</button>
+            <button className="button-gray" onClick={toggleChatbot}>✕</button>
           </div>
         </div>
         <div className="chat-history" ref={chatHistoryRef}>
           {messages.length === 0 ? (
-            <div className="welcome-message">
-              <p>Hello{user ? `, ${user.name}` : ''}! I'm SukoonSphere's AI assistant. How can I help you today?</p>
-              <p>You can ask me about mental health, wellness tips, or how to use this website.</p>
-              <div className="welcome-features">
-                <p><span className="feature-icon">🎤</span> Click the microphone to speak to me</p>
-                <p><span className="feature-icon">🔊</span> Click the speaker on my messages to hear them</p>
+            <div className="welcome-message md:max-w-md mx-auto">
+              <p className="md:text-lg">Hello{user ? `, ${user.name}` : ''}! I'm SukoonSphere's AI assistant. How can I help you today?</p>
+              <p className="md:text-lg">You can ask me about mental health, wellness tips, or how to use this website.</p>
+              <div className="welcome-features grid gap-4 md:grid-cols-2">
+                <p className="flex items-center"><span className="feature-icon mr-2">🎤</span>Click the microphone to speak to me</p>
+                <p className="flex items-center"><span className="feature-icon mr-2">🔊</span>Click the speaker on my messages to hear them</p>
                 {user ? (
-                  <p><span className="feature-icon">💾</span> Your conversations are saved automatically</p>
+                  <p className="flex items-center"><span className="feature-icon mr-2">💾</span>Your conversations are saved automatically</p>
                 ) : (
-                  <p><span className="feature-icon">🔒</span> <a href="/auth/sign-in" className="login-link">Sign in</a> to save your conversations</p>
+                  <p className="flex items-center"><span className="feature-icon mr-2">🔒</span> <a href="/auth/sign-in" className="login-link">Sign in</a> to save your conversations</p>
                 )}
               </div>
             </div>
@@ -520,7 +525,7 @@ const Chatbot = () => {
               onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSend()}
               placeholder={isListening ? "Listening... (speak now)" : "Type your message..."}
               disabled={isLoading || isListening}
-              className={isListening ? 'listening' : ''}
+              className={` ${isListening ? 'listening' : ''}`}
             />
             <button
               className={`mic-button ${isListening ? 'listening' : ''}`}
@@ -528,16 +533,16 @@ const Chatbot = () => {
               disabled={isLoading}
               title={isListening ? "Stop listening" : "Speak your message"}
             >
-              {isListening ? '🔴' : '🎤'}
+              {isListening ? <FaMicrophone className="text-red-500" /> : <FaMicrophoneAlt />}
             </button>
           </div>
           <button
             onClick={handleSend}
             disabled={isLoading || (!input.trim() && !isListening)}
-            className={`send-button ${isLoading ? 'loading' : ''}`}
+            className={`btn-2  ${isLoading ? 'loading' : ''}`}
             title="Send message"
           >
-            {isLoading ? 'Sending...' : 'Send'}
+            {isLoading ? <AiOutlineLoading3Quarters className="text-2xl" /> : <BiSend className="text-2xl text-white" />}
           </button>
         </div>
       </div>

@@ -146,12 +146,5 @@ export const homeRoutes = [
       },
     ],
   },
-  {
-    path: "/sukoonai",
-    element: (
-      <Suspense fallback={<LoadingSpinner />}>
-        <SukoonAI />
-      </Suspense>
-    ),
-  },
+
 ];

@@ -92,21 +92,21 @@ export default function GraphSection() {
           fontSize: '11px'
         }
       },
-       gridLineColor: '#E2E8F0', // Gray-200
-       lineColor: '#CBD5E0', // Gray-300
-       tickColor: '#CBD5E0'
+      gridLineColor: '#E2E8F0', // Gray-200
+      lineColor: '#CBD5E0', // Gray-300
+      tickColor: '#CBD5E0'
     },
     yAxis: {
       title: {
         text: 'Global Prevalence (%)',
         style: {
-           color: '#4A5568'
+          color: '#4A5568'
         }
       },
       labels: {
         format: '{value}%',
-         style: {
-           color: '#4A5568'
+        style: {
+          color: '#4A5568'
         }
       },
       gridLineColor: '#E2E8F0', // Gray-200
@@ -178,22 +178,22 @@ export default function GraphSection() {
           color: '#4A5568'
         }
       },
-       gridLineColor: '#E2E8F0', // Gray-200
-       lineColor: '#CBD5E0', // Gray-300
-       tickColor: '#CBD5E0'
+      gridLineColor: '#E2E8F0', // Gray-200
+      lineColor: '#CBD5E0', // Gray-300
+      tickColor: '#CBD5E0'
     },
     yAxis: {
       title: {
         text: 'Prevalence (%)',
         margin: 20, // Add margin to avoid overlap with skewed labels
         style: {
-           color: '#4A5568'
+          color: '#4A5568'
         }
       },
       labels: {
         format: '{value}%',
-         style: {
-           color: '#4A5568'
+        style: {
+          color: '#4A5568'
         }
       },
       gridLineColor: '#E2E8F0', // Gray-200
@@ -253,13 +253,13 @@ export default function GraphSection() {
 
       <div className="p-5 flex-grow">
         {mounted ? (
-           <HighchartsReact
-             highcharts={Highcharts}
-             options={disordersChartOptions}
-           />
-         ) : (
-           <div className="h-64 w-full bg-gray-100 rounded animate-pulse"></div> // Placeholder while mounting
-         )}
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={disordersChartOptions}
+          />
+        ) : (
+          <div className="h-64 w-full bg-gray-100 rounded animate-pulse"></div> // Placeholder while mounting
+        )}
       </div>
     </div>
   );
@@ -280,14 +280,14 @@ export default function GraphSection() {
       </div>
 
       <div className="p-5 flex-grow">
-       {mounted ? (
-           <HighchartsReact
-             highcharts={Highcharts}
-             options={ageGroupChartOptions}
-           />
-         ) : (
-            <div className="h-64 w-full bg-gray-100 rounded animate-pulse"></div> // Placeholder while mounting
-         )}
+        {mounted ? (
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={ageGroupChartOptions}
+          />
+        ) : (
+          <div className="h-64 w-full bg-gray-100 rounded animate-pulse"></div> // Placeholder while mounting
+        )}
       </div>
     </div>
   );

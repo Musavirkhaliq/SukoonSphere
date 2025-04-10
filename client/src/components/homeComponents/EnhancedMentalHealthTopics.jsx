@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FaInfoCircle, FaArrowRight, FaExternalLinkAlt, FaBookOpen } from 'react-icons/fa';
-import SectionTitle from '../sharedComponents/SectionTitle';
 import '../../assets/styles/EnhancedMentalHealthTopics.css';
 
 const EnhancedMentalHealthTopics = () => {
   const [activeCategory, setActiveCategory] = useState(null);
-  
+
   // Mental health categories with descriptions and resources
   const categories = [
     {
@@ -181,14 +180,13 @@ const EnhancedMentalHealthTopics = () => {
 
   return (
     <div className="enhanced-mental-health-topics">
-      <SectionTitle title="Mental Health Topics" />
-      
+
       <div className="categories-container">
         {categories.map((category) => (
           <div key={category.id} className="category-section">
-            <motion.div 
+            <motion.div
               className="category-row"
-              style={{ 
+              style={{
                 borderColor: category.color,
                 backgroundColor: activeCategory === category.id ? `${category.color}10` : 'transparent'
               }}
@@ -197,15 +195,15 @@ const EnhancedMentalHealthTopics = () => {
               transition={{ duration: 0.2 }}
             >
               <div className="category-header">
-                <div 
-                  className="category-icon" 
+                <div
+                  className="category-icon"
                   style={{ backgroundColor: category.color }}
                 >
                   <FaInfoCircle className="text-white" />
                 </div>
                 <h3 className="category-name">{category.name}</h3>
               </div>
-              
+
               <div className="category-disorders">
                 {category.disorders.map((disorder, index) => (
                   <span key={index} className="disorder-tag">
@@ -213,17 +211,17 @@ const EnhancedMentalHealthTopics = () => {
                   </span>
                 ))}
               </div>
-              
+
               <div className="category-toggle">
-                <FaArrowRight 
-                  className={`toggle-icon ${activeCategory === category.id ? 'rotate-90' : ''}`} 
+                <FaArrowRight
+                  className={`toggle-icon ${activeCategory === category.id ? 'rotate-90' : ''}`}
                   style={{ color: category.color }}
                 />
               </div>
             </motion.div>
-            
+
             {activeCategory === category.id && (
-              <motion.div 
+              <motion.div
                 className="category-details"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -234,19 +232,19 @@ const EnhancedMentalHealthTopics = () => {
                   <div className="details-image">
                     <img src={category.image} alt={category.name} />
                   </div>
-                  
+
                   <div className="details-content">
                     <div className="details-description">
                       <h4>About {category.name}</h4>
                       <p>{category.description}</p>
                     </div>
-                    
+
                     <div className="details-symptoms">
                       <h4>Common Symptoms</h4>
                       <ul>
                         {category.symptoms.map((symptom, index) => (
                           <li key={index}>
-                            <span 
+                            <span
                               className="symptom-dot"
                               style={{ backgroundColor: category.color }}
                             ></span>
@@ -255,15 +253,15 @@ const EnhancedMentalHealthTopics = () => {
                         ))}
                       </ul>
                     </div>
-                    
+
                     <div className="details-resources">
                       <h4>Helpful Resources</h4>
                       <ul>
                         {category.resources.map((resource, index) => (
                           <li key={index}>
-                            <a 
-                              href={resource.url} 
-                              target="_blank" 
+                            <a
+                              href={resource.url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="resource-link"
                               style={{ color: category.color }}
@@ -277,10 +275,10 @@ const EnhancedMentalHealthTopics = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="details-footer">
-                  <Link 
-                    to="/resources" 
+                  <Link
+                    to="/about/mental-health"
                     className="learn-more-link"
                     style={{ backgroundColor: category.color }}
                   >
@@ -293,14 +291,14 @@ const EnhancedMentalHealthTopics = () => {
           </div>
         ))}
       </div>
-      
+
       <div className="topics-footer">
         <p className="disclaimer">
-          This information is for educational purposes only. If you're experiencing symptoms, 
+          This information is for educational purposes only. If you're experiencing symptoms,
           please consult with a qualified mental health professional.
         </p>
-        
-        <Link to="/resources" className="all-resources-link">
+
+        <Link to="/articles" className="all-resources-link">
           View all mental health resources <FaArrowRight className="ml-2" />
         </Link>
       </div>

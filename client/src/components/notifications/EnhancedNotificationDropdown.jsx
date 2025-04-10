@@ -1,26 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
-import { toast } from 'react-toastify';
 import { useNotifications } from '../../context/NotificationContext';
-import customFetch from '../../utils/customFetch';
 
 // Icons
 import {
   IoNotifications,
   IoClose,
-  IoCheckmarkDone,
   IoTrash,
   IoCheckmarkCircle,
   IoSad,
-  IoRefresh,
-  IoEllipsisHorizontal,
-  IoChevronDown,
-  IoChevronUp,
 } from 'react-icons/io5';
 
-// Notification card components
+// Notification card components (keeping imports same)
 import {
   PostLikeNotification,
   PostReplyLikeNotification,
@@ -49,8 +41,9 @@ import {
 
 import { FollowNotification } from './UserNotificationCards';
 import { RequestChatNotification } from './RequestChatNotification';
+import { IoMdClose } from 'react-icons/io';
 
-// Dropdown animations
+// Dropdown animations (keeping same)
 const dropdownVariants = {
   hidden: {
     opacity: 0,
@@ -78,7 +71,7 @@ const dropdownVariants = {
   }
 };
 
-// Notification item animation
+// Notification item animation (keeping same)
 const itemVariants = {
   hidden: { opacity: 0, x: -10 },
   visible: (i) => ({
@@ -102,19 +95,16 @@ const EnhancedNotificationDropdown = () => {
     unreadCount,
     isLoading,
     showDropdown,
-    fetchNotifications,
-    markAllAsRead,
     markAsRead,
     deleteNotification,
     closeDropdown
   } = useNotifications();
 
-  const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
+  const [filter, setFilter] = useState('all');
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Filter notifications based on the selected filter
   const filteredNotifications = Array.isArray(notifications) ? notifications.filter(notification => {
     if (filter === 'all') return true;
     if (filter === 'unread') return !notification.seen;
@@ -122,31 +112,12 @@ const EnhancedNotificationDropdown = () => {
     return true;
   }) : [];
 
-  // Handle click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        closeDropdown();
-      }
-    };
-
-    if (showDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showDropdown, closeDropdown]);
-
-  // Handle marking a notification as read when clicked
   const handleNotificationClick = (notification) => {
     if (!notification.seen) {
       markAsRead(notification._id);
     }
   };
 
-  // Handle notification actions
   const handleAction = (e, action, notification) => {
     e.stopPropagation();
     e.preventDefault();
@@ -166,7 +137,6 @@ const EnhancedNotificationDropdown = () => {
     }
   };
 
-  // Render notification based on type
   const renderNotification = (notification, index) => {
     const notificationProps = {
       item: notification,
@@ -175,7 +145,6 @@ const EnhancedNotificationDropdown = () => {
       isNew: !notification.seen
     };
 
-    // Use motion.div to animate each notification
     return (
       <motion.div
         key={notification._id}
@@ -188,7 +157,6 @@ const EnhancedNotificationDropdown = () => {
       >
         {(() => {
           switch (notification.type) {
-            // Post related Notification cases
             case "like":
               return <PostLikeNotification {...notificationProps} />;
             case "comment":
@@ -199,8 +167,6 @@ const EnhancedNotificationDropdown = () => {
               return <PostCommentLikeNotification {...notificationProps} />;
             case "replyLiked":
               return <PostReplyLikeNotification {...notificationProps} />;
-
-            // Question/Answer related Notification cases
             case "answered":
               return <QuestionAnsweredNotification {...notificationProps} />;
             case "answerLiked":
@@ -215,8 +181,6 @@ const EnhancedNotificationDropdown = () => {
               return <AnswerReplyLikedNotification {...notificationProps} />;
             case "answerCommentReplyLiked":
               return <AnswerCommentReplyLikedNotification {...notificationProps} />;
-
-            // Article related Notification cases
             case "articleLiked":
               return <ArticleLikedNotification {...notificationProps} />;
             case "articleComment":
@@ -227,28 +191,27 @@ const EnhancedNotificationDropdown = () => {
               return <ArticleCommentLikedNotification {...notificationProps} />;
             case "articleCommentReplyLiked":
               return <ArticleCommentReplyLikedNotification {...notificationProps} />;
-
-            // User related Notification cases
             case "follow":
               return <FollowNotification {...notificationProps} />;
             case "requestChat":
               return <RequestChatNotification {...notificationProps} />;
-
-            // Default case
             default:
               return (
-                <div className={`notification-item ${!notification.seen ? 'unread' : ''}`}>
-                  <div className="notification-content">
-                    <div className="notification-icon">
+                <div className={`p-3 border-b border-slate-50 cursor-pointer transition-all relative hover:bg-slate-50 ${!notification.seen ? 'bg-blue-50 hover:bg-blue-100' : ''}`}>
+                  <div className="flex gap-3 mb-2">
+                    <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-lg text-slate-500">
                       <IoNotifications />
                     </div>
-                    <div className="notification-text">
+                    <div className="text-sm text-slate-700 leading-6 flex-1">
                       {notification.message}
                     </div>
                   </div>
-                  <div className="notification-time">
+                  <div className="text-xs text-slate-400">
                     {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                   </div>
+                  {!notification.seen && (
+                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-500 rounded-r"></div>
+                  )}
                 </div>
               );
           }
@@ -262,92 +225,69 @@ const EnhancedNotificationDropdown = () => {
       {showDropdown && (
         <motion.div
           ref={dropdownRef}
-          className="notification-dropdown"
+          className="
+          fixed top-0 left-0 w-full h-full bg-white z-[1000] overflow-y-auto 
+          md:absolute md:top-[45px] md:left-auto md:right-0 md:w-[380px] md:h-[80vh] md:rounded-xl md:shadow-2xl 
+          lg:w-[420px] lg:max-h-[85vh] 
+          xl:w-[450px] xl:max-h-[90vh]
+          no-scrollbar
+        "
           variants={dropdownVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
-          <div className="notification-header">
-            <div className="notification-title">
-              <IoNotifications className="notification-icon" />
-              <h3>Notifications</h3>
-              {unreadCount > 0 && (
-                <span className="notification-badge">{unreadCount}</span>
-              )}
-            </div>
-
-            <div className="notification-actions">
-              {unreadCount > 0 && (
-                <button
-                  className="action-button"
-                  onClick={markAllAsRead}
-                  title="Mark all as read"
-                >
-                  <IoCheckmarkDone />
-                </button>
-              )}
-
-              <button
-                className="action-button"
-                onClick={fetchNotifications}
-                title="Refresh notifications"
-              >
-                <IoRefresh />
-              </button>
-
-              <button
-                className="action-button"
-                onClick={() => setIsExpanded(!isExpanded)}
-                title={isExpanded ? "Collapse" : "Expand"}
-              >
-                {isExpanded ? <IoChevronUp /> : <IoChevronDown />}
-              </button>
-
-              <button
-                className="action-button close-button"
-                onClick={closeDropdown}
-                title="Close"
-              >
-                <IoClose />
+          <div className="flex justify-between items-center p-4 border-b border-slate-100 bg-slate-50">
+            <div className="flex justify-between items-center w-full">
+              <div className="flex items-center gap-2">
+                <IoNotifications className="mr-2 text-xl md:text-2xl" />
+                <h3 className="text-base md:text-xl font-semibold m-0 text-slate-800">Notifications</h3>
+                {unreadCount > 0 && (
+                  <span className="flex items-center justify-center min-w-5 h-5 px-1.5 bg-red-500 text-white text-xs font-semibold rounded-full">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+              <button className="bg-transparent border-none p-0 cursor-pointer" onClick={closeDropdown}>
+                <IoMdClose className="text-black text-2xl" />
               </button>
             </div>
           </div>
 
-          <div className="notification-filters">
+          <div className="flex p-2 border-b border-slate-100 bg-white">
             <button
-              className={`filter-button ${filter === 'all' ? 'active' : ''}`}
+              className={`px-3 !py-[6px] border-none rounded-[6px] text-sm text-slate-500 cursor-pointer transition-all ${filter === 'all' ? 'bg-[var(--primary)] text-white font-medium' : ''}`}
               onClick={() => setFilter('all')}
             >
               All
             </button>
             <button
-              className={`filter-button ${filter === 'unread' ? 'active' : ''}`}
+              className={`px-3 py-[6px]  border-none rounded-[6px] text-sm text-slate-500 cursor-pointer transition-all ${filter === 'unread' ? 'bg-[var(--primary)] text-white font-medium' : ''}`}
               onClick={() => setFilter('unread')}
             >
               Unread
             </button>
             <button
-              className={`filter-button ${filter === 'read' ? 'active' : ''}`}
+              className={`px-3 py-[6px]  border-none rounded-[6px] text-sm text-slate-500 cursor-pointer transition-all ${filter === 'read' ? 'bg-[var(--primary)] text-white font-medium' : ''}`}
               onClick={() => setFilter('read')}
             >
               Read
             </button>
           </div>
 
-          <div className={`notification-list ${isExpanded ? 'expanded' : ''}`}>
+          <div className={`flex-1 overflow-y-auto max-h-[400px] p-2 transition-all ${isExpanded ? 'max-h-[600px]' : ''}`}>
             {isLoading ? (
-              <div className="notification-loading">
-                <div className="loading-spinner"></div>
+              <div className="flex flex-col items-center justify-center p-8 text-slate-500">
+                <div className="w-6 h-6 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin mb-3"></div>
                 <p>Loading notifications...</p>
               </div>
             ) : filteredNotifications.length === 0 ? (
-              <div className="notification-empty">
-                <IoSad className="empty-icon" />
+              <div className="flex flex-col items-center justify-center p-8 text-slate-500 text-center">
+                <IoSad className="text-4xl text-slate-400 mb-3" />
                 <p>No notifications found</p>
                 {filter !== 'all' && (
                   <button
-                    className="empty-action"
+                    className="mt-3 px-3 py-1.5 bg-slate-100 border-none rounded-full text-sm text-blue-500 cursor-pointer transition-all hover:bg-blue-50"
                     onClick={() => setFilter('all')}
                   >
                     Show all notifications
@@ -364,74 +304,68 @@ const EnhancedNotificationDropdown = () => {
           </div>
 
           {notifications.length > 0 && (
-            <div className="notification-footer">
+            <div className="p-3 border-t border-slate-100 text-center">
               <button
-                className="view-all-button"
-                onClick={() => {
-                  // Navigate to notifications page or expand the dropdown
-                  setIsExpanded(!isExpanded);
-                }}
+                className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm text-blue-500 cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-200"
+                onClick={() => setIsExpanded(!isExpanded)}
               >
                 {isExpanded ? "Show less" : "Show more"}
               </button>
             </div>
           )}
 
-          {/* Notification detail view */}
           <AnimatePresence>
             {selectedNotification && (
               <motion.div
-                className="notification-detail"
+                className="absolute inset-0 bg-white z-10 flex flex-col"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
               >
-                <div className="detail-header">
+                <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
                   <button
-                    className="back-button"
+                    className="px-3 py-1.5 bg-transparent border-none text-sm text-blue-500 cursor-pointer transition-all hover:underline"
                     onClick={() => setSelectedNotification(null)}
                   >
                     Back
                   </button>
-                  <h4>Notification Details</h4>
+                  <h4 className="text-base font-semibold m-0 text-slate-800">Notification Details</h4>
                   <button
-                    className="close-button"
+                    className="bg-transparent border-none cursor-pointer"
                     onClick={() => setSelectedNotification(null)}
                   >
                     <IoClose />
                   </button>
                 </div>
 
-                <div className="detail-content">
+                <div className="flex-1 overflow-y-auto p-4">
                   {renderNotification(selectedNotification, 0)}
 
-                  <div className="detail-info">
-                    <div className="detail-item">
-                      <span className="detail-label">Received:</span>
-                      <span className="detail-value">
+                  <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm text-slate-500 font-medium">Received:</span>
+                      <span className="text-sm text-slate-700">
                         {new Date(selectedNotification.createdAt).toLocaleString()}
                       </span>
                     </div>
-
-                    <div className="detail-item">
-                      <span className="detail-label">Status:</span>
-                      <span className="detail-value">
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm text-slate-500 font-medium">Status:</span>
+                      <span className="text-sm text-slate-700">
                         {selectedNotification.seen ? 'Read' : 'Unread'}
                       </span>
                     </div>
-
-                    <div className="detail-item">
-                      <span className="detail-label">Type:</span>
-                      <span className="detail-value">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500 font-medium">Type:</span>
+                      <span className="text-sm text-slate-700">
                         {selectedNotification.type}
                       </span>
                     </div>
                   </div>
 
-                  <div className="detail-actions">
+                  <div className="flex gap-2 mt-4">
                     {!selectedNotification.seen && (
                       <button
-                        className="detail-button"
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-blue-500 cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-200"
                         onClick={() => {
                           markAsRead(selectedNotification._id);
                           setSelectedNotification({
@@ -444,9 +378,8 @@ const EnhancedNotificationDropdown = () => {
                         Mark as read
                       </button>
                     )}
-
                     <button
-                      className="detail-button delete-button"
+                      className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-red-500 cursor-pointer transition-all hover:bg-red-50 hover:border-red-200"
                       onClick={() => {
                         deleteNotification(selectedNotification._id);
                         setSelectedNotification(null);

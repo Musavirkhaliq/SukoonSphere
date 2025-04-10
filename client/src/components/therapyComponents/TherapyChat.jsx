@@ -179,37 +179,42 @@ const TherapyChat = ({
 
         {sessionStatus === 'active' ? (
           <div className="therapy-chat-input">
-            <div className="therapy-chat-input-container">
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={isListening ? "Listening... (speak now)" : "Type your message..."}
-                disabled={isLoading || isListening}
-                className={isListening ? 'listening' : ''}
-              />
+            <div className="therapy-chat-input-group">
+              <div className="therapy-chat-input-container">
+                <textarea
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={isListening ? "Listening... (speak now)" : "Type your message..."}
+                  disabled={isLoading || isListening}
+                  className={`therapy-input ${isListening ? 'listening' : ''}`}
+                  rows={"2"}
+                />
+                <button
+                  className={`therapy-mic-button ${isListening ? 'listening' : ''}`}
+                  onClick={toggleListening}
+                  disabled={isLoading}
+                  title={isListening ? "Stop listening" : "Speak your message"}
+                >
+                  {isListening ? <FaMicrophoneSlash /> : <FaMicrophone />}
+                </button>
+              </div>
               <button
-                className={`therapy-mic-button ${isListening ? 'listening' : ''}`}
-                onClick={toggleListening}
-                disabled={isLoading}
-                title={isListening ? "Stop listening" : "Speak your message"}
+                className="btn-2"
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                title="Send message"
               >
-                {isListening ? <FaMicrophoneSlash /> : <FaMicrophone />}
+                {isLoading ? <FaSpinner className="spin" /> : <FaPaperPlane />}
               </button>
             </div>
             <div className="therapy-chat-actions">
               <button
-                className="therapy-send-button"
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
-              >
-                {isLoading ? <FaSpinner className="spin" /> : <FaPaperPlane />}
-              </button>
-              <button
                 className="therapy-complete-button"
                 onClick={() => setShowCompletionModal(true)}
+                title="Complete session"
               >
                 Complete Session
               </button>
@@ -224,59 +229,61 @@ const TherapyChat = ({
       </div>
 
       {/* Session Completion Modal */}
-      {showCompletionModal && (
-        <div className="therapy-modal-overlay">
-          <div className="therapy-modal">
-            <h3>Complete Therapy Session</h3>
-            <p>Before we end this session, please rate how you're feeling now:</p>
+      {
+        showCompletionModal && (
+          <div className="therapy-modal-overlay">
+            <div className="therapy-modal">
+              <h3>Complete Therapy Session</h3>
+              <p>Before we end this session, please rate how you're feeling now:</p>
 
-            <div className="therapy-mood-rating">
-              <div className="therapy-mood-scale">
-                <span>😞</span>
-                <div className="therapy-mood-numbers">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                    <button
-                      key={num}
-                      className={`therapy-mood-number ${moodRating === num ? 'active' : ''}`}
-                      onClick={() => setMoodRating(num)}
-                    >
-                      {num}
-                    </button>
-                  ))}
+              <div className="therapy-mood-rating">
+                <div className="therapy-mood-scale">
+                  <span>😞</span>
+                  <div className="therapy-mood-numbers">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                      <button
+                        key={num}
+                        className={`therapy-mood-number ${moodRating === num ? 'active' : ''}`}
+                        onClick={() => setMoodRating(num)}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                  <span>😊</span>
                 </div>
-                <span>😊</span>
+              </div>
+
+              <div className="therapy-feedback">
+                <label htmlFor="feedback">Any feedback about this session?</label>
+                <textarea
+                  id="feedback"
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Share your thoughts about this session..."
+                />
+              </div>
+
+              <div className="therapy-modal-actions">
+                <button
+                  className="therapy-modal-cancel"
+                  onClick={() => setShowCompletionModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="therapy-modal-confirm"
+                  onClick={handleCompleteSession}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? <FaSpinner className="spin" /> : 'Complete Session'}
+                </button>
               </div>
             </div>
-
-            <div className="therapy-feedback">
-              <label htmlFor="feedback">Any feedback about this session?</label>
-              <textarea
-                id="feedback"
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Share your thoughts about this session..."
-              />
-            </div>
-
-            <div className="therapy-modal-actions">
-              <button
-                className="therapy-modal-cancel"
-                onClick={() => setShowCompletionModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="therapy-modal-confirm"
-                onClick={handleCompleteSession}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? <FaSpinner className="spin" /> : 'Complete Session'}
-              </button>
-            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 };
 

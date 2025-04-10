@@ -2,6 +2,7 @@
 
 /* Fix for mobile chat layout */
 @media (max-width: 768px) {
+
   /* Fix for main content area */
   .chat-main-content {
     display: flex !important;
@@ -14,6 +15,7 @@
     right: 0 !important;
     bottom: 0 !important;
   }
+
   /* Ensure chat container takes full height */
   .chat-container {
     height: 100% !important;
@@ -54,8 +56,8 @@
 
   /* Fix for sidebar */
   .chat-sidebar {
-    height: calc(100vh - 65px) !important;
-    top: 65px !important;
+    height: 100vh;
+    top: 0 !important;
   }
 
   /* Fix for DefaultChat component */

@@ -62,7 +62,7 @@ function OurMission() {
   };
 
   return (
-    <section className="my-12">
+    <section >
       <SectionTitle title="Our Mission" />
       <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-8">
         <motion.div
@@ -109,7 +109,7 @@ function OurMission() {
           {/* Right side - Accordion */}
           <div className="lg:w-1/2 mt-8 lg:mt-0">
             <motion.div
-              className="bg-white-color rounded-lg shadow-lg p-6"
+              className="bg-white-color rounded-lg shadow-lg p-1"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -128,11 +128,11 @@ function OurMission() {
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                   >
                     <button
-                      className={`w-full flex justify-between items-center p-4 text-left transition-colors duration-300 ${activeAccordion === index ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'bg-grey-100 hover:bg-grey-200'}`}
+                      className={`w-full flex justify-between items-center p-4 text-left transition-colors duration-300 ${activeAccordion === index ? 'bg-[var(--primary)] text-white' : 'bg-grey-100 hover:bg-grey-200'}`}
                       onClick={() => toggleAccordion(index)}
                     >
-                      <span className={`font-bold ${activeAccordion === index ? 'text-[var(--primary)]' : 'text-[var(--grey--800)]'}`}>{item.question}</span>
-                      <span className={`${activeAccordion === index ? 'text-[var(--primary)]' : 'text-[var(--grey--600)]'} text-xl`}>
+                      <span className={`font-bold ${activeAccordion === index ? 'text-[var(--text-white)]' : 'text-[var(--grey--800)]'}`}>{item.question}</span>
+                      <span className={`${activeAccordion === index ? 'text-[var(--text-white)]' : 'text-[var(--grey--600)]'} text-xl`}>
                         {activeAccordion === index ? '−' : '+'}
                       </span>
                     </button>

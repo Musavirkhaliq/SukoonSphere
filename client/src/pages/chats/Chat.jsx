@@ -1,47 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useParams, useLocation } from "react-router-dom";
-// Import the improved sidebar component
 import ImprovedChatSidebar from "@/components/chatsComponents/ImprovedChatSidebar";
-// Import mobile-specific styles
 import "@/components/chatsComponents/ChatMobile.css";
-// Import icons
 import { FaArrowLeft } from "react-icons/fa";
 
 const Chat = () => {
   const { id } = useParams();
   const location = useLocation();
-  // Always keep sidebar closed on mobile by default
-  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
+
+  // Always keep sidebar open by default on all screen sizes
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   // Flag to prevent sidebar from closing when search is focused
   const [preventSidebarClose, setPreventSidebarClose] = useState(false);
 
-  // Close sidebar on mobile when navigating to a chat or location changes
+  // Remove the effect that closes sidebar on mobile when navigating
   useEffect(() => {
-    if (window.innerWidth < 1024 && !preventSidebarClose) {
-      setIsSidebarOpen(false);
-    }
+    // No need to close sidebar on mobile; keep it open unless manually toggled
   }, [id, location, preventSidebarClose]);
 
-  // Listen for window resize to handle responsive behavior
+  // Listen for window resize to keep sidebar open on all sizes
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsSidebarOpen(true);
-      } else if (!preventSidebarClose) {
-        setIsSidebarOpen(false);
-      }
+      // Always keep sidebar open, regardless of window size
+      setIsSidebarOpen(true);
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [preventSidebarClose]);
+  }, []);
 
   return (
     <div
       style={{ height: `calc(100vh - 65px)` }}
       className="bg-gray-50 relative overflow-hidden"
     >
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar Overlay - Only show when sidebar can be closed */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
@@ -62,7 +55,6 @@ const Chat = () => {
               shadow-lg lg:shadow-md lg:border-r border-gray-200 chat-sidebar
               ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             `}
-            style={{ top: '65px', height: 'calc(100% - 65px)' }}
           >
             <ImprovedChatSidebar
               onClose={() => setIsSidebarOpen(false)}
@@ -74,7 +66,7 @@ const Chat = () => {
           {/* Main Content */}
           <div className="flex-1 w-full bg-white overflow-hidden relative chat-main-content">
             {/* Mobile Back Button - Only visible when no chat is selected and on mobile */}
-            {!id && (
+            {!id && !isSidebarOpen && (
               <button
                 onClick={() => setIsSidebarOpen(true)}
                 className="absolute top-4 left-4 p-3 bg-blue-500 text-white rounded-full shadow-md lg:hidden z-10"

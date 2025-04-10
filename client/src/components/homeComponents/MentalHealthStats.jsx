@@ -427,18 +427,9 @@ function MentalHealthStats() {
   };
 
   return (
-    <div className="stats-container" ref={containerRef}>
+    <div ref={containerRef}>
       <div className="stats-bg-pattern"></div>
-      <div className="container mx-auto px-4">
-        {/* <div className="stats-header">
-          <h2 className="stats-title">Mental Health Statistics</h2>
-          <p className="stats-subtitle">
-            Explore the latest data on mental health conditions, their prevalence, and trends over time.
-            Understanding these statistics helps us recognize the scale of mental health challenges and
-            the importance of accessible support and treatment.
-          </p>
-        </div> */}
-
+      <div className="">
         {/* Key Statistics Cards */}
         <div className={`key-stats-grid ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}>
           <div className="stat-card delay-100">
@@ -522,7 +513,7 @@ function MentalHealthStats() {
             </div>
           </div>
 
-          <div className="chart-tabs">
+          <div className="chart-tabs overflow-x-auto">
             {[
               { id: "anxiety", label: "Anxiety" },
               { id: "depression", label: "Depression" },
@@ -531,7 +522,7 @@ function MentalHealthStats() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                className={`chart-tab ${activeTab === tab.id ? "active" : ""}`}
+                className={`chart-tab mr-2 ${activeTab === tab.id ? "active" : ""}`}
                 onClick={() => setActiveTab(tab.id)}
               >
                 {tab.label}
@@ -574,7 +565,7 @@ function MentalHealthStats() {
         </div>
 
         {/* Additional Information Section */}
-        <div className="additional-info">
+        {/* <div className="additional-info">
           <div className="info-grid">
             <div className="info-card">
               <h4 className="info-title">
@@ -618,7 +609,7 @@ function MentalHealthStats() {
               </Link>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

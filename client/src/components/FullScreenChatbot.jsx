@@ -33,6 +33,7 @@ import {
   FaShare
 } from "react-icons/fa";
 import "./FullScreenChatbot.css";
+import { IoMdClose } from "react-icons/io";
 
 const FullScreenChatbot = ({
   onClose,
@@ -56,7 +57,7 @@ const FullScreenChatbot = ({
 
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [showMessageActions, setShowMessageActions] = useState(null);
   const [savedMessages, setSavedMessages] = useState([]);
@@ -146,7 +147,7 @@ const FullScreenChatbot = ({
 
           // Set the active conversation to the most recent one
           const activeConv = conversationsResponse.data.conversations.find(c => c.isActive) ||
-                            conversationsResponse.data.conversations[0];
+            conversationsResponse.data.conversations[0];
           setActiveConversationId(activeConv._id);
 
           // Fetch messages for the active conversation
@@ -517,7 +518,12 @@ const FullScreenChatbot = ({
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
             <div className="sidebar-header">
-              <h2>Conversations</h2>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-900">Conversations</h2>
+                <button className="bg-transparent border-none p-0 cursor-pointer" onClick={() => setShowSidebar(false)}>
+                  <IoMdClose className="text-black text-2xl" />
+                </button>
+              </div>
               <button
                 className="new-chat-button"
                 onClick={startNewConversation}
@@ -762,7 +768,7 @@ const FullScreenChatbot = ({
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
-                          code({node, inline, className, children, ...props}) {
+                          code({ node, inline, className, children, ...props }) {
                             const match = /language-(\w+)/.exec(className || '');
                             return !inline && match ? (
                               <SyntaxHighlighter
@@ -850,11 +856,11 @@ const FullScreenChatbot = ({
                           <button onClick={() => saveMessage(msg)}>
                             <FaRegBookmark /> Save message
                           </button>
-                          <button onClick={() => {/* Implement share functionality */}}>
+                          <button onClick={() => {/* Implement share functionality */ }}>
                             <FaShare /> Share
                           </button>
                           {msg.sender === "bot" && (
-                            <button onClick={() => {/* Implement download functionality */}}>
+                            <button onClick={() => {/* Implement download functionality */ }}>
                               <FaDownload /> Download
                             </button>
                           )}
@@ -912,7 +918,7 @@ const FullScreenChatbot = ({
           <button
             onClick={handleSend}
             disabled={isLoading || (!input.trim() && !isListening)}
-            className={`send-button ${isLoading ? 'loading' : ''}`}
+            className={`btn-2 ${isLoading ? 'loading' : ''}`}
             title="Send message"
           >
             {isLoading ? <FaSpinner className="spin" /> : <FaPaperPlane />}

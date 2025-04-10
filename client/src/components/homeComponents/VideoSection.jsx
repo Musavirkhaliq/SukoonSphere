@@ -1,16 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import {
   FiPlay,
-  FiChevronLeft,
-  FiChevronRight,
   FiX,
   FiVolume2,
   FiVolumeX,
 } from "react-icons/fi";
 import { FaPlay, FaChevronRight } from "react-icons/fa";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
-import "@splidejs/react-splide/css";
-import SectionTitle from "../sharedComponents/SectionTitle";
+import "@splidejs/react-splide/css/core";
 import customFetch from "../../utils/customFetch";
 import { Link } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
@@ -21,32 +18,26 @@ const formatDuration = (seconds) => {
   if (!seconds) return "00:00";
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 
 // Skeleton Video Card Component
 const SkeletonVideoCard = () => {
   return (
     <div className="rounded-xl overflow-hidden shadow-md h-[440px] animate-pulse">
-      {/* Skeleton for thumbnail/video */}
       <div className="relative h-full">
-        <div className="w-full h-full bg-gray-200"></div>{" "}
-        {/* Video placeholder */}
-        {/* Play button overlay */}
+        <div className="w-full h-full bg-gray-200" />
         <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
           <div className="p-3 bg-white/80 rounded-full">
             <FiPlay className="text-2xl text-gray-800" />
           </div>
         </div>
-        {/* Duration badge */}
         <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-          <div className="h-4 w-8 bg-gray-300 rounded"></div>
+          <div className="h-4 w-8 bg-gray-300 rounded" />
         </div>
-        {/* Video info */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-          <div className="h-5 bg-gray-300 rounded w-3/4 mb-1"></div>{" "}
-          {/* Title */}
-          <div className="h-4 bg-gray-300 rounded w-1/2"></div> {/* Author */}
+          <div className="h-5 bg-gray-300 rounded w-3/4 mb-1" />
+          <div className="h-4 bg-gray-300 rounded w-1/2" />
         </div>
       </div>
     </div>
@@ -62,16 +53,17 @@ export default function VideoReels() {
   const [watchHistory, setWatchHistory] = useState({});
   const [recommendedVideos, setRecommendedVideos] = useState([]);
   const videoRef = useRef(null);
+  const splideRef = useRef(null); // Add ref to Splide instance
 
   // Fetch videos from API
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         setLoading(true);
-        const { data } = await customFetch.get('/videos/all-videos');
-        setVideos(data.videos.slice(0, 8)); // Limit to 8 videos for the carousel
+        const { data } = await customFetch.get("/videos/all-videos");
+        setVideos(data.videos.slice(0, 8));
       } catch (error) {
-        console.error('Error fetching videos:', error);
+        console.error("Error fetching videos:", error);
       } finally {
         setLoading(false);
       }
@@ -86,17 +78,14 @@ export default function VideoReels() {
       if (!user) return;
 
       try {
-        const { data } = await customFetch.get('/videos/watch-history');
-
-        // Create a map of videoId -> watchPercentage
+        const { data } = await customFetch.get("/videos/watch-history");
         const historyMap = {};
-        data.watchHistory.forEach(item => {
+        data.watchHistory.forEach((item) => {
           historyMap[item.videoId._id] = item.watchPercentage;
         });
-
         setWatchHistory(historyMap);
       } catch (error) {
-        console.error('Error fetching watch history:', error);
+        console.error("Error fetching watch history:", error);
       }
     };
 
@@ -109,37 +98,40 @@ export default function VideoReels() {
       if (!user || !videos.length) return;
 
       try {
-        // Use the first video as a reference for recommendations if no watch history
-        const videoId = Object.keys(watchHistory).length > 0
-          ? Object.keys(watchHistory)[0]
-          : videos[0]?._id;
+        const videoId =
+          Object.keys(watchHistory).length > 0
+            ? Object.keys(watchHistory)[0]
+            : videos[0]?._id;
 
         if (videoId) {
           const recommendations = await VideoTracker.getRecommendations(videoId, 4);
           setRecommendedVideos(recommendations);
         }
       } catch (error) {
-        console.error('Error fetching recommendations:', error);
+        console.error("Error fetching recommendations:", error);
       }
     };
 
     fetchRecommendedVideos();
   }, [user, videos, watchHistory]);
 
+  // Splide options
   const splideOptions = {
+    type: "slide", // Ensure sliding behavior
     perPage: 4,
     perMove: 1,
     gap: "1rem",
     pagination: true,
     arrows: false,
+    focus: "center",
+    trimSpace: true,
     breakpoints: {
       1200: { perPage: 3 },
       768: { perPage: 2 },
-      640: { perPage: 1.5 },
-      480: { perPage: 1.2 },
+      640: { perPage: 1 }, // Use whole numbers for smaller screens
+      480: { perPage: 1 },
     },
   };
-
   const openVideoPlayer = (video) => {
     setSelectedVideo(video);
     setMuted(true);
@@ -162,7 +154,7 @@ export default function VideoReels() {
   return (
     <section className="max-w-7xl mx-auto p-2">
       <div className="flex justify-between items-center mb-4">
-        <SectionTitle title="Featured Videos" />
+        <h2 className="text-base font-bold">Featured Videos</h2>
         <Link
           to="/all-videos"
           className="text-[var(--primary)] hover:underline flex items-center"
@@ -172,57 +164,53 @@ export default function VideoReels() {
       </div>
 
       {/* Featured Videos Carousel */}
-      <Splide options={splideOptions} aria-label="Featured Videos">
-        {loading
-          ? // Show skeleton cards while loading
-            Array.from({ length: 4 }).map((_, index) => (
+      <div className="relative">
+        <Splide
+          options={splideOptions}
+          aria-label="Featured Videos"
+          ref={splideRef}
+        >
+          {loading
+            ? Array.from({ length: 4 }).map((_, index) => (
               <SplideSlide key={`skeleton-${index}`} className="pb-8">
                 <SkeletonVideoCard />
               </SplideSlide>
             ))
-          : // Show real video cards when loaded
-            videos.map((video) => (
-              <SplideSlide key={video._id} className="pb-8">
+            : videos.map((video) => (
+              <SplideSlide key={video._id} className="pb-12">
                 <div
                   className="rounded-xl overflow-hidden shadow-md hover:shadow-xl transition cursor-pointer h-[440px]"
                   onClick={() => openVideoPlayer(video)}
                 >
                   <div className="relative h-full">
-                    {/* Play button overlay */}
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/40 transition-all">
                       <div className="p-3 bg-white/80 rounded-full">
                         <FiPlay className="text-2xl text-gray-800" />
                       </div>
                     </div>
-
-                    {/* Duration badge */}
                     <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
                       {formatDuration(video.duration)}
                     </div>
-
-                    {/* Video info */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                       <h3 className="text-lg font-medium text-white line-clamp-2 mb-1">
                         {video.title}
                       </h3>
-
-                      {/* Watch progress for logged-in users */}
                       {user && watchHistory[video._id] > 0 && (
                         <div className="mt-2 mb-2">
                           <div className="w-full bg-gray-600 rounded-full h-1">
                             <div
                               className="bg-[var(--primary)] h-1 rounded-full"
                               style={{ width: `${watchHistory[video._id]}%` }}
-                            ></div>
+                            />
                           </div>
                           <p className="text-xs text-gray-300 mt-1">
-                            {watchHistory[video._id] >= 90 ? 'Watched' : `${Math.round(watchHistory[video._id])}% watched`}
+                            {watchHistory[video._id] >= 90
+                              ? "Watched"
+                              : `${Math.round(watchHistory[video._id])}% watched`}
                           </p>
                         </div>
                       )}
                     </div>
-
-                    {/* Video thumbnail or cover image */}
                     <img
                       className="w-full h-full object-cover"
                       src={video.coverImage}
@@ -232,20 +220,21 @@ export default function VideoReels() {
                 </div>
               </SplideSlide>
             ))}
-      </Splide>
+        </Splide>
 
-      {/* Recommended Videos Section (if user is logged in) */}
+      </div>
+
+      {/* Recommended Videos Section */}
       {user && recommendedVideos.length > 0 && (
         <div className="mt-8">
           <h3 className="text-xl font-semibold mb-4">Recommended for You</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {recommendedVideos.map(video => (
+            {recommendedVideos.map((video) => (
               <Link
                 key={video._id}
                 to={`/all-videos/video/${video._id}`}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
-                {/* Thumbnail */}
                 <div className="relative">
                   <img
                     src={video.coverImage}
@@ -257,27 +246,27 @@ export default function VideoReels() {
                       <FaPlay className="text-gray-800" />
                     </div>
                   </div>
-
-                  {/* Watch progress indicator */}
                   {watchHistory[video._id] > 0 && (
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
                       <div
                         className="h-full bg-[var(--primary)]"
                         style={{ width: `${watchHistory[video._id]}%` }}
-                      ></div>
+                      />
                     </div>
                   )}
                 </div>
-
-                {/* Video info */}
                 <div className="p-3">
-                  <h4 className="font-medium text-gray-900 line-clamp-2">{video.title}</h4>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-1">{video.description}</p>
-
-                  {/* Watch progress text */}
+                  <h4 className="font-medium text-gray-900 line-clamp-2">
+                    {video.title}
+                  </h4>
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                    {video.description}
+                  </p>
                   {watchHistory[video._id] > 0 && (
                     <p className="text-xs text-[var(--primary)] mt-1">
-                      {watchHistory[video._id] >= 90 ? 'Watched' : `${Math.round(watchHistory[video._id])}% watched`}
+                      {watchHistory[video._id] >= 90
+                        ? "Watched"
+                        : `${Math.round(watchHistory[video._id])}% watched`}
                     </p>
                   )}
                 </div>
@@ -321,7 +310,7 @@ export default function VideoReels() {
               </h3>
               <Link
                 to={`/all-videos/video/${selectedVideo._id}`}
-                className="text-sm text-[var(--primary)] hover:underline"
+                className="text-sm text-[var(--ternery)] hover:underline"
                 onClick={closeVideoPlayer}
               >
                 Watch full video

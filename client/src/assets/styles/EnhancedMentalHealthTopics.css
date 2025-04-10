@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 1rem .3rem;
 }
 
 .categories-container {
@@ -234,27 +234,27 @@
   .details-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .details-image {
     max-height: 200px;
   }
-  
+
   .category-header {
     flex: 0 0 auto;
   }
-  
+
   .category-disorders {
     display: none;
   }
-  
+
   .category-row {
     padding: 0.75rem 1rem;
   }
-  
+
   .category-name {
     font-size: 1rem;
   }
-  
+
   .details-symptoms ul {
     grid-template-columns: 1fr;
   }

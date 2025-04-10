@@ -1,5 +1,3 @@
-/* Notification Button Styles */
-
 .notification-button-container {
   position: relative;
 }
@@ -9,8 +7,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
   border-radius: 50%;
   background: none;
   border: none;
@@ -27,10 +23,6 @@
 .notification-button.active {
   background-color: #eff6ff;
   color: #3b82f6;
-}
-
-.notification-icon {
-  font-size: 1.5rem;
 }
 
 .notification-count {
