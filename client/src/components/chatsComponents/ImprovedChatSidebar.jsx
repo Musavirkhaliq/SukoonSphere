@@ -305,7 +305,7 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
   return (
     <div className="flex flex-col h-full bg-white">
       {/* User Profile */}
-      <div className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+      <div className="p-4 bg-[var(--primary)]  text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="relative">
@@ -356,11 +356,10 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
       <div className="flex border-b">
         <button
           onClick={() => setActiveTab("chats")}
-          className={`flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center space-x-1 ${
-            activeTab === "chats"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
+          className={`flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center space-x-1 ${activeTab === "chats"
+            ? "text-blue-600 border-b-2 border-blue-600"
+            : "text-gray-500 hover:text-gray-700"
+            }`}
         >
           <FaComments size={14} />
           <span>Chats</span>
@@ -372,11 +371,10 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
         </button>
         <button
           onClick={() => setActiveTab("rooms")}
-          className={`flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center space-x-1 ${
-            activeTab === "rooms"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
+          className={`flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center space-x-1 ${activeTab === "rooms"
+            ? "text-blue-600 border-b-2 border-blue-600"
+            : "text-gray-500 hover:text-gray-700"
+            }`}
         >
           <FaUsers size={14} />
           <span>Rooms</span>
@@ -415,7 +413,7 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
               document.querySelector('.chat-sidebar')?.classList.remove('sidebar-search-focused');
             }}
             placeholder={activeTab === "chats" ? "Search chats or users..." : "Search rooms..."}
-            className="pl-10 pr-10 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent chat-search-input"
+            className="w-full bg-[var(--white-color)] py-2 px-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
           />
           {searchTerm && (
             <button

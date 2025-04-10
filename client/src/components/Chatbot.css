@@ -3,7 +3,7 @@
 /* Chatbot toggle button */
 .chatbot-toggle {
   position: fixed;
-  bottom: 20px;
+  bottom: 10px;
   right: 20px;
   width: 60px;
   height: 60px;
@@ -33,10 +33,10 @@
 /* Chatbot container */
 .chatbot {
   position: fixed;
-  bottom: 90px;
+  bottom: 20px;
   right: 20px;
-  width: 380px;
-  height: 550px;
+  width: 600px;
+  height: 80%;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   display: flex;
@@ -59,7 +59,7 @@
 
 /* Chat header */
 .chat-header {
-  background-color: #00bcd4;
+  background-color: var(--primary);
   color: #fff;
   padding: 16px;
   display: flex;
@@ -74,29 +74,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.new-chat-button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  opacity: 0.9;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.new-chat-button:hover {
-  opacity: 1;
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
 }
 
 .voice-toggle {
@@ -121,7 +98,7 @@
   background-color: rgba(255, 255, 255, 0.3);
 }
 
-.fullscreen-button {
+.button-gray {
   background: none;
   border: none;
   color: white;
@@ -132,37 +109,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-.fullscreen-button:hover {
+.button-gray:hover {
   opacity: 1;
   background-color: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
-}
-
-.close-button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  opacity: 0.9;
-  transition: opacity 0.2s ease;
-}
-
-.close-button:hover {
-  opacity: 1;
 }
 
 /* Chat history */
 .chat-history {
   flex: 1;
   overflow-y: auto;
-  padding: 18px;
   background: #f7f7f7;
   scroll-behavior: smooth;
 }
@@ -170,9 +132,8 @@
 /* Welcome message */
 .welcome-message {
   background-color: #e8f5e9;
-  padding: 18px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   animation: fadeIn 0.5s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -244,7 +205,8 @@
   color: #2e7d32;
   border-bottom-left-radius: 4px;
   animation: slideInLeft 0.3s ease;
-  padding-right: 40px; /* Space for the speak button */
+  padding-right: 40px;
+  /* Space for the speak button */
 }
 
 /* Speak button */
@@ -309,14 +271,7 @@
 }
 
 /* Chat input */
-.chat-input {
-  display: flex;
-  padding: 14px;
-  border-top: 1px solid #ddd;
-  background-color: #fff;
-  align-items: center;
-  gap: 10px;
-}
+
 
 .input-container {
   flex: 1;
@@ -330,9 +285,9 @@
   padding: 12px 40px 12px 16px;
   font-size: 1em;
   border: 1px solid #ccc;
-  border-radius: 24px;
+  border-radius: 8px;
   outline: none;
-  transition: all 0.3s ease;
+  /* transition: all 0.3s ease; */
   background-color: #f5f5f5;
 }
 
@@ -345,7 +300,7 @@
 .chat-input input.listening {
   border-color: #f44336;
   background-color: #ffebee;
-  animation: pulse 1.5s infinite;
+  /* animation: pulse 1.5s infinite; */
   caret-color: transparent;
 }
 
@@ -384,6 +339,8 @@
   animation: pulse 1.5s infinite;
   background-color: rgba(244, 67, 54, 0.1);
   box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.2);
+  right: 10px;
+  top: 50%;
 }
 
 .send-button {
@@ -424,6 +381,7 @@
     transform: translateX(-20px);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -435,6 +393,7 @@
     transform: translateX(20px);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -445,15 +404,20 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
 
 @keyframes bounce {
-  0%, 80%, 100% {
+
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
   }
+
   40% {
     transform: scale(1.2);
   }
@@ -464,10 +428,12 @@
     opacity: 0.6;
     transform: scale(1);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.05);
   }
+
   100% {
     opacity: 0.6;
     transform: scale(1);
@@ -477,16 +443,17 @@
 /* Responsive adjustments */
 @media (max-width: 480px) {
   .chatbot {
-    width: 90%;
-    right: 5%;
+    width: 95%;
+    right: 2%;
     bottom: 80px;
-    height: 60vh;
+    height: 78vh;
   }
 
   .chatbot-toggle {
     width: 50px;
     height: 50px;
     font-size: 20px;
+    bottom: 80px;
   }
 
   .message-bubble {

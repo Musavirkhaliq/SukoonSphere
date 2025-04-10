@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaRegComment, FaRegHeart, FaPlus, FaShare, FaEllipsisH } from "react-icons/fa";
+import { FaRegComment, FaRegHeart, FaPlus, FaShare, FaEllipsisH, FaRegCommentAlt } from "react-icons/fa";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 import customFetch from "@/utils/customFetch";
@@ -35,14 +35,14 @@ const SkeletonPostCard = () => {
 const CallToActionCard = () => {
   return (
     <div className="community-card cta-card">
-      <div className="cta-icon">
+      <div className="cta-icon bg-[var(--primary-color)]">
         <FaPlus />
       </div>
       <h3>Share Your Story</h3>
       <p>
         Join our supportive community and share your experiences, insights, and journey.
       </p>
-      <Link to="/posts" className="cta-button">
+      <Link to="/posts" className="btn-1">
         Create Post
       </Link>
     </div>
@@ -51,9 +51,9 @@ const CallToActionCard = () => {
 
 const PostCard = ({ post }) => {
   const [isHovered, setIsHovered] = useState(false);
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="community-card post-card"
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
@@ -68,38 +68,38 @@ const PostCard = ({ post }) => {
           createdAt={post?.createdAt}
           size="medium"
         />
-        
+
         <div className="card-menu">
           <FaEllipsisH />
           <div className={`card-menu-dropdown ${isHovered ? 'visible' : ''}`}>
-            <Link to={`/posts/${post?._id}`} className="menu-item">
+            <Link to={`/Posts`} className="menu-item">
               View Post
             </Link>
-            <Link to={`/user/${post?.createdBy?._id}`} className="menu-item">
+            <Link to={`/about/user/${post?.createdBy?._id}`} className="menu-item">
               View Profile
             </Link>
           </div>
         </div>
       </div>
-      
+
       <Link to={`/posts/${post?._id}`} className="card-content">
         <p>{post?.description}</p>
       </Link>
-      
+
       <div className="card-footer">
-        <div className="card-actions">
-          <button className="action-button">
+        <div className="flex gap-8 items-center ">
+          <button className=" flex gap-2 items-center">
             <FaRegHeart className={post?.likes?.includes(post?.createdBy?._id) ? "text-red-500" : ""} />
             <span>{post?.likes?.length || 0}</span>
           </button>
-          
-          <button className="action-button">
-            <FaRegComment />
+
+          <button className="flex gap-2 items-center">
+            <FaRegCommentAlt className="text-black" />
             <span>{post?.comments?.length || 0}</span>
           </button>
-          
+
           <button className="action-button">
-            <FaShare />
+            <FaShare className="text-black" />
           </button>
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function EnhancedUserPosts() {
     perPage: 3,
     perMove: 1,
     pagination: true,
-    arrows: true,
+    arrows: false,
     gap: "2rem",
     breakpoints: {
       1024: { perPage: 2 },
@@ -161,21 +161,21 @@ export default function EnhancedUserPosts() {
           View All Posts
         </Link>
       </div>
-      
+
       <div className="splide-container">
         <Splide options={splideOptions} className="enhanced-splide">
           {loading
             ? Array.from({ length: 3 }).map((_, index) => (
-                <SplideSlide key={`skeleton-${index}`}>
-                  <SkeletonPostCard />
-                </SplideSlide>
-              ))
+              <SplideSlide key={`skeleton-${index}`}>
+                <SkeletonPostCard />
+              </SplideSlide>
+            ))
             : userPosts.map((post) => (
-                <SplideSlide key={post?._id}>
-                  <PostCard post={post} />
-                </SplideSlide>
-              ))}
-          
+              <SplideSlide key={post?._id}>
+                <PostCard post={post} />
+              </SplideSlide>
+            ))}
+
           {!loading && (
             <SplideSlide>
               <CallToActionCard />

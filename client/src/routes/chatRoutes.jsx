@@ -4,6 +4,7 @@ import { Chat } from "@/pages";
 import ChatOutlet from "@/pages/chats/ChatOutlet";
 import RoomOutlet from "@/pages/chats/RoomOutlet";
 import { DefaultChat } from "@/components";
+import SukoonAI from "@/pages/therapy/Therapy";
 
 export const chatRoutes = [
   {
@@ -27,5 +28,13 @@ export const chatRoutes = [
         element: <RoomOutlet />,
       },
     ],
+  },
+  {
+    path: "/sukoonai",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <SukoonAI />
+      </Suspense>
+    ),
   },
 ];

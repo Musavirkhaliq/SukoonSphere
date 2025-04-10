@@ -57,7 +57,7 @@ const Posts = () => {
         </div>
 
         {/* Main Content */}
-        <div className="col-span-12 lg:col-span-6 space-y-4">
+        <div className="col-span-12 lg:col-span-6 space-y-4 order-2 lg:order-0">
           {/* Add Post Card */}
           <div >
             <Outlet />
@@ -65,7 +65,7 @@ const Posts = () => {
         </div>
 
         {/* Mobile User Search - Visible on small screens */}
-        <div className="lg:hidden col-span-full mb-4">
+        <div className="lg:hidden col-span-full mb-4  order-0 lg:order-1">
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <div className="mb-2">
               <h3 className="text-lg font-semibold mb-2 flex items-center">
@@ -78,7 +78,7 @@ const Posts = () => {
         </div>
 
         {/* Right Sidebar - User Search (Desktop) */}
-        <div className="hidden shadow-sm lg:block lg:col-span-3 rounded-lg">
+        <div className="hidden shadow-sm lg:block lg:col-span-3 rounded-lg order-2">
           <div className="bg-white p-4 rounded-lg sticky top-20">
             <div className="mb-4">
               <h3 className="text-lg font-semibold mb-2 flex items-center">

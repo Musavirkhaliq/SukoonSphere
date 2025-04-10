@@ -156,13 +156,7 @@ export const homeRoutes = [
       </Suspense>
     ),
   },
-  {
-    path: "/personal-stories/:id",
-    element: (
-      <Suspense fallback={<LoadingSpinner />}>
-        <SinglePersonalStory />
-      </Suspense>
-    ),
+,
   },
   {
     path: "/sukoonai",

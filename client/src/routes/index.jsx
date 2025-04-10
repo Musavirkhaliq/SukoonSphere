@@ -12,6 +12,7 @@ import { dashboardRoutes } from "./dashboardRoutes";
 import ChatLayout from "@/layouts/ChatLayout";
 import { chatRoutes } from "./chatRoutes";
 import { prescriptionRoutes } from "./prescriptionRoutes";
+import SukoonAI from "@/pages/therapy/Therapy";
 const HomeLayout = lazy(() => import("@/layouts/HomeLayout"));
 
 export const routes = [
@@ -44,4 +45,5 @@ export const routes = [
     ),
     children: [...chatRoutes],
   },
+
 ];

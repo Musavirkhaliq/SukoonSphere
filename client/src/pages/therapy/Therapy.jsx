@@ -114,7 +114,7 @@ const SukoonAI = () => {
         setShowAssessment(true);
         setAssessmentType('initial');
       } else if (sessionData.messages.length > 0 &&
-                (sessionData.assessments?.length === 0 || !sessionData.assessments)) {
+        (sessionData.assessments?.length === 0 || !sessionData.assessments)) {
         // If there are messages but no assessments, suggest taking the assessment
         console.log('Session has messages but no assessments');
         setShowAssessment(false);
@@ -424,8 +424,8 @@ const SukoonAI = () => {
             <h2>SukoonAI</h2>
             <p className="sukoon-sidebar-tagline">Your self-discovery journey</p>
           </div>
-          <button className="therapy-new-session-button" onClick={startNewSession}>
-            <FaPlus />
+          <button className="btn-2 " onClick={startNewSession}>
+            <FaPlus className='mr-3' />
             <span>New Journey</span>
           </button>
         </div>
