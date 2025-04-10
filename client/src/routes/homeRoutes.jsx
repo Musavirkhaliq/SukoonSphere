@@ -157,11 +157,19 @@ export const homeRoutes = [
     ),
   },
   {
-    path: "/sukoonai",
+    path: "/personal-stories/:id",
     element: (
       <Suspense fallback={<LoadingSpinner />}>
-        <SukoonAI />
+        <SinglePersonalStory />
       </Suspense>
     ),
   },
+  // {
+  //   path: "/sukoonai",
+  //   element: (
+  //     <Suspense fallback={<LoadingSpinner />}>
+  //       <SukoonAI />
+  //     </Suspense>
+  //   ),
+  // },
 ];
