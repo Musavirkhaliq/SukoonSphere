@@ -45,6 +45,10 @@ export { default as Posts } from "./stories&discussions/posts/Posts";
 export { default as RepliesOutlet } from "./stories&discussions/posts/RepliesOutlet";
 export { default as SinglePost } from "./stories&discussions/posts/SinglePost";
 
+// -->Personal Stories
+export { default as PersonalStories } from "./stories&discussions/personalStories/PersonalStories";
+export { default as SinglePersonalStory } from "./stories&discussions/personalStories/SinglePersonalStory";
+
 // --> Questions and Answers
 export { default as Answer } from "./stories&discussions/qaSection/answer/Answer";
 export { default as AllQuestionAnswers } from "./stories&discussions/qaSection/AllQuestionAnswers";

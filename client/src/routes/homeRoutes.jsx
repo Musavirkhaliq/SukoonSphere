@@ -6,6 +6,8 @@ const Answer = lazy(() => import("../pages/stories&discussions/qaSection/answer/
 const Article = lazy(() => import("../pages/articles&resources/articles/Article"));
 const AllQuestionAnswers = lazy(() => import("../pages/stories&discussions/qaSection/AllQuestionAnswers"));
 const SukoonAI = lazy(() => import("../pages/therapy/Therapy"));
+const PersonalStories = lazy(() => import("../pages/stories&discussions/personalStories/PersonalStories"));
+const SinglePersonalStory = lazy(() => import("../pages/stories&discussions/personalStories/SinglePersonalStory"));
 
 // Keep the loader as
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
@@ -146,5 +148,22 @@ export const homeRoutes = [
       },
     ],
   },
-
+  {
+    path: "/personal-stories",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <PersonalStories />
+      </Suspense>
+    ),
+  },
+,
+  },
+  {
+    path: "/sukoonai",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <SukoonAI />
+      </Suspense>
+    ),
+  },
 ];
