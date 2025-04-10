@@ -45,7 +45,7 @@ const Home = () => {
       <section className="homogeneous-section">
         <div className="section-content">
           <div className="homogeneous-header">
-            <h2 className="homogeneous-title">Mental Health Statistics</h2>
+            <h2 className="homogeneous-title text-[1.8rem]  md:text-[2.5rem] lg:text-[3.5rem] sm:leading-[3.5rem]">Mental Health Statistics</h2>
             <p className="homogeneous-subtitle">Explore the latest data on mental health conditions, their prevalence, and trends over time.</p>
           </div>
           <Suspense fallback={<LoadingSpinner />}>
@@ -134,13 +134,13 @@ const Home = () => {
       </section>
 
       {/* Mental Health Quiz Section */}
-      <section className="homogeneous-section featured-section">
+      {/* <section className="homogeneous-section featured-section">
         <div className="section-content">
           <Suspense fallback={<LoadingSpinner />}>
             <TodaysQuiz />
           </Suspense>
         </div>
-      </section>
+      </section> */}
 
       {/* Additional Content */}
       <section className="homogeneous-section">

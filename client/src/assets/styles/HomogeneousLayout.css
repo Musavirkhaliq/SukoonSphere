@@ -2,12 +2,18 @@
 
 :root {
   /* Main color palette */
-  --primary-color: #2a4365; /* Deep blue */
-  --primary-light: #4299e1; /* Lighter blue */
-  --primary-dark: #1a365d; /* Darker blue */
-  --accent-color: #ed8936; /* Orange */
-  --accent-light: #fbd38d; /* Light orange */
-  --accent-dark: #c05621; /* Dark orange */
+  --primary-color: #2a4365;
+  /* Deep blue */
+  --primary-light: #4299e1;
+  /* Lighter blue */
+  --primary-dark: #1a365d;
+  /* Darker blue */
+  --accent-color: #ed8936;
+  /* Orange */
+  --accent-light: #fbd38d;
+  /* Light orange */
+  --accent-dark: #c05621;
+  /* Dark orange */
   --text-dark: #1a202c;
   --text-medium: #4a5568;
   --text-light: #a0aec0;
@@ -231,6 +237,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -241,6 +248,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

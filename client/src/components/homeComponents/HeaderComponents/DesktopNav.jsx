@@ -19,7 +19,7 @@ const NavItem = ({ link, index }) => (
   <div className="group relative h-full align-middle">
     <NavLink to={link.address} className="flex group items-center justify-center ">
       <span className="ml-2">{link.name}</span>
-      {index !== 0 && (
+      {index !== 0 && index !== 1 && (
         <MdOutlineKeyboardArrowUp className="size-[1.4rem] ml-1 group-hover:rotate-180 transition-all duration-300 ease-in-out transform hover:scale-110 text-[var(--primary)] group-hover:text-[var(--ternery)] drop-shadow-sm hover:drop-shadow-md" />
       )}
     </NavLink>
@@ -31,7 +31,6 @@ const SubLinks = ({ sublinks }) => (
   <ul className="top-14 absolute opacity-0 max-h-0 invisible group-hover:opacity-100 group-hover:max-h-[500px] group-hover:visible transition-[opacity, max-height, transform] duration-300 ease-in-out transform group-hover:translate-y-1 shadow-[0px_1px_10px_rgba(0,0,0,0.1)] bg-white p-2 rounded-[5px] w-72">
     <BsFillTriangleFill className="text-lg absolute -top-3 left-5 text-white" />
     {sublinks.map((sublink) => {
-      // Check if the sublink is for videos or podcasts
       return <SubLink key={sublink.name} sublink={sublink} />;
     })}
   </ul>

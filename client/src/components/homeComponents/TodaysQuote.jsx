@@ -126,8 +126,7 @@ function TodaysQuote() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-8">
-      <SectionTitle title="Request a quote" />
+    <div className="max-w-7xl mx-auto  lg:px-8">
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 flex flex-col items-center justify-center font-sans">
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-[var(--primary)] tracking-tight">
           Spin the wheel to get started

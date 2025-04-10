@@ -6,17 +6,17 @@ import EnhancedNotificationDropdown from './EnhancedNotificationDropdown';
 import './NotificationButton.css';
 
 const NotificationButton = () => {
-  const { 
-    unreadCount, 
-    showDropdown, 
-    toggleDropdown 
+  const {
+    unreadCount,
+    showDropdown,
+    toggleDropdown
   } = useNotifications();
-  
+
   // Animation for the notification badge
   const badgeVariants = {
     initial: { scale: 0, opacity: 0 },
-    animate: { 
-      scale: 1, 
+    animate: {
+      scale: 1,
       opacity: 1,
       transition: {
         type: 'spring',
@@ -24,15 +24,15 @@ const NotificationButton = () => {
         damping: 15
       }
     },
-    exit: { 
-      scale: 0, 
+    exit: {
+      scale: 0,
       opacity: 0,
       transition: {
         duration: 0.2
       }
     }
   };
-  
+
   // Animation for the bell shake
   const bellVariants = {
     initial: { rotate: 0 },
@@ -44,7 +44,7 @@ const NotificationButton = () => {
       }
     }
   };
-  
+
   return (
     <div className="notification-button-container">
       <motion.button
@@ -57,11 +57,11 @@ const NotificationButton = () => {
         whileTap={{ scale: 0.95 }}
       >
         {unreadCount > 0 ? (
-          <IoNotifications className="notification-icon" />
+          <IoNotifications className=" text-[1.7rem] text-black" />
         ) : (
-          <IoNotificationsOutline className="notification-icon" />
+          <IoNotificationsOutline className=" text-[1.7rem] text-black" />
         )}
-        
+
         <AnimatePresence>
           {unreadCount > 0 && (
             <motion.span
@@ -76,7 +76,7 @@ const NotificationButton = () => {
           )}
         </AnimatePresence>
       </motion.button>
-      
+
       <EnhancedNotificationDropdown />
     </div>
   );

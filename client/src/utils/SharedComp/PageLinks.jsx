@@ -15,12 +15,10 @@ const links = [
     address: "/",
     icon: <RiHomeSmileFill />,
   },
-  {
-    name: "SukoonAI",
-    address: "/sukoonai",
-    description: "AI-powered self-discovery journey",
-    icon: <FaRobot className="text-lg" />,
-  },
+  // {
+  //   name: "SukoonAI",
+  //   address: "/sukoonai",
+  // },
   {
     name: "Articles & Resources",
     address: '',

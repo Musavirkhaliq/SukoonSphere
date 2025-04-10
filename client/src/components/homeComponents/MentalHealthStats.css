@@ -29,7 +29,7 @@
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 1rem;
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -87,7 +87,7 @@
   left: 0;
   width: 100%;
   height: 5px;
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
   z-index: 1;
 }
 
@@ -118,7 +118,7 @@
 .stat-value {
   font-size: 2.5rem;
   font-weight: 800;
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -127,7 +127,7 @@
 
 .stat-icon {
   font-size: 1.5rem;
-  color: #3b82f6;
+  color: var(--primary-color);
   margin-left: auto;
 }
 
@@ -171,7 +171,7 @@
 }
 
 .chart-control-btn.active {
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
   color: white;
   border-color: transparent;
 }
@@ -179,12 +179,13 @@
 .chart-tabs {
   display: flex;
   border-bottom: 1px solid #f3f4f6;
-  overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
+  overflow-x: auto !important;
+
 }
 
 .chart-tabs::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  display: none;
+  /* Chrome, Safari, Edge */
 }
 
 .chart-tab {
@@ -198,8 +199,8 @@
 }
 
 .chart-tab.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
 }
 
 .chart-tab:hover:not(.active) {
@@ -219,12 +220,12 @@
 }
 
 .chart-visualization {
-  padding: 1.5rem;
+  padding-top: 1rem;
   min-height: 400px;
 }
 
 .chart-insights {
-  padding: 1.5rem;
+  padding: 1rem;
   background: #f9fafb;
   border-left: 1px solid #f3f4f6;
 }
@@ -298,7 +299,7 @@
 .additional-info {
   background: linear-gradient(135deg, #eff6ff, #dbeafe);
   border-radius: 16px;
-  padding: 2rem;
+  padding: 2rem .3rem;
   margin-top: 3rem;
 }
 
@@ -364,6 +365,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -395,25 +397,25 @@
   .stats-title {
     font-size: 2rem;
   }
-  
+
   .stats-subtitle {
     font-size: 1rem;
   }
-  
+
   .stat-value {
     font-size: 2rem;
   }
-  
+
   .chart-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .chart-controls {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .chart-tab {
     padding: 0.75rem 1rem;
   }

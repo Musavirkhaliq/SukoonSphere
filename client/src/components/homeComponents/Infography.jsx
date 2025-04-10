@@ -125,7 +125,7 @@ function Infography() {
     const timer = setTimeout(() => {
       if (chartRef.current && chartRef.current.chart) {
         const chart = chartRef.current.chart;
-        
+
         // Animated rotation for 3D effect
         let alpha = 0;
         const intervalId = setInterval(() => {
@@ -134,7 +134,7 @@ function Infography() {
             clearInterval(intervalId);
             return;
           }
-          
+
           chart.update({
             chart: {
               options3d: {
@@ -145,7 +145,7 @@ function Infography() {
         }, 30);
       }
     }, 100);
-    
+
     return () => clearTimeout(timer);
   }, [activeTab, timeRange]);
 
@@ -269,12 +269,12 @@ function Infography() {
   const getBarColors = () => {
     const baseColor = getChartColor();
     const data = getActiveData();
-    
+
     // Generate a different color for each year's bar
     return data.map((item, index) => {
       // Create color variations based on position in array
       const position = index / (data.length - 1); // 0 to 1
-      
+
       // Different color strategies for different mental health categories
       switch (activeTab) {
         case "anxiety":
@@ -301,7 +301,7 @@ function Infography() {
     const years = data.map(item => item.year.toString());
     const values = data.map(item => item.value);
     const colors = getBarColors();
-    
+
     return {
       chart: {
         type: 'column',
@@ -389,7 +389,6 @@ function Infography() {
 
   return (
     <div className="min-h-screen">
-      <SectionTitle title={"Mental Health Statistics"} />
       <main className="container mx-auto px-4 py-8">
         <section className="mb-12">
           <div className="flex flex-col gap-6 justify-center items-center max-w-7xl mx-auto relative text-center">
@@ -410,7 +409,7 @@ function Infography() {
                 className="font-bold text-[var(--grey--900)] hover:text-[var(--ternery)] cursor-pointer text-[1.6rem] md:text-[2.5rem] lg:text-[3.5rem] sm:leading-[3.5rem]"
                 data-aos="fade-up"
               >
-                Mental Health Challenges
+                Mental Health Chal
               </h2>
             </Link>
             <p
@@ -488,13 +487,13 @@ function Infography() {
             </h2>
             <div className="flex gap-2">
               <button
-                className={`px-3 py-1 rounded-md text-sm ${timeRange === "5year" ? "bg-[var(--primary)] text-white" : "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"}`}
+                className={`btn-1 ${timeRange === "5year" ? "bg-[var(--primary)] text-white" : "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"}`}
                 onClick={() => setTimeRange("5year")}
               >
                 5 Years
               </button>
               <button
-                className={`px-3 py-1 rounded-md text-sm ${timeRange === "10year" ? "bg-[var(--primary)] text-white" : "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"}`}
+                className={`btn-1 ${timeRange === "10year" ? "bg-[var(--primary)] text-white" : "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"}`}
                 onClick={() => setTimeRange("10year")}
               >
                 10 Years

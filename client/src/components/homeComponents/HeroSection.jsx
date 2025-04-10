@@ -113,20 +113,6 @@ export default function HeroSection() {
               initial="hidden"
               animate="visible"
             >
-              {/* <motion.div className="hero-floating-badge" variants={floatingItem}>
-                <span className="hero-badge-icon">🌟</span>
-                <span className="hero-badge-text">Mental Wellness</span>
-              </motion.div>
-
-              <motion.div className="hero-floating-badge" variants={floatingItem}>
-                <span className="hero-badge-icon">💪</span>
-                <span className="hero-badge-text">Community Support</span>
-              </motion.div>
-
-              <motion.div className="hero-floating-badge" variants={floatingItem}>
-                <span className="hero-badge-icon">🧠</span>
-                <span className="hero-badge-text">Expert Resources</span>
-              </motion.div> */}
             </motion.div>
 
             {/* Main content with enhanced typography */}
@@ -163,19 +149,19 @@ export default function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
               >
-                <Link to="/QA-section" className="hero-cta-primary">
+                <Link to="/posts" className="btn-2 !rounded-full !py-4">
+                  <span className="hero-cta-text">Share a story</span>
+                  <span className="hero-cta-icon">
+                    <FaLongArrowAltRight />
+                  </span>
+                </Link>
+                <Link to="/QA-section" className=" hero-cta-secondary">
                   <span className="hero-cta-text">Ask questions</span>
                   <span className="hero-cta-icon">
                     <FaLongArrowAltRight />
                   </span>
                 </Link>
 
-                <Link to="/posts" className="hero-cta-secondary">
-                  <span className="hero-cta-text">Share a story</span>
-                  <span className="hero-cta-icon">
-                    <FaLongArrowAltRight />
-                  </span>
-                </Link>
               </motion.div>
             </motion.div>
 

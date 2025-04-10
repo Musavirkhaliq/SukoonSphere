@@ -228,7 +228,7 @@ const ChatInput = ({ chatId, fetchChatMessages }) => {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Type a message..."
-              className="bg-gray-50 w-full p-3 border border-gray-200 rounded-full focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
+              className="w-full bg-[var(--white-color)] py-2 px-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
