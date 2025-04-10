@@ -3,6 +3,7 @@ import { useInView } from "react-intersection-observer";
 import { useEffect, useState } from "react";
 import QuestionCard from "./components/QuestionCard";
 import QaFilter from "@/components/qa/QaFilter";
+import LoadingSpinner from "@/components/loaders/LoadingSpinner";
 
 import customFetch from "@/utils/customFetch";
 
@@ -15,7 +16,7 @@ const QaOutlet = () => {
       queryKey: ["questions", activeFilter],
       queryFn: async ({ pageParam = 1 }) => {
         const response = await customFetch.get(
-          `/qa-section?page=${pageParam}&limit=10&sortBy=${activeFilter}`
+          `/qa-section/all-questions?page=${pageParam}&limit=10&sortBy=${activeFilter}`
         );
         return response.data;
       },
@@ -36,11 +37,7 @@ const QaOutlet = () => {
   const allQuestions = data?.pages.flatMap((page) => page.questions) || [];
 
   if (status === "loading") {
-    return (
-      <div className="text-center py-4">
-        <Spinner />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (status === "error") {
