@@ -12,6 +12,9 @@ import './components/notifications/EnhancedNotificationDropdown.css';
 // Import chat component styles
 import './components/chatsComponents/VoiceRecorder.css';
 
+// Import personal stories styles
+import './components/personalStories/PersonalStories.css';
+
 // Create root once and store it
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
