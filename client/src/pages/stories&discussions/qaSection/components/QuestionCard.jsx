@@ -130,11 +130,10 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       <div className="flex flex-wrap gap-2 mt-4">
         <button
           onClick={handleAnswerButtonClick}
-          className={`inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
-            showAnswerForm
-              ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
-              : "btn-2 shadow-sm hover:shadow-md"
-          }`}
+          className={`inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${showAnswerForm
+            ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+            : "btn-2 shadow-sm hover:shadow-md"
+            }`}
         >
           {showAnswerForm ? (
             <>

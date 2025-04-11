@@ -77,7 +77,7 @@ const SinglePost = () => {
         <PostCommentModal
           isOpen={showCommentModal}
           onClose={() => setShowCommentModal(false)}
-          postId={post._id}
+          postId={post?._id}
         />
       )}
 

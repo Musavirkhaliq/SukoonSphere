@@ -415,6 +415,7 @@ const SukoonAI = () => {
         <button className="therapy-new-session-button" onClick={startNewSession}>
           <FaPlus />
         </button>
+
       </div>
 
       {/* Sidebar */}
@@ -458,7 +459,7 @@ const SukoonAI = () => {
                 <h2>{activeSession?.title?.replace('Therapy Session', 'SukoonAI Journey') || 'SukoonAI Journey'}</h2>
                 <p className="sukoon-session-subtitle">Your path to self-discovery</p>
               </div>
-              <div className="therapy-tabs">
+              {/* <div className="therapy-tabs">
                 <button
                   className={`therapy-tab ${activeTab === 'chat' ? 'active' : ''}`}
                   onClick={() => setActiveTab('chat')}
@@ -480,7 +481,7 @@ const SukoonAI = () => {
                   <FaLightbulb className="tab-icon" />
                   <span>Insights</span>
                 </button>
-              </div>
+              </div> */}
             </div>
 
             {/* Tab content */}

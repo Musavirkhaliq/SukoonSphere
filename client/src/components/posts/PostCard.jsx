@@ -16,9 +16,6 @@ import PostCommentModal from "./PostCommentModal";
 const PostCard = ({
   post,
   user,
-  comment = "link",
-  totalComments,
-  onCommentClick,
   onPostUpdate,
 }) => {
   const [isLiked, setIsLiked] = useState(post?.likes?.includes(user?._id));
@@ -30,7 +27,6 @@ const PostCard = ({
   const [showCommentModal, setShowCommentModal] = useState(false);
   const navigate = useNavigate();
   const handleDelete = () => {
-    console.log('handleDelete called, showing delete modal');
     setShowDeleteModal(true);
   };
 
@@ -60,11 +56,9 @@ const PostCard = ({
     }
   };
 
-  console.log('Post data:', { post, currentPost });
   const handleLike = async () => {
     if (!user) {
       toast.error("Please login to like this post!");
-      navigate("/auth/sign-up");
       return;
     }
     setIsLoading(true);
@@ -79,52 +73,43 @@ const PostCard = ({
     }
   };
 
+  console.log('Post data:', { post, currentPost });
   return (
     <>
       <div className="bg-white rounded-lg shadow-sm p-4 relative">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-2">
             <UserAvatar
-              username={currentPost.username}
-              userAvatar={currentPost.userAvatar}
-              createdBy={currentPost.createdBy}
-              createdAt={currentPost.createdAt}
+              username={currentPost?.username}
+              userAvatar={currentPost?.userAvatar}
+              createdBy={currentPost?.createdBy}
+              createdAt={currentPost?.createdAt}
               size="medium"
             />
           </div>
 
-          {/* Debug info */}
-          {console.log('User auth check:', {
-            userId: user?._id,
-            postCreatedBy: currentPost.createdBy,
-            postRealCreator: currentPost.realCreator,
-            isCreator: String(user?._id) === String(currentPost.createdBy),
-            isRealCreator: String(user?._id) === String(currentPost.realCreator),
-            isAnonymous: currentPost.isAnonymous
-          })}
-
           {user?._id && (
             // Show edit/delete options if user is the creator OR the real creator of an anonymous post
-            (currentPost.createdBy && String(user._id) === String(currentPost.createdBy)) ||
-            (currentPost.isAnonymous && currentPost.realCreator && String(user._id) === String(currentPost.realCreator))
+            (currentPost?.createdBy && String(user?._id) === String(currentPost?.createdBy)) ||
+            (currentPost?.isAnonymous && currentPost?.realCreator && String(user?._id) === String(currentPost?.realCreator))
           ) && (
-            <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
-          )}
+              <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
+            )}
         </div>
 
-        {currentPost.imageUrl && (
+        {currentPost?.imageUrl && (
           <img
-            src={currentPost.imageUrl}
+            src={currentPost?.imageUrl}
             alt="Post"
             className="w-full object-cover rounded-lg mb-4"
           />
         )}
-        <p className="text-gray-800 mb-4">{currentPost.description}</p>
+        <p className="text-gray-800 mb-4">{currentPost?.description}</p>
 
         {/* Tags Section */}
-        {currentPost.tags && currentPost.tags.length > 0 && (
+        {currentPost?.tags && currentPost?.tags?.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {currentPost.tags.map((tag, index) => (
+            {currentPost?.tags?.map((tag, index) => (
               <span
                 key={index}
                 className="px-2 py-1 bg-blue-50 text-blue-600 rounded-full text-sm"
@@ -139,9 +124,8 @@ const PostCard = ({
           <button
             onClick={handleLike}
             disabled={isLoading}
-            className={`flex items-center gap-1 ${
-              isLiked ? "text-red-500" : ""
-            } lg:hover:text-red-500 transition-colors`}
+            className={`flex items-center gap-1 ${isLiked ? "text-red-500" : ""
+              } lg:hover:text-red-500 transition-colors`}
           >
             <FaRegHeart className={isLiked ? "fill-current" : ""} />
             <span>{likesCount}</span>
@@ -153,7 +137,7 @@ const PostCard = ({
             className="flex items-center gap-1 hover:text-blue-500 cursor-pointer transition-colors duration-200"
           >
             <FaRegComment />
-            <span>{currentPost.totalComments || 0}</span>
+            <span>{currentPost?.totalComments || 0}</span>
           </div>
           {/* )  */}
           {/* : (
@@ -166,10 +150,10 @@ const PostCard = ({
             </button> */}
           {/* )} */}
 
-          {currentPost.editedAt && (
+          {currentPost?.editedAt && (
             <span className="text-xs text-gray-400 ml-auto">
               edited{" "}
-              {formatDistanceToNow(new Date(currentPost.editedAt), {
+              {formatDistanceToNow(new Date(currentPost?.editedAt), {
                 addSuffix: true,
               })}
             </span>
@@ -180,7 +164,7 @@ const PostCard = ({
         <PostCommentModal
           isOpen={showCommentModal}
           onClose={() => setShowCommentModal(false)}
-          postId={currentPost._id}
+          postId={currentPost?._id}
         />
       )}
       {showDeleteModal && (

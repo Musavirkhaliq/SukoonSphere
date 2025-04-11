@@ -73,7 +73,7 @@ const PostCommentModal = ({ isOpen, onClose, postId }) => {
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center">
         <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all duration-300 animate-modalFadeIn">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-white z-10 rounded-t-xl">

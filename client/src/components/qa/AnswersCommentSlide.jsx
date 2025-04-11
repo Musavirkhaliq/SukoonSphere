@@ -8,17 +8,15 @@ const AnswersCommentSlide = ({ isOpen, onClose, answerId }) => {
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 z-[70] transition-opacity duration-300 custom-scrollbar  ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black/50 z-[70] transition-opacity duration-300 custom-scrollbar  ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={onClose}
       />
 
       {/* Slide-out panel */}
       <div
-        className={`fixed top-0 left-0 w-full sm:w-[450px] h-screen bg-white z-[80] transform transition-transform duration-300 ease-in-out custom-scrollbar ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 w-full sm:w-[450px] h-screen bg-white z-[80] transform transition-transform duration-300 ease-in-out custom-scrollbar ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="h-full flex flex-col">
           {/* Header */}

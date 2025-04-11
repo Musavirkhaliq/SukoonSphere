@@ -134,7 +134,7 @@ const Chatbot = () => {
       }
     } catch (error) {
       console.error("Error sending message to chatbot:", error);
-      let errorMessage = "Failed to get a response. Please try again later.";
+      let errorMessage = "Failed to get a response. Please try again laterrrrr.";
 
       if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
@@ -145,7 +145,7 @@ const Chatbot = () => {
       // Add error message to chat
       const botErrorMessage = {
         sender: "bot",
-        text: "I'm having trouble connecting right now. Please try again later."
+        text: "I'm having trouble connecting right now. Please try again laterrrrr."
       };
       setMessages((prev) => [...prev, botErrorMessage]);
     } finally {
@@ -518,15 +518,20 @@ const Chatbot = () => {
         </div>
         <div className="chat-input">
           <div className="input-container">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSend()}
-              placeholder={isListening ? "Listening... (speak now)" : "Type your message..."}
-              disabled={isLoading || isListening}
-              className={` ${isListening ? 'listening' : ''}`}
-            />
+            {user ?
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSend()}
+                placeholder={isListening ? "Listening... (speak now)" : "Type your message..."}
+                disabled={isLoading || isListening}
+                className={` ${isListening ? 'listening' : ''}`}
+              />
+              :
+              <h2 className="text-center">Please <a href="/auth/sign-in" className="login-link">login</a> to chat</h2>
+            }
+
             <button
               className={`mic-button ${isListening ? 'listening' : ''}`}
               onClick={toggleListening}
@@ -538,14 +543,14 @@ const Chatbot = () => {
           </div>
           <button
             onClick={handleSend}
-            disabled={isLoading || (!input.trim() && !isListening)}
+            disabled={!user || isLoading || (!input.trim() && !isListening)}
             className={`btn-2  ${isLoading ? 'loading' : ''}`}
             title="Send message"
           >
             {isLoading ? <AiOutlineLoading3Quarters className="text-2xl" /> : <BiSend className="text-2xl text-white" />}
           </button>
         </div>
-      </div>
+      </div >
     </>
   );
 };

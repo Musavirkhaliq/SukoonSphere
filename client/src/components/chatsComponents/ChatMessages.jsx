@@ -25,7 +25,7 @@ const ChatMessages = ({ user, messages, setMessages }) => {
   // Close context menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (chatContainerRef.current ) {
+      if (chatContainerRef.current) {
         setContextMenu(null);
       }
     };

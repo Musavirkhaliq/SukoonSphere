@@ -168,14 +168,14 @@ const TherapyChat = ({
       </div>
 
       <div className="therapy-chat-footer">
-        {shouldShowAssessmentButton() && (
+        {/* {shouldShowAssessmentButton() && (
           <button
             className="therapy-assessment-button"
             onClick={onStartAssessment}
           >
             Take Progress Assessment
           </button>
-        )}
+        )} */}
 
         {sessionStatus === 'active' ? (
           <div className="therapy-chat-input">
@@ -259,6 +259,9 @@ const TherapyChat = ({
                 <textarea
                   id="feedback"
                   value={feedback}
+                  style={{ resize: "none", maxHeight: "120px" }}
+                  className="bg-[var(--white-color)] py-2 px-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                  rows={"1"}
                   onChange={(e) => setFeedback(e.target.value)}
                   placeholder="Share your thoughts about this session..."
                 />
@@ -266,13 +269,13 @@ const TherapyChat = ({
 
               <div className="therapy-modal-actions">
                 <button
-                  className="therapy-modal-cancel"
+                  className="btn-red"
                   onClick={() => setShowCompletionModal(false)}
                 >
                   Cancel
                 </button>
                 <button
-                  className="therapy-modal-confirm"
+                  className="btn-2"
                   onClick={handleCompleteSession}
                   disabled={isSubmitting}
                 >

@@ -72,7 +72,7 @@ const PostCard = ({ post }) => {
         <div className="card-menu">
           <FaEllipsisH />
           <div className={`card-menu-dropdown ${isHovered ? 'visible' : ''}`}>
-            <Link to={`/Posts`} className="menu-item">
+            <Link to={`/posts/${post?._id}`} className="menu-item">
               View Post
             </Link>
             <Link to={`/about/user/${post?.createdBy?._id}`} className="menu-item">

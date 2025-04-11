@@ -1,3 +1,4 @@
+import AnswerCommentModal from "@/components/qa/AnswerCommentModal";
 import AnswersCommentSlide from "@/components/qa/AnswersCommentSlide";
 import DeleteModal from "@/components/shared/DeleteModal";
 import PostActions from "@/components/shared/PostActions";
@@ -162,9 +163,8 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
       {/* Show interaction buttons in a more compact way for preview mode */}
       <div className="flex items-center gap-4 text-gray-500">
         <button
-          className={`flex items-center gap-1 ${
-            isLiked ? "text-red-500" : ""
-          } hover:text-red-500 transition-colors ${preview ? 'text-sm' : ''}`}
+          className={`flex items-center gap-1 ${isLiked ? "text-red-500" : ""
+            } hover:text-red-500 transition-colors ${preview ? 'text-sm' : ''}`}
           onClick={handleLikeAnswer}
         >
           <FaRegHeart className={`${isLiked ? "fill-current" : ""} ${preview ? 'w-3 h-3' : ''}`} />
@@ -188,7 +188,7 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
       </div>
 
       {showCommentModal && (
-        <AnswersCommentSlide
+        <AnswerCommentModal
           isOpen={showCommentModal}
           onClose={() => setShowCommentModal(false)}
           answerId={answer._id}

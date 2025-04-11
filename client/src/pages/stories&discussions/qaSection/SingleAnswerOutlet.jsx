@@ -1,13 +1,12 @@
 import PostActions from "@/components/shared/PostActions";
 import UserAvatar from "@/components/shared/UserAvatar";
 import customFetch from "@/utils/customFetch";
-import { Outlet, useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import Answer from "./components/Answer";
 import { useUser } from "@/context/UserContext";
 import DeleteModal from "@/components/shared/DeleteModal";
 import { useState } from "react";
-import AnswersCommentSlide from "@/components/qa/AnswersCommentSlide";
-
+import AnswerCommentModal from "@/components/qa/AnswerCommentModal";
 const SingleAnswerOutlet = () => {
   const { user } = useUser();
   const navigate = useNavigate();
@@ -77,7 +76,7 @@ const SingleAnswerOutlet = () => {
       </div>
       <Answer answer={answer} key={answer._id} user={user} answerCount={1} />
       {showCommentSlide && (
-        <AnswersCommentSlide
+        <AnswerCommentModal
           isOpen={showCommentSlide}
           onClose={() => setShowCommentSlide(false)}
           answerId={answer._id}

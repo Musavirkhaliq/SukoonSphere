@@ -98,7 +98,7 @@ const AddVideoToPlaylistModel = ({ setShowModal, playlistId, onSuccess }) => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Search videos by title or description"
-                            className="pl-10 shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                         />
                     </div>
 
@@ -116,9 +116,8 @@ const AddVideoToPlaylistModel = ({ setShowModal, playlistId, onSuccess }) => {
                             filteredVideos.map((video) => (
                                 <div
                                     key={video._id}
-                                    className={`flex items-center p-3 border-b cursor-pointer hover:bg-gray-50 ${
-                                        selectedVideo === video._id ? "bg-blue-50" : ""
-                                    }`}
+                                    className={`flex items-center p-3 border-b cursor-pointer hover:bg-gray-50 ${selectedVideo === video._id ? "bg-blue-50" : ""
+                                        }`}
                                     onClick={() => setSelectedVideo(video._id)}
                                 >
                                     <div className="flex-shrink-0 w-16 h-12 mr-3">

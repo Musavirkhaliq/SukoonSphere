@@ -124,7 +124,7 @@ const Video = () => {
 
     if (error) {
         return (
-            <div className="min-h-[50vh] flex items-center justify-center px-4">
+            <div className="min-h-[50vh] flex items-center justify-center ">
                 <div className="bg-red-50 p-4 rounded-lg max-w-md w-full">
                     <h2 className="text-red-800 text-xl mb-2">Error Loading Video</h2>
                     <p className="text-red-600 mb-4">{error}</p>
@@ -141,8 +141,8 @@ const Video = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="container mx-auto px-4 py-6">
-                <div className="max-w-6xl mx-auto">
+            <div className=" py-6">
+                <div className="max-w-7xl mx-auto">
                     {/* Navigation */}
                     <nav className="mb-4">
                         <Link

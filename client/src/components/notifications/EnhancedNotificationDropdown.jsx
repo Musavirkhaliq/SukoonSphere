@@ -154,6 +154,7 @@ const EnhancedNotificationDropdown = () => {
         animate="visible"
         exit="exit"
         layout
+        onClick={closeDropdown}
       >
         {(() => {
           switch (notification.type) {

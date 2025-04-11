@@ -37,6 +37,14 @@ export const routes = [
   },
   ...authRoutes,
   {
+    path: "/sukoonai",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <SukoonAI />
+      </Suspense>
+    ),
+  },
+  {
     path: "/",
     element: (
       <Suspense fallback={<LoadingSpinner />}>
