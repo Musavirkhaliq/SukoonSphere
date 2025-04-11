@@ -166,25 +166,17 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
             isLiked ? "text-red-500" : ""
           } hover:text-red-500 transition-colors ${preview ? 'text-sm' : ''}`}
           onClick={handleLikeAnswer}
-          disabled={preview} // Disable interactions in preview mode
         >
           <FaRegHeart className={`${isLiked ? "fill-current" : ""} ${preview ? 'w-3 h-3' : ''}`} />
           <span>{likeCount}</span>
         </button>
-        {!preview ? (
-          <div
-            onClick={() => setShowCommentModal(true)}
-            className="flex items-center gap-2 hover:text-blue-500 transition-colors cursor-pointer"
-          >
-            <FaRegComment />
-            <span>{answer.totalComments}</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1 text-sm">
-            <FaRegComment className="w-3 h-3" />
-            <span>{answer.totalComments}</span>
-          </div>
-        )}
+        <div
+          onClick={() => setShowCommentModal(true)}
+          className={`flex items-center ${preview ? 'gap-1 text-sm' : 'gap-2'} hover:text-blue-500 transition-colors cursor-pointer`}
+        >
+          <FaRegComment className={preview ? 'w-3 h-3' : ''} />
+          <span>{answer.totalComments}</span>
+        </div>
         {answer.editedAt && !preview && (
           <span className="text-xs text-gray-400 ml-auto">
             edited{" "}

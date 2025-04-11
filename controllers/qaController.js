@@ -248,18 +248,11 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
   const skip = (page - 1) * limit;
   const sortBy = req.query.sortBy || "newest";
 
-  // Get total count for pagination info
-  const totalCount = await Question.countDocuments({
-    answers: { $exists: true, $not: { $size: 0 } },
-  });
+  // Get total count for pagination info - show all questions
+  const totalCount = await Question.countDocuments({});
 
-  // Base pipeline for questions with answers
+  // Base pipeline for all questions
   const pipeline = [
-    {
-      $match: {
-        answers: { $exists: true, $not: { $size: 0 } },
-      },
-    },
     {
       $lookup: {
         from: "users",
