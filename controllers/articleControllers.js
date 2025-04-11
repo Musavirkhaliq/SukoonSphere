@@ -68,6 +68,15 @@ export const getAllArticles = async (req, res) => {
       case "title":
         pipeline.push({ $sort: { title: 1, createdAt: -1 } });
         break;
+      case "popular":
+        // Sort by likes count (descending) and then by creation date (descending)
+        pipeline.push({
+          $addFields: {
+            likesCount: { $size: { $ifNull: ["$likes", []] } }
+          }
+        });
+        pipeline.push({ $sort: { likesCount: -1, createdAt: -1 } });
+        break;
       default: // 'newest'
         pipeline.push({ $sort: { createdAt: -1 } });
     }
