@@ -547,8 +547,15 @@ const Article = () => {
 
                     {/* Comment Button */}
                     <button
-                      onClick={() => setIsCommentOpen(true)}
+                      onClick={() => {
+                        const currentUser = JSON.parse(localStorage.getItem("user"));
+                        if (!currentUser) {
+                          toast.info("Login to join the conversation");
+                        }
+                        setIsCommentOpen(true);
+                      }}
                       className="flex items-center gap-2 text-[var(--grey--800)] hover:text-[var(--ternery)]"
+                      title="View comments"
                     >
                       <FaRegCommentAlt className="w-5 h-5" />
                       <span>{article.totalComments || 0}</span>

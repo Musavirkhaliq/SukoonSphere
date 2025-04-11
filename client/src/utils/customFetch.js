@@ -10,13 +10,20 @@ const customFetch = axios.create({
 customFetch.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    // Only handle 401 errors for authenticated requests that aren't auth-related
+    if (error.response?.status === 401 &&
+        localStorage.getItem("isAuthenticated") === "true" &&
+        !error.config.url.includes('/auth/') &&
+        // Don't show session expired for optional endpoints
+        !error.config.url.includes('/articles/')) {
+
       // Clear user data from localStorage on authentication error
       await customFetch.delete("/auth/logout");
       localStorage.removeItem("user");
       localStorage.removeItem("isAuthenticated");
-      toast.error("Session expired, please log in again!!!!");
-      // Force reload the page to reset app state
+      toast.error("Session expired, please log in again");
+
+      // Force reload the page to reset app state, but only if user was on a protected page
       setTimeout(() => {
         window.location.href = "/auth/sign-in";
       }, 800);

@@ -10,8 +10,18 @@ export const authenticateUser = async (req, res, next) => {
       const payload = verifyJWT(accessToken);
       req.user = payload.user;
       req.user.userId = payload.user._id;
-      req.user.username = payload.user.name
-      await updateUserStreak(payload.user._id);
+      req.user.username = payload.user.name;
+
+      // Only update streak if we have a valid user ID
+      if (payload.user._id) {
+        try {
+          await updateUserStreak(payload.user._id);
+        } catch (err) {
+          console.error('Error updating user streak:', err);
+          // Continue even if streak update fails
+        }
+      }
+
       return next();
     }
     const payload = verifyJWT(refreshToken);
@@ -29,8 +39,18 @@ export const authenticateUser = async (req, res, next) => {
     });
     req.user = payload.user;
     req.user.userId = payload.user._id;
-      req.user.username = payload.user.name;
-      await updateUserStreak(payload.user._id);
+    req.user.username = payload.user.name;
+
+    // Only update streak if we have a valid user ID
+    if (payload.user._id) {
+      try {
+        await updateUserStreak(payload.user._id);
+      } catch (err) {
+        console.error('Error updating user streak:', err);
+        // Continue even if streak update fails
+      }
+    }
+
     next();
   } catch {
     throw new UnauthenticatedError("authentication invalid");
@@ -75,7 +95,17 @@ export const optionalAuthenticateUser = async (req, res, next) => {
     req.user = payload.user;
     req.user.userId = payload.user._id;
     req.user.username = payload.user.name;
-    await updateUserStreak(payload.user._id);
+
+    // Only update streak if we have a valid user ID
+    if (payload.user._id) {
+      try {
+        await updateUserStreak(payload.user._id);
+      } catch (err) {
+        console.error('Error updating user streak:', err);
+        // Continue even if streak update fails
+      }
+    }
+
     next();
   } catch (error) {
     // If token verification fails, continue without authentication
