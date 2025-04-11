@@ -39,7 +39,7 @@ const ArticleComments = ({ articleId }) => {
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!user) {
-      toast.error("Please login to comment!");
+      toast.info("Please login to comment on this article");
       return;
     }
     if (!commentContent.trim()) {
@@ -91,14 +91,19 @@ const ArticleComments = ({ articleId }) => {
           value={commentContent}
           onChange={(e) => setCommentContent(e.target.value)}
           placeholder={
-            user ? "Write your comment..." : "Please login to comment"
+            user ? "Write your comment..." : "Login to join the conversation"
           }
           className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
           rows="3"
           disabled={!user}
         />
-        <button type="submit" disabled={!user} className="btn-2 mt-2">
-          Post Comment
+        <button
+          type="submit"
+          disabled={!user}
+          className="btn-2 mt-2"
+          title={user ? "Post your comment" : "Login to comment"}
+        >
+          {user ? "Post Comment" : "Login to Comment"}
         </button>
       </form>
 

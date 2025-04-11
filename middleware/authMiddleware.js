@@ -11,7 +11,7 @@ export const authenticateUser = async (req, res, next) => {
       req.user = payload.user;
       req.user.userId = payload.user._id;
       req.user.username = payload.user.name
-      await updateUserStreak(payload.user._id); 
+      await updateUserStreak(payload.user._id);
       return next();
     }
     const payload = verifyJWT(refreshToken);
@@ -39,10 +39,11 @@ export const authenticateUser = async (req, res, next) => {
 
 export const optionalAuthenticateUser = async (req, res, next) => {
   const { accessToken, refreshToken } = req.signedCookies;
-  
+
   // If no tokens present, continue without authentication
   if (!accessToken && !refreshToken) {
-    await updateUserStreak(req.user.userId);
+    // Initialize an empty user object to prevent errors when accessing req.user
+    req.user = { userId: null, username: 'Guest' };
     return next();
   }
 
@@ -76,8 +77,10 @@ export const optionalAuthenticateUser = async (req, res, next) => {
     req.user.username = payload.user.name;
     await updateUserStreak(payload.user._id);
     next();
-  } catch {
+  } catch (error) {
     // If token verification fails, continue without authentication
+    // Initialize an empty user object to prevent errors when accessing req.user
+    req.user = { userId: null, username: 'Guest' };
     next();
   }
 };

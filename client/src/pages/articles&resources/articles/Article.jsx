@@ -128,7 +128,7 @@ const Article = () => {
   const handleLike = async () => {
     const currentUser = JSON.parse(localStorage.getItem("user"));
     if (!currentUser) {
-      toast.error("Please login to like this article!");
+      toast.info("Please login to like this article");
       navigate("/auth/sign-up");
       return;
     }
