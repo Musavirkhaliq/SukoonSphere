@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FaUsers, FaComments } from 'react-icons/fa';
-import { MdConnectWithoutContact } from "react-icons/md";
+import { FaUsers, FaHeadphones } from 'react-icons/fa';
+import { MdConnectWithoutContact, MdScience } from "react-icons/md";
 import { RiMentalHealthFill } from "react-icons/ri";
+import { GiTeacher } from "react-icons/gi";
 import SectionTitle from "../sharedComponents/SectionTitle";
 import { motion } from "framer-motion";
 function OurMission() {
@@ -10,24 +11,36 @@ function OurMission() {
   const features = [
     {
       id: 1,
-      icon: <FaComments size={40} className="text-[var(--primary)]" />,
-      title: "Open Communication",
-      description: "Fostering a space where people can freely express themselves and engage in meaningful dialogue about mental health."
+      icon: <GiTeacher size={40} className="text-[var(--primary)]" />,
+      title: "Reciprocal Learning",
+      description: "Creating spaces where we learn from each other through collaborative education and shared experiences."
     },
     {
       id: 2,
+      icon: <FaHeadphones size={40} className="text-[var(--primary)]" />,
+      title: "Active Listening",
+      description: "Practicing deep, attentive listening to understand diverse perspectives and respect others' feelings and opinions."
+    },
+    {
+      id: 3,
+      icon: <MdScience size={40} className="text-[var(--primary)]" />,
+      title: "Research-Oriented Approach",
+      description: "Embracing scientific perspectives without scientism, promoting research on computational neuroscience to understand the brain."
+    },
+    {
+      id: 4,
       icon: <FaUsers size={40} className="text-[var(--primary)]" />,
       title: "Culture of Discussion",
       description: "Building a community that values diverse perspectives, respectful debate, and collaborative problem-solving."
     },
     {
-      id: 3,
+      id: 5,
       icon: <MdConnectWithoutContact size={40} className="text-[var(--primary)]" />,
       title: "Modern Connectivity",
       description: "Leveraging cutting-edge technology to connect people in more meaningful and supportive ways across distances."
     },
     {
-      id: 4,
+      id: 6,
       icon: <RiMentalHealthFill size={40} className="text-[var(--primary)]" />,
       title: "Resilience Building",
       description: "Equipping individuals with the tools and mindsets to navigate life's challenges and thrive in an unchangeable world."
@@ -37,15 +50,15 @@ function OurMission() {
   const accordionItems = [
     {
       question: "What is our core mission?",
-      answer: "Our core mission is to create an open platform where people can freely communicate about mental health, fostering a culture of meaningful discussion and connection. We believe in using modern technology to bring people together in more profound ways, helping them develop resilience to navigate life's challenges in a world whose fundamental design cannot be changed."
+      answer: "Our core mission is to create an open platform where people can freely communicate about mental health, fostering reciprocal learning and collaborative education. We believe in using modern technology and scientific research to bring people together in more profound ways, helping them develop resilience to navigate life's challenges in a world whose fundamental design cannot be changed."
     },
     {
       question: "Why do we focus on communication?",
-      answer: "We believe that open, honest communication is the foundation of mental wellbeing. By creating spaces where people can express themselves authentically and be truly heard, we help break down isolation and stigma. Our platform encourages dialogue that builds understanding, empathy, and collective wisdom."
+      answer: "We believe that open, honest communication and active listening are the foundation of mental wellbeing. By creating spaces where people can express themselves authentically and be truly heard, we help break down isolation and stigma. Our platform encourages dialogue that builds understanding, empathy, and collective wisdom while respecting diverse viewpoints."
     },
     {
-      question: "How do we use technology?",
-      answer: "We leverage cutting-edge technology not just to connect people, but to create meaningful interactions that transcend physical boundaries. From AI-powered tools like SukoonAI that facilitate self-discovery to community features that enable supportive conversations, we're using technology to enhance human connection rather than replace it."
+      question: "How do we use technology and science?",
+      answer: "We leverage cutting-edge technology and scientific research not just to connect people, but to create meaningful interactions that transcend physical boundaries. From AI-powered tools like SukoonAI that facilitate self-discovery to promoting computational neuroscience research to understand the brain, we're using technology and science to enhance human connection and mental wellbeing."
     },
     {
       question: "What do we mean by resilience?",
@@ -53,7 +66,11 @@ function OurMission() {
     },
     {
       question: "How do we create community?",
-      answer: "We foster a culture of discussion where diverse perspectives are valued and respectful dialogue is encouraged. Our community guidelines promote constructive conversation, mutual support, and collaborative problem-solving. We believe that by bringing people together around shared challenges, we create a collective wisdom greater than any individual solution."
+      answer: "We foster a culture of discussion where diverse perspectives are valued and respectful dialogue is encouraged. Our community guidelines promote constructive conversation, mutual support, and collaborative problem-solving. We believe that by bringing people together around shared challenges and practicing reciprocal learning, we create a collective wisdom greater than any individual solution."
+    },
+    {
+      question: "What is our research approach?",
+      answer: "We embrace a research-oriented approach that values scientific perspectives without subscribing to scientism. By promoting research on computational neuroscience, we aim to better understand the brain and help people heal and grow. This balanced approach allows us to incorporate evidence-based practices while remaining open to diverse ways of knowing and experiencing the world."
     }
   ];
 
@@ -73,11 +90,11 @@ function OurMission() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl md:text-4xl font-bold text-[var(--primary)] mb-4">
-            Connecting People Through Open Communication
+            Connecting People Through Reciprocal Learning and Scientific Understanding
           </h2>
           <p className="text-grey-800 text-lg max-w-3xl mx-auto leading-relaxed">
-            We believe in the power of open dialogue to transform lives. Our mission is to create spaces where people can freely communicate,
-            foster a culture of meaningful discussion, and use modern technology to connect at deeper levels—helping everyone develop
+            We believe in the power of reciprocal learning and active listening to transform lives. Our mission is to create spaces where people can freely communicate,
+            share ideas, respect diverse viewpoints, and use scientific research to better understand the brain—helping everyone develop
             the resilience to navigate life in a world whose design cannot be changed.
           </p>
         </motion.div>
@@ -165,10 +182,10 @@ function OurMission() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <h3 className="text-2xl md:text-3xl font-bold text-[var(--primary)] mb-4">
-            Join Our Community of Open Communication
+            Join Our Community of Collaborative Learning and Scientific Discovery
           </h3>
           <p className="text-grey-800 text-lg max-w-3xl mx-auto mb-8">
-            Together, we can build a world where meaningful connections thrive and everyone has the tools to navigate life's challenges.
+            Together, we can build a world where meaningful connections thrive, diverse perspectives are respected, and everyone has the tools to navigate life's challenges through both scientific understanding and shared wisdom.
           </p>
           <a
             href="/auth/sign-in"

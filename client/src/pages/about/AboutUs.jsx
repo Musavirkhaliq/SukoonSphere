@@ -84,9 +84,9 @@ function AboutUs() {
               Where You Discover Yourself, We Help You
             </h2>
             <p className="text-lg text-[--grey--800] mb-8">
-              Our mission is to enable open communication, foster a culture of discussion,
-              and use modern technology to better connect people. We help develop resilience
-              and show people how to navigate toward happiness in a world whose design cannot be changed.
+              Our mission is to enable reciprocal learning, foster active listening,
+              and use scientific research to better understand the brain and help people. We promote
+              respect for diverse viewpoints while helping develop resilience to navigate toward happiness in a world whose design cannot be changed.
             </p>
             <Link to={"/contact-us"} className="btn-1">
               Contact Us
@@ -101,9 +101,9 @@ function AboutUs() {
             </h2>
             <hr />
             <p className="text-[var(--grey--800)] text-justify lg:text-center text-sm md:text-base">
-              We create spaces for open communication, foster meaningful discussions, and use
-              modern technology to connect people at deeper levels. Our platform enables
-              self-discovery and personal growth through supportive community interaction.
+              We create spaces for reciprocal learning and collaborative education, foster meaningful discussions, and use
+              scientific research to understand the brain. Our platform enables
+              self-discovery and personal growth through supportive community interaction and active listening.
             </p>
           </div>
           <div
@@ -116,9 +116,9 @@ function AboutUs() {
             </h2>
             <hr />
             <p className="text-[var(--grey--800)] text-justify lg:text-center text-sm md:text-base">
-              We believe in the power of human connection and open dialogue to transform lives.
-              While the design of the world cannot be changed, we can help people develop the
-              resilience to navigate it successfully and discover their true selves along the way.
+              We believe in the power of reciprocal learning and scientific understanding to transform lives.
+              Through a research-centric approach that respects diverse viewpoints, we can help people develop the
+              resilience to navigate life successfully and discover their true selves along the way.
             </p>
           </div>
         </div>
@@ -145,12 +145,13 @@ function AboutUs() {
 
             {/* Main Headline */}
             <h2 className="text-2xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-              Creating Spaces for Healing and Growth
+              Creating Spaces for Learning and Scientific Understanding
             </h2>
 
             {/* Mission Description */}
             <p className="text-base md:text-lg font-light text-[var(--grey--600)] text-balance text-center md:text-left">
-              Our mission is to create safe and supportive environments where individuals can heal, grow, and thrive mentally and emotionally.
+              Our mission is to create spaces for reciprocal learning where we share ideas, practice active listening, respect diverse viewpoints,
+              and use computational neuroscience research to help people heal, grow, and thrive mentally and emotionally.
             </p>
 
             <hr className="border-[var(--grey--700)] opacity-30" />
@@ -171,7 +172,7 @@ function AboutUs() {
         {/* Mission Details Section */}
         <div className="mt-12 space-y-6">
           <h2 className="text-xl md:text-5xl font-bold text-[var(--white-color)] mb-6">
-            Our mission is to help you discover yourself through open communication
+            Our mission is to help you discover yourself through reciprocal learning and scientific understanding
           </h2>
 
           <ol className="space-y-4 text-[var(--grey--600)]">
