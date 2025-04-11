@@ -8,6 +8,8 @@ import { FiEdit } from "react-icons/fi";
 import { IoCloseOutline } from "react-icons/io5";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
+import MobileGroupIcons from "@/components/shared/MobileGroupIcons";
+import "@/components/shared/MobileGroupIcons.css";
 
 export const answerAction = async ({ request }) => {
   const formData = await request.formData();
@@ -190,6 +192,11 @@ const Answer = () => {
     <>
       <div className="relative max-w-7xl mx-auto p-2 md:p-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Mobile Groups - Visible on small screens */}
+          <div className="lg:hidden col-span-full mb-4">
+            <MobileGroupIcons />
+          </div>
+
           {/* Profile Sidebar - Hidden on mobile, visible on md+ screens */}
           <div className="hidden lg:block md:col-span-3 sticky top-[10%] h-screen overflow-y-auto">
             <div className="bg-white p-4 rounded-lg">

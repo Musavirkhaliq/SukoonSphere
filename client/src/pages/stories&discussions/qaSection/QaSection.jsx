@@ -7,6 +7,8 @@ import customFetch from "@/utils/customFetch";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import TopPublicGroups from "@/components/shared/TopPublicGroups";
+import MobileGroupIcons from "@/components/shared/MobileGroupIcons";
+import "@/components/shared/MobileGroupIcons.css";
 
 export const questionsAction = async ({ request }) => {
   const result = await request.formData();
@@ -36,7 +38,7 @@ const QaSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Mobile Groups - Visible on small screens */}
           <div className="lg:hidden col-span-full mb-4">
-            <TopPublicGroups />
+            <MobileGroupIcons />
           </div>
           {/* Left sidebar */}
           <div className="hidden lg:block lg:col-span-3">

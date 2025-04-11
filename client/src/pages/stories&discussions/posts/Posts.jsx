@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 import UserSearchBar from "../../../components/common/UserSearchBar";
 import { FaUsers } from "react-icons/fa";
 import TopPublicGroups from "../../../components/shared/TopPublicGroups";
+import MobileGroupIcons from "../../../components/shared/MobileGroupIcons";
+import "../../../components/shared/MobileGroupIcons.css";
 
 const Posts = () => {
 
@@ -12,7 +14,7 @@ const Posts = () => {
       <div className="grid grid-cols-12 gap-2">
         {/* Mobile Groups - Visible on small screens */}
         <div className="lg:hidden col-span-full mb-4 order-0">
-          <TopPublicGroups />
+          <MobileGroupIcons />
         </div>
         {/* Left Sidebar - Groups */}
         <div className="hidden lg:block lg:col-span-3">
