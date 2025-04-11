@@ -51,7 +51,7 @@ const PersonalStoryComments = ({ storyId }) => {
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!user) {
-      toast.error("Please login to comment!");
+      toast.info("Please login to comment on this story");
       return;
     }
     if (!commentContent.trim()) {
@@ -93,7 +93,7 @@ const PersonalStoryComments = ({ storyId }) => {
             <textarea
               value={commentContent}
               onChange={(e) => setCommentContent(e.target.value)}
-              placeholder={user ? "Add a comment..." : "Please login to comment"}
+              placeholder={user ? "Write your comment..." : "Login to join the conversation"}
               className="w-full px-4 py-2 bg-[var(--pure)] rounded-lg border focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all duration-300 placeholder-ternary min-h-[80px]"
               disabled={!user}
             />
@@ -119,13 +119,14 @@ const PersonalStoryComments = ({ storyId }) => {
             type="submit"
             disabled={!user || isSubmitting}
             className="btn-2 flex items-center gap-2"
+            title={user ? "Post your comment" : "Login to comment"}
           >
             {isSubmitting ? (
               <FaSpinner className="animate-spin" />
             ) : (
               <FaPaperPlane />
             )}
-            Comment
+            {user ? "Post Comment" : "Login to Comment"}
           </button>
         </div>
       </form>
