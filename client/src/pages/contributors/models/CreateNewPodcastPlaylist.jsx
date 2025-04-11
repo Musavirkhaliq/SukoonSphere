@@ -25,11 +25,11 @@ const CreateNewPodcastPlaylist = ({ setShowModal }) => {
         try {
             setIsSubmitting(true);
             const formData = new FormData();
-            
+
             // Append all fields
             formData.append('title', title.trim());
             formData.append('description', description.trim());
-            
+
             // Append image file
             if (coverImage) {
                 formData.append('image', coverImage);
@@ -98,7 +98,8 @@ const CreateNewPodcastPlaylist = ({ setShowModal }) => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Enter playlist title..."
-                            className="w-full px-4 py-3 bg-[var(--pure)] rounded-lg border  focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all duration-300 placeholder-ternary"
+                            className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
                         />
                     </div>
 
@@ -107,7 +108,8 @@ const CreateNewPodcastPlaylist = ({ setShowModal }) => {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Enter playlist description..."
-                            className="w-full px-4 py-3 bg-[var(--pure)] rounded-lg border  focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all duration-300 placeholder-ternary min-h-[100px]"
+                            className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
                         />
                     </div>
 
@@ -124,7 +126,7 @@ const CreateNewPodcastPlaylist = ({ setShowModal }) => {
                     </div>
 
                     <div className="flex justify-end space-x-4">
-                    <button
+                        <button
                             type="button"
                             onClick={() => setShowModal(false)}
                             className="btn-red flex items-center justify-center gap-2"

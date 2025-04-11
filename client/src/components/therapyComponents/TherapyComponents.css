@@ -155,7 +155,6 @@
 .therapy-chat-input {
   display: flex;
   flex-direction: column;
-  /* Stack group and actions vertically */
   padding: 16px;
   background-color: #fff;
   border-top: 1px solid #e0e0e0;
@@ -339,6 +338,10 @@
   .therapy-chat-input {
     padding: 12px;
     gap: 10px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
   }
 
   .therapy-chat-input-group {
@@ -377,6 +380,10 @@
   .therapy-chat-input {
     padding: 10px;
     gap: 8px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
   }
 
   .therapy-input {

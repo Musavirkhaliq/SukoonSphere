@@ -39,11 +39,11 @@ const CreatePlaylistModel = ({ setShowModal, onSuccess }) => {
             formData.append('title', title.trim());
             formData.append('description', description.trim());
             formData.append('coverImage', coverImage);
-            
+
             if (category.trim()) {
                 formData.append('category', category.trim());
             }
-            
+
             if (tags.trim()) {
                 // Split tags by commas and trim whitespace
                 const tagArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
@@ -94,7 +94,8 @@ const CreatePlaylistModel = ({ setShowModal, onSuccess }) => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Enter playlist title"
-                            className="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
                             required
                         />
                     </div>
@@ -107,7 +108,8 @@ const CreatePlaylistModel = ({ setShowModal, onSuccess }) => {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Enter playlist description"
-                            className="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24"
+                            className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
                             required
                         />
                     </div>
@@ -121,7 +123,8 @@ const CreatePlaylistModel = ({ setShowModal, onSuccess }) => {
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                             placeholder="Enter category (e.g., Mental Health, Anxiety)"
-                            className="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
                         />
                     </div>
 
@@ -134,7 +137,8 @@ const CreatePlaylistModel = ({ setShowModal, onSuccess }) => {
                             value={tags}
                             onChange={(e) => setTags(e.target.value)}
                             placeholder="Enter tags separated by commas"
-                            className="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
                         />
                     </div>
 

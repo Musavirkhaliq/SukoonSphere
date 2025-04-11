@@ -76,8 +76,8 @@ const AddMaterialModal = ({ videoId, onClose, onSuccess }) => {
 
         // Show more detailed error message
         const errorMessage = error.response.data?.msg ||
-                           error.response.data?.message ||
-                           'Failed to add material';
+          error.response.data?.message ||
+          'Failed to add material';
         toast.error(errorMessage);
       } else if (error.request) {
         console.error('No response received from server');
@@ -124,7 +124,7 @@ const AddMaterialModal = ({ videoId, onClose, onSuccess }) => {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+              className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
               placeholder="Enter title..."
               required
             />
@@ -188,7 +188,7 @@ const AddMaterialModal = ({ videoId, onClose, onSuccess }) => {
                 type="text"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                 placeholder="https://example.com"
                 required
               />
@@ -203,7 +203,7 @@ const AddMaterialModal = ({ videoId, onClose, onSuccess }) => {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)] min-h-[100px]"
+                className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                 placeholder="Enter note content..."
                 required
               />
@@ -218,7 +218,7 @@ const AddMaterialModal = ({ videoId, onClose, onSuccess }) => {
               <input
                 type="file"
                 onChange={handleFileChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                 required
               />
               {file && (

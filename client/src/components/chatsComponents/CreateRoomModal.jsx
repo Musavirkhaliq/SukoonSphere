@@ -23,30 +23,30 @@ const CreateRoomModal = ({ onClose, onRoomCreated }) => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       toast.error("Room name is required");
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("description", description);
       formData.append("isPublic", isPublic);
-      
+
       if (image) {
         formData.append("image", image);
       }
-      
+
       await customFetch.post("/rooms", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      
+
       toast.success("Room created successfully");
       onRoomCreated();
       onClose();
@@ -119,7 +119,8 @@ const CreateRoomModal = ({ onClose, onRoomCreated }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter room name"
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
                 required
               />
             </div>
@@ -134,7 +135,8 @@ const CreateRoomModal = ({ onClose, onRoomCreated }) => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Enter room description"
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
+                className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
               />
             </div>
 
@@ -158,14 +160,14 @@ const CreateRoomModal = ({ onClose, onRoomCreated }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+              className="btn-red"
               disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center"
+              className="btn-2"
               disabled={loading}
             >
               {loading ? (

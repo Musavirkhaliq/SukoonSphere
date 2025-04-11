@@ -16,10 +16,9 @@ const AllVideos = () => {
               to="."
               end
               className={({ isActive }) =>
-                `${
-                  isActive
-                    ? "border-[var(--primary)] text-[var(--primary)]"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                `${isActive
+                  ? "border-[var(--primary)] text-[var(--primary)]"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 } w-1/2 py-2 px-1 text-center border-b-2 font-medium text-sm transition-colors duration-200`
               }
             >
@@ -29,10 +28,9 @@ const AllVideos = () => {
             <NavLink
               to="/all-videos/playlists"
               className={({ isActive }) =>
-                `${
-                  isActive
-                    ? "border-[var(--primary)] text-[var(--primary)]"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                `${isActive
+                  ? "border-[var(--primary)] text-[var(--primary)]"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 } w-1/2 py-2 px-1 text-center border-b-2 font-medium text-sm transition-colors duration-200`
               }
             >

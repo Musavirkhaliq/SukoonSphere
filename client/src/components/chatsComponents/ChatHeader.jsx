@@ -6,13 +6,13 @@ import { toast } from 'react-toastify';
 import customFetch from '@/utils/customFetch';
 
 const ChatHeader = ({ activeUser, onMenuClick, totalMessages, setMessages, unreadCount = 0 }) => {
-  const {id:chatId} = useParams();
+  const { id: chatId } = useParams();
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const deleteAllMessages = async() => {
+  const deleteAllMessages = async () => {
     try {
       setDeleting(true);
       await customFetch.delete(`/messages/delete-all-by-chat-id/${chatId}`);
@@ -22,7 +22,7 @@ const ChatHeader = ({ activeUser, onMenuClick, totalMessages, setMessages, unrea
     } catch (error) {
       toast.error("Failed to delete messages");
     }
-    finally{
+    finally {
       setDeleting(false);
     }
   }
@@ -112,15 +112,15 @@ const ChatHeader = ({ activeUser, onMenuClick, totalMessages, setMessages, unrea
           )}
         </div>
       </div>
-    <DeleteModal
-          isOpen={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-          onDelete={deleteAllMessages}
-          title="Delete Chat"
-          itemType="chat"
-          isLoading={deleting}
-          message="Are you sure you want to delete this chat? This action cannot be undone."
-        />
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDelete={deleteAllMessages}
+        title="Delete Chat"
+        itemType="chat"
+        isLoading={deleting}
+        message="Are you sure you want to delete this chat? This action cannot be undone."
+      />
     </>
   );
 };

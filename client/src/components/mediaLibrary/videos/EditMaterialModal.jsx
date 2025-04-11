@@ -8,39 +8,39 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
   const [content, setContent] = useState(material.content);
   const [file, setFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!title.trim()) {
       toast.error('Please enter a title');
       return;
     }
-    
+
     if (material.type !== 'file' && !content.trim()) {
       toast.error('Please enter content');
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      
+
       const formData = new FormData();
       formData.append('title', title.trim());
-      
+
       if (material.type === 'file' && file) {
         formData.append('content', file.name);
         formData.append('file', file);
       } else if (material.type !== 'file') {
         formData.append('content', content.trim());
       }
-      
+
       await customFetch.patch(`/video-materials/update/${material._id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      
+
       toast.success('Material updated successfully');
       onSuccess();
       onClose();
@@ -51,7 +51,7 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -62,7 +62,7 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
       setFile(selectedFile);
     }
   };
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -75,7 +75,7 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
             <FaTimes />
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -85,12 +85,13 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+              className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
               placeholder="Enter title..."
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Type
@@ -102,7 +103,7 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
               <span className="capitalize">{material.type}</span>
             </div>
           </div>
-          
+
           {material.type === 'link' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -112,13 +113,14 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
                 type="text"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
                 placeholder="https://example.com"
                 required
               />
             </div>
           )}
-          
+
           {material.type === 'note' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -133,7 +135,7 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
               />
             </div>
           )}
-          
+
           {material.type === 'file' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -141,8 +143,8 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
               </label>
               <div className="mb-2">
                 <span className="text-sm text-gray-600">Current file: </span>
-                <a 
-                  href={material.fileUrl} 
+                <a
+                  href={material.fileUrl}
                   download={material.fileName}
                   className="text-blue-600 hover:underline text-sm"
                 >
@@ -152,7 +154,8 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
               <input
                 type="file"
                 onChange={handleFileChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
               />
               {file && (
                 <p className="text-sm text-gray-500 mt-1">
@@ -161,7 +164,7 @@ const EditMaterialModal = ({ material, onClose, onSuccess }) => {
               )}
             </div>
           )}
-          
+
           <div className="flex justify-end space-x-3 pt-4 border-t">
             <button
               type="button"

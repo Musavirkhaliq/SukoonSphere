@@ -84,7 +84,7 @@ const AnswerComments = ({ answerId }) => {
 
   const allComments = data?.pages.flatMap((page) => page.comments) || [];
   return (
-    <div className="mt-8">
+    <div className="mt-2">
       {/* Comment Form */}
       <form onSubmit={handleSubmitComment} className="mb-6">
         <textarea
@@ -94,7 +94,7 @@ const AnswerComments = ({ answerId }) => {
             user ? "Write your comment..." : "Please login to comment"
           }
           className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
-          rows="3"
+          rows="2"
           disabled={!user}
         />
         <button type="submit" disabled={!user} className="btn-2 mt-2">

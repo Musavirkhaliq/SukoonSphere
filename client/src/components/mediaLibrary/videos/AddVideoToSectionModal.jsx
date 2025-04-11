@@ -117,7 +117,8 @@ const AddVideoToSectionModal = ({ setShowModal, sectionId, playlistId, onSuccess
               placeholder="Search videos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+              className="w-full bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
             />
             <FaSearch className="absolute left-3 top-3 text-gray-400" />
           </div>

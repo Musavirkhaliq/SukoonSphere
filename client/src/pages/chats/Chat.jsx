@@ -9,7 +9,7 @@ const Chat = () => {
   const location = useLocation();
 
   // Always keep sidebar open by default on all screen sizes
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   // Flag to prevent sidebar from closing when search is focused
   const [preventSidebarClose, setPreventSidebarClose] = useState(false);
 
@@ -22,7 +22,7 @@ const Chat = () => {
   useEffect(() => {
     const handleResize = () => {
       // Always keep sidebar open, regardless of window size
-      setIsSidebarOpen(true);
+      // setIsSidebarOpen(true);
     };
 
     window.addEventListener('resize', handleResize);

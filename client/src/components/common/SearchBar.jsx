@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 
-const SearchBar = ({ 
-  placeholder = 'Search...', 
-  onSearch, 
+const SearchBar = ({
+  placeholder = 'Search...',
+  onSearch,
   initialValue = '',
   className = '',
   autoFocus = false,
@@ -51,13 +51,13 @@ const SearchBar = ({
   };
 
   return (
-    <div 
+    <div
       className={`relative flex items-center ${className}`}
     >
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <FaSearch className={`${isFocused ? 'text-[var(--primary)]' : 'text-gray-400'}`} />
       </div>
-      
+
       <input
         ref={inputRef}
         type="text"
@@ -66,9 +66,10 @@ const SearchBar = ({
         onChange={(e) => setSearchTerm(e.target.value)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+        className="w-full pl-10 bg-[var(--white-color)] p-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+
       />
-      
+
       {searchTerm && (
         <button
           onClick={handleClear}

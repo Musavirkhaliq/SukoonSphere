@@ -166,11 +166,11 @@ const ChatInput = ({ chatId, fetchChatMessages }) => {
           />
         </div>
       ) : (
-        <div className="p-3 flex items-center gap-2 sm:gap-3 justify-between">
+        <div className="p-2 flex items-center gap-2 sm:gap-2 justify-between">
           <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={() => setShowPicker((prev) => !prev)}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors duration-200"
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors duration-200 hidden md:block"
               title="Add emoji"
               ref={emojiRef}
             >
@@ -205,7 +205,7 @@ const ChatInput = ({ chatId, fetchChatMessages }) => {
 
           {showPicker && (
             <div
-              className="absolute bottom-20 left-0 w-full sm:w-96 bg-white shadow-lg rounded-t-lg overflow-hidden z-10 border border-gray-200"
+              className="absolute bottom-20 left-0 w-full sm:w-96 bg-white shadow-lg rounded-t-lg overflow-hidden z-10 border border-gray-200 "
             >
               <div className="p-2 border-b border-gray-200 flex justify-between items-center">
                 <span className="text-sm font-medium">Emojis</span>
@@ -228,19 +228,19 @@ const ChatInput = ({ chatId, fetchChatMessages }) => {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Type a message..."
-              className="w-full bg-[var(--white-color)] py-2 px-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+              className="w-full bg-[var(--white-color)] p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSend();
-                }
+                } 1
               }}
             />
           </div>
 
           <button
             onClick={handleSend}
-            className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center min-w-[40px] min-h-[40px]"
+            className="btn-2"
             disabled={loading}
             title="Send message"
           >

@@ -357,7 +357,7 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
         <button
           onClick={() => setActiveTab("chats")}
           className={`flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center space-x-1 ${activeTab === "chats"
-            ? "text-blue-600 border-b-2 border-blue-600"
+            ? "text-[var(--primary)] border-b-2 border-[var(--primary)]"
             : "text-gray-500 hover:text-gray-700"
             }`}
         >
@@ -372,7 +372,7 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
         <button
           onClick={() => setActiveTab("rooms")}
           className={`flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center space-x-1 ${activeTab === "rooms"
-            ? "text-blue-600 border-b-2 border-blue-600"
+            ? "text-[var(--primary)] border-b-2 border-[var(--primary)]"
             : "text-gray-500 hover:text-gray-700"
             }`}
         >

@@ -29,12 +29,5 @@ export const chatRoutes = [
       },
     ],
   },
-  {
-    path: "/sukoonai",
-    element: (
-      <Suspense fallback={<LoadingSpinner />}>
-        <SukoonAI />
-      </Suspense>
-    ),
-  },
+
 ];
