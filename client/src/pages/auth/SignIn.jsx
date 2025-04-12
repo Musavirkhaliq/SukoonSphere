@@ -8,13 +8,43 @@ import { InputComponent } from "@/components/sharedComponents/FormRow";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import customFetch from "@/utils/customFetch";
 
 const SignIn = () => {
-  const { login, isLoading } = useUser();
+  const { login, isLoading, updateUser } = useUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [socialLoginLoading, setSocialLoginLoading] = useState(false);
+
+  // Fetch user profile after social login
+  const fetchUserProfile = async () => {
+    try {
+      setSocialLoginLoading(true);
+      const { data } = await customFetch.get('/user/profile');
+
+      if (data) {
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(data));
+        localStorage.setItem("isAuthenticated", "true");
+
+        // Update user context
+        updateUser(data);
+
+        toast.success('Login successful');
+        navigate('/posts');
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      toast.error('Failed to load user profile. Please try again.');
+      // Clear any partial authentication state
+      localStorage.removeItem("user");
+      localStorage.removeItem("isAuthenticated");
+    } finally {
+      setSocialLoginLoading(false);
+    }
+  };
 
   // Handle social login redirects
   useEffect(() => {
@@ -22,8 +52,8 @@ const SignIn = () => {
     const error = searchParams.get('error');
 
     if (success === 'true') {
-      toast.success('Login successful');
-      navigate('/posts');
+      // Fetch user profile after successful social login
+      fetchUserProfile();
     } else if (error) {
       switch (error) {
         case 'authentication_failed':
@@ -109,9 +139,9 @@ const SignIn = () => {
             <button
               type="submit"
               className="btn-2 w-full flex items-center justify-center gap-2"
-              disabled={isLoading}
+              disabled={isLoading || socialLoginLoading}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? "Signing in..." : socialLoginLoading ? "Loading profile..." : "Sign In"}
               <GrLogin />
             </button>
 

@@ -73,9 +73,11 @@ export const login = async (req, res) => {
     refreshToken = existingToken.refreshToken;
   } else {
     refreshToken = crypto.randomBytes(50).toString("hex");
-    const userAgent = req.headers["user-agent"];
-    const ipAddress = req.ip;
+    const userAgent = req.headers["user-agent"] || 'Unknown';
+    // Get IP address, accounting for proxies
+    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
     const userToken = { refreshToken, ipAddress, userAgent, user: user._id };
+    console.log('Creating refresh token for regular login:', { userId: user._id, ipAddress });
     await RefreshToken.create(userToken);
   }
 
@@ -235,29 +237,62 @@ export const logout = async (req, res) => {
 export const googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
 
 export const googleAuthCallback = (req, res, next) => {
-  passport.authenticate('google', { session: false }, async (err, user) => {
+  passport.authenticate('google', { session: false }, async (err, user, info) => {
+    // Log detailed error information
     if (err) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=authentication_failed`);
+      console.error('Google authentication error:', err);
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?error=authentication_failed`);
     }
 
     if (!user) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=user_not_found`);
+      console.error('Google authentication: No user returned', info);
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?error=user_not_found`);
     }
 
     try {
-      // Create refresh token
-      const tokenUser = { userId: user._id, role: user.role };
+      console.log('Google auth: Creating session for user:', { id: user._id, role: user.role });
+
+      // Create token user object with proper format
+      // Make sure we include all required user properties for the JWT
+      const tokenUser = {
+        _id: user._id,
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      };
+      console.log('Google auth: Created tokenUser object');
+
       const refreshToken = crypto.randomBytes(40).toString('hex');
+      console.log('Google auth: Generated refresh token');
 
-      const userToken = { refreshToken, ip: req.ip, userAgent: req.headers['user-agent'], user: user._id };
+      // Get IP address, accounting for proxies
+      const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+      console.log('Google auth: Got IP address:', ipAddress);
+
+      // Create user token object
+      const userToken = {
+        refreshToken,
+        ipAddress: ipAddress, // Changed from 'ip' to 'ipAddress' to match schema
+        userAgent: req.headers['user-agent'] || 'Unknown',
+        user: user._id
+      };
+      console.log('Google auth: Created userToken object');
+
+      // Save refresh token to database
       await RefreshToken.create(userToken);
+      console.log('Google auth: Saved refresh token to database');
 
+      // Attach cookies to response
       attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+      console.log('Google auth: Attached cookies to response');
 
       // Redirect to frontend with success
-      return res.redirect(`${process.env.CLIENT_URL}/login?success=true`);
+      console.log('Google auth: Redirecting to success URL');
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?success=true`);
     } catch (error) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
+      console.error('Error creating session after Google auth:', error);
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?error=server_error`);
     }
   })(req, res, next);
 };
@@ -266,29 +301,61 @@ export const googleAuthCallback = (req, res, next) => {
 export const facebookAuth = passport.authenticate('facebook', { scope: ['email'] });
 
 export const facebookAuthCallback = (req, res, next) => {
-  passport.authenticate('facebook', { session: false }, async (err, user) => {
+  passport.authenticate('facebook', { session: false }, async (err, user, info) => {
+    // Log detailed error information
     if (err) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=authentication_failed`);
+      console.error('Facebook authentication error:', err);
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?error=authentication_failed`);
     }
 
     if (!user) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=user_not_found`);
+      console.error('Facebook authentication: No user returned', info);
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?error=user_not_found`);
     }
 
     try {
-      // Create refresh token
-      const tokenUser = { userId: user._id, role: user.role };
+      console.log('Facebook auth: Creating session for user:', { id: user._id, role: user.role });
+
+      // Create token user object with proper format
+      const tokenUser = {
+        _id: user._id,
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      };
+      console.log('Facebook auth: Created tokenUser object');
+
       const refreshToken = crypto.randomBytes(40).toString('hex');
+      console.log('Facebook auth: Generated refresh token');
 
-      const userToken = { refreshToken, ip: req.ip, userAgent: req.headers['user-agent'], user: user._id };
+      // Get IP address, accounting for proxies
+      const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+      console.log('Facebook auth: Got IP address:', ipAddress);
+
+      // Create user token object
+      const userToken = {
+        refreshToken,
+        ipAddress: ipAddress,
+        userAgent: req.headers['user-agent'] || 'Unknown',
+        user: user._id
+      };
+      console.log('Facebook auth: Created userToken object');
+
+      // Save refresh token to database
       await RefreshToken.create(userToken);
+      console.log('Facebook auth: Saved refresh token to database');
 
+      // Attach cookies to response
       attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+      console.log('Facebook auth: Attached cookies to response');
 
       // Redirect to frontend with success
-      return res.redirect(`${process.env.CLIENT_URL}/login?success=true`);
+      console.log('Facebook auth: Redirecting to success URL');
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?success=true`);
     } catch (error) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
+      console.error('Error creating session after Facebook auth:', error);
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?error=server_error`);
     }
   })(req, res, next);
 };
@@ -297,29 +364,61 @@ export const facebookAuthCallback = (req, res, next) => {
 export const twitterAuth = passport.authenticate('twitter');
 
 export const twitterAuthCallback = (req, res, next) => {
-  passport.authenticate('twitter', { session: false }, async (err, user) => {
+  passport.authenticate('twitter', { session: false }, async (err, user, info) => {
+    // Log detailed error information
     if (err) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=authentication_failed`);
+      console.error('Twitter authentication error:', err);
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?error=authentication_failed`);
     }
 
     if (!user) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=user_not_found`);
+      console.error('Twitter authentication: No user returned', info);
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?error=user_not_found`);
     }
 
     try {
-      // Create refresh token
-      const tokenUser = { userId: user._id, role: user.role };
+      console.log('Twitter auth: Creating session for user:', { id: user._id, role: user.role });
+
+      // Create token user object with proper format
+      const tokenUser = {
+        _id: user._id,
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      };
+      console.log('Twitter auth: Created tokenUser object');
+
       const refreshToken = crypto.randomBytes(40).toString('hex');
+      console.log('Twitter auth: Generated refresh token');
 
-      const userToken = { refreshToken, ip: req.ip, userAgent: req.headers['user-agent'], user: user._id };
+      // Get IP address, accounting for proxies
+      const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+      console.log('Twitter auth: Got IP address:', ipAddress);
+
+      // Create user token object
+      const userToken = {
+        refreshToken,
+        ipAddress: ipAddress,
+        userAgent: req.headers['user-agent'] || 'Unknown',
+        user: user._id
+      };
+      console.log('Twitter auth: Created userToken object');
+
+      // Save refresh token to database
       await RefreshToken.create(userToken);
+      console.log('Twitter auth: Saved refresh token to database');
 
+      // Attach cookies to response
       attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+      console.log('Twitter auth: Attached cookies to response');
 
       // Redirect to frontend with success
-      return res.redirect(`${process.env.CLIENT_URL}/login?success=true`);
+      console.log('Twitter auth: Redirecting to success URL');
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?success=true`);
     } catch (error) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
+      console.error('Error creating session after Twitter auth:', error);
+      return res.redirect(`${process.env.CLIENT_URL}/auth/sign-in?error=server_error`);
     }
   })(req, res, next);
 };

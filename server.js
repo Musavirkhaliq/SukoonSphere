@@ -46,6 +46,7 @@ import { fileURLToPath } from "url";
 
 // Middleware
 import errorHandlerMiddleware from "./middleware/errorhandlerMiddleware.js";
+import authErrorMiddleware from "./middleware/authErrorMiddleware.js";
 
 // Cloudinary Configuration
 cloudinary.config({
@@ -123,7 +124,8 @@ app.use("*", (req, res) => {
 });
 
 // Error Handling Middleware
-app.use(errorHandlerMiddleware);
+app.use(authErrorMiddleware); // Handle authentication errors first
+app.use(errorHandlerMiddleware); // Handle other errors
 
 // Track open chats and rooms to prevent sending notifications
 const openChats = new Map(); // Map of userId -> Set of chatIds

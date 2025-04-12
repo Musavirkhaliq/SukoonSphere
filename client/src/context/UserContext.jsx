@@ -120,24 +120,27 @@ export const UserProvider = ({ children }) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
 
-      const { data } = await customFetch.patch(
-        "/user/change-profile",
-        updates,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      // If updates is a FormData object, it's a profile update request
+      if (updates instanceof FormData) {
+        const { data } = await customFetch.patch(
+          "/user/change-profile",
+          updates,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        // Update localStorage with new user data
+        if (data.user) {
+          const updatedUser = { ...state.user, ...data.user };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          dispatch({ type: "SET_USER", payload: updatedUser });
         }
-      );
-
-      // Update localStorage with new user data
-
-      if (data.user) {
-        const updatedUser = { ...state.user, ...data.user };
-
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-
-        dispatch({ type: "SET_USER", payload: updatedUser });
+      } else {
+        // If updates is a regular object, it's a direct user update (e.g., from social login)
+        dispatch({ type: "SET_USER", payload: updates });
       }
 
       return { success: true };

@@ -29,21 +29,37 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: '/api/v1/auth/google/callback',
-      scope: ['profile', 'email']
+      scope: ['profile', 'email'],
+      proxy: true // Enable proxy for secure callback behind reverse proxies
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        console.log('Google profile received:', {
+          id: profile.id,
+          displayName: profile.displayName,
+          emails: profile.emails ? profile.emails.length : 'none',
+          photos: profile.photos ? profile.photos.length : 'none'
+        });
+
         // Check if user already exists
         let user = await User.findOne({ googleId: profile.id });
 
         if (user) {
+          console.log('Existing user found by googleId');
           return done(null, user);
+        }
+
+        // Check if profile has emails
+        if (!profile.emails || !profile.emails[0]) {
+          console.error('Google profile missing email information');
+          return done(new Error('Google profile missing email information'), null);
         }
 
         // Check if user exists with the same email
         user = await User.findOne({ email: profile.emails[0].value });
 
         if (user) {
+          console.log('Existing user found by email, updating with Google ID');
           // Update existing user with Google ID
           user.googleId = profile.id;
           user.socialProvider = 'google';
@@ -55,6 +71,7 @@ passport.use(
           return done(null, user);
         }
 
+        console.log('Creating new user from Google profile');
         // Create new user
         const newUser = await User.create({
           name: profile.displayName,
@@ -63,11 +80,12 @@ passport.use(
           socialProvider: 'google',
           isVerified: true,
           verified: new Date(),
-          avatar: profile.photos[0]?.value || ''
+          avatar: profile.photos && profile.photos[0] ? profile.photos[0].value : ''
         });
 
         return done(null, newUser);
       } catch (error) {
+        console.error('Error in Google authentication strategy:', error);
         return done(error, null);
       }
     }
