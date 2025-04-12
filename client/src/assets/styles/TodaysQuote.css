@@ -1,3 +1,4 @@
+/* Glossy Effect */
 .glossy-effect {
     background: linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
     position: relative;
@@ -28,4 +29,94 @@
 
 .scroll-widget.animate-float {
     opacity: 1;
+}
+
+/* Daily Inspiration Container */
+.inspiration-container {
+    min-height: auto;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+/* Wheel Animations */
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+    100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+}
+
+.wheel-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+/* Achievement Badge Styles */
+.achievement-badge {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.achievement-badge::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: rotate(30deg);
+    transition: transform 0.5s;
+}
+
+.achievement-badge:hover::after {
+    transform: rotate(30deg) translate(50%, 50%);
+}
+
+/* Progress Bar Animation */
+@keyframes progress-fill {
+    0% { width: 0; }
+    100% { width: 100%; }
+}
+
+/* Button Styles */
+.btn-1 {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    color: white;
+    background: linear-gradient(to right, #4f46e5, #7c3aed);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+.btn-1:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-1:active {
+    transform: translateY(0);
+}
+
+.btn-1:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .inspiration-container {
+        padding: 1rem;
+    }
+
+    .gamification-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 }
