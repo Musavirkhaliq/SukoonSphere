@@ -68,16 +68,16 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
       toast.error("Please login to edit comments!");
       return;
     }
-    
-    const isAuthorized = 
-      (comment.createdBy === user._id) || 
+
+    const isAuthorized =
+      (comment.createdBy === user._id) ||
       (comment.isAnonymous && comment.realCreator === user._id);
-      
+
     if (!isAuthorized) {
       toast.error("You can only edit your own comments!");
       return;
     }
-    
+
     setIsEditing(true);
     setEditContent(comment.content);
   };
@@ -88,7 +88,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
       toast.error("Comment cannot be empty!");
       return;
     }
-    
+
     try {
       await customFetch.patch(`/personal-stories/comments/${comment._id}`, {
         content: editContent,
@@ -107,20 +107,20 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
       toast.error("Please login to delete comments!");
       return;
     }
-    
-    const isAuthorized = 
-      (comment.createdBy === user._id) || 
+
+    const isAuthorized =
+      (comment.createdBy === user._id) ||
       (comment.isAnonymous && comment.realCreator === user._id);
-      
+
     if (!isAuthorized) {
       toast.error("You can only delete your own comments!");
       return;
     }
-    
+
     if (!window.confirm("Are you sure you want to delete this comment?")) {
       return;
     }
-    
+
     try {
       await customFetch.delete(`/personal-stories/comments/${comment._id}`);
       onCommentUpdate();
@@ -182,11 +182,11 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
       toast.error("Please login to delete replies!");
       return;
     }
-    
+
     if (!window.confirm("Are you sure you want to delete this reply?")) {
       return;
     }
-    
+
     try {
       await customFetch.delete(`/personal-stories/replies/${replyId}`);
       fetchReplies();
@@ -208,7 +208,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
           createdAt={comment.createdAt}
           size="verySmall"
         />
-        
+
         {user && (user._id === comment.createdBy || (comment.isAnonymous && user._id === comment.realCreator)) && (
           <div className="flex gap-2">
             <button
@@ -226,7 +226,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
           </div>
         )}
       </div>
-      
+
       {/* Comment content */}
       {isEditing ? (
         <div className="mt-2">
@@ -253,7 +253,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
       ) : (
         <p className="text-gray-800 mt-1">{comment.content}</p>
       )}
-      
+
       {/* Comment actions */}
       <div className="flex items-center gap-4 mt-3">
         <button
@@ -267,7 +267,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
           )}
           <span className="text-xs">{comment.totalLikes || 0}</span>
         </button>
-        
+
         <button
           onClick={() => {
             setShowReplyForm(!showReplyForm);
@@ -280,11 +280,11 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
           <FaReply />
           <span className="text-xs">Reply</span>
         </button>
-        
+
         {comment.totalReplies > 0 && (
           <button
             onClick={() => setShowReplies(!showReplies)}
-            className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors"
+            className="flex items-center gap-1 text-[var(--ternery)] hover:text-blue-500 transition-colors"
           >
             <span className="text-xs">
               {showReplies ? "Hide replies" : `Show ${comment.totalReplies} ${comment.totalReplies === 1 ? "reply" : "replies"}`}
@@ -292,17 +292,17 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
           </button>
         )}
       </div>
-      
+
       {/* Reply form */}
       {showReplyForm && (
         <div className="mt-3 pl-8 border-l-2 border-gray-200">
           <form onSubmit={handleSubmitReply}>
             <div className="flex gap-2 mb-2">
-              <UserAvatar
+              {/* <UserAvatar
                 username={user?.name || "Guest"}
                 userAvatar={user?.avatar}
                 size="verySmall"
-              />
+              /> */}
               <div className="flex-1">
                 <textarea
                   value={replyContent}
@@ -313,7 +313,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -328,24 +328,22 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
                   Reply anonymously
                 </span>
               </label>
-              
+
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setShowReplyForm(false)}
-                  className="px-3 py-1 text-xs text-gray-600 hover:text-gray-800"
+                  className="btn-red !py-1"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingReply || !user}
-                  className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
+                  className="btn-2 !py-1"
                 >
-                  {isSubmittingReply ? (
+                  {isSubmittingReply && (
                     <FaSpinner className="animate-spin" size={10} />
-                  ) : (
-                    <FaPaperPlane size={10} />
                   )}
                   Reply
                 </button>
@@ -354,7 +352,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
           </form>
         </div>
       )}
-      
+
       {/* Replies */}
       {showReplies && (
         <div className="mt-3 pl-8 border-l-2 border-gray-200 space-y-3">
@@ -380,7 +378,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
                       </span>
                     )}
                   </div>
-                  
+
                   {user && (user._id === reply.createdBy || (reply.isAnonymous && user._id === reply.realCreator)) && (
                     <button
                       onClick={() => handleDeleteReply(reply._id)}
@@ -390,9 +388,9 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
                     </button>
                   )}
                 </div>
-                
+
                 <p className="text-gray-800 text-sm mt-1">{reply.content}</p>
-                
+
                 <div className="flex items-center gap-3 mt-2">
                   <button
                     onClick={() => handleLikeReply(reply._id)}

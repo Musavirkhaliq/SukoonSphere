@@ -1,31 +1,21 @@
 import React, { useState } from "react";
-import {
-  FaRegHeart,
-  FaRegComment,
-} from "react-icons/fa";
+import { formatDistanceToNow } from "date-fns";
 import DeleteModal from "../shared/DeleteModal";
 import customFetch from "@/utils/customFetch";
 import { useNavigate } from "react-router-dom";
 import UserAvatar from "../shared/UserAvatar";
-import PostActions from "../shared/PostActions";
+import PostActions from "./PostActions"; // Use the PostActions component
 import { toast } from "react-toastify";
 import EditPostModal from "./EditPostModal";
-import { formatDistanceToNow } from "date-fns";
 import PostCommentModal from "./PostCommentModal";
 
-const PostCard = ({
-  post,
-  user,
-  onPostUpdate,
-}) => {
-  const [isLiked, setIsLiked] = useState(post?.likes?.includes(user?._id));
+const PostCard = ({ post, user, onPostUpdate }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [likesCount, setLikesCount] = useState(post?.totalLikes || 0);
-  const [isLoading, setIsLoading] = useState(false);
   const [currentPost, setCurrentPost] = useState(post);
   const [showCommentModal, setShowCommentModal] = useState(false);
   const navigate = useNavigate();
+
   const handleDelete = () => {
     setShowDeleteModal(true);
   };
@@ -43,37 +33,20 @@ const PostCard = ({
 
   const handleDeletePost = async () => {
     try {
-      // Make sure we're using the current post ID
       const postId = currentPost._id || post._id;
-      console.log('Deleting post with ID:', postId);
+      console.log("Deleting post with ID:", postId);
       const response = await customFetch.delete(`/posts/${postId}`);
-      console.log('Delete response:', response);
+      console.log("Delete response:", response);
       toast.success("Post deleted successfully!");
       window.location.reload();
     } catch (error) {
-      console.error('Error deleting post:', error);
-      toast.error(error?.response?.data?.msg || 'Failed to delete post');
+      console.error("Error deleting post:", error);
+      toast.error(error?.response?.data?.msg || "Failed to delete post");
     }
   };
 
-  const handleLike = async () => {
-    if (!user) {
-      toast.error("Please login to like this post!");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      await customFetch.patch(`/posts/${currentPost._id}/like`);
-      setIsLiked(!isLiked);
-      setLikesCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  console.log("Post data:", { post, currentPost });
 
-  console.log('Post data:', { post, currentPost });
   return (
     <>
       <div className="bg-white rounded-lg shadow-sm p-4 relative">
@@ -88,22 +61,30 @@ const PostCard = ({
             />
           </div>
 
-          {user?._id && (
-            // Show edit/delete options if user is the creator OR the real creator of an anonymous post
-            (currentPost?.createdBy && String(user?._id) === String(currentPost?.createdBy)) ||
-            (currentPost?.isAnonymous && currentPost?.realCreator && String(user?._id) === String(currentPost?.realCreator))
-          ) && (
-              <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
+          {user?._id &&
+            ((currentPost?.createdBy &&
+              String(user?._id) === String(currentPost?.createdBy)) ||
+              (currentPost?.isAnonymous &&
+                currentPost?.realCreator &&
+                String(user?._id) === String(currentPost?.realCreator))) && (
+              <PostActions
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                isEditDeleteOnly={true} // Flag to show only edit/delete
+              />
             )}
         </div>
 
         {currentPost?.imageUrl && (
-          <img
-            src={currentPost?.imageUrl}
-            alt="Post"
-            className="w-full object-cover rounded-lg mb-4"
-          />
+          <div className="relative w-full aspect-[4/3] mb-4">
+            <img
+              src={currentPost?.imageUrl}
+              alt="Post"
+              className="w-full h-full object-contain rounded-lg"
+            />
+          </div>
         )}
+
         <p className="text-gray-800 mb-4">{currentPost?.description}</p>
 
         {/* Tags Section */}
@@ -120,46 +101,26 @@ const PostCard = ({
           </div>
         )}
 
-        <div className="flex items-center gap-4 text-gray-500">
-          <button
-            onClick={handleLike}
-            disabled={isLoading}
-            className={`flex items-center gap-1 ${isLiked ? "text-red-500" : ""
-              } lg:hover:text-red-500 transition-colors`}
-          >
-            <FaRegHeart className={isLiked ? "fill-current" : ""} />
-            <span>{likesCount}</span>
-          </button>
+        {/* Post Actions (Like, Comment, Share) */}
+        <PostActions
+          postId={currentPost?._id}
+          initialLikesCount={currentPost?.totalLikes || 0}
+          isInitiallyLiked={post?.likes?.includes(user?._id)}
+          totalComments={currentPost?.totalComments || 0}
+          onCommentClick={() => setShowCommentModal(true)}
+          isEditDeleteOnly={false} // Show like, comment, share
+        />
 
-          {/* {comment === "link" ? ( */}
-          <div
-            onClick={() => setShowCommentModal(true)}
-            className="flex items-center gap-1 hover:text-blue-500 cursor-pointer transition-colors duration-200"
-          >
-            <FaRegComment />
-            <span>{currentPost?.totalComments || 0}</span>
+        {currentPost?.editedAt && (
+          <div className="text-xs text-gray-400 text-right mt-2">
+            edited{" "}
+            {formatDistanceToNow(new Date(currentPost?.editedAt), {
+              addSuffix: true,
+            })}
           </div>
-          {/* )  */}
-          {/* : (
-            <button
-              className="flex items-center gap-1 hover:text-blue-500"
-              onClick={() => onCommentClick(currentPost._id)}
-            >
-              <FaRegComment />
-              <span>{totalComments}</span>
-            </button> */}
-          {/* )} */}
-
-          {currentPost?.editedAt && (
-            <span className="text-xs text-gray-400 ml-auto">
-              edited{" "}
-              {formatDistanceToNow(new Date(currentPost?.editedAt), {
-                addSuffix: true,
-              })}
-            </span>
-          )}
-        </div>
+        )}
       </div>
+
       {showCommentModal && (
         <PostCommentModal
           isOpen={showCommentModal}
@@ -167,6 +128,7 @@ const PostCard = ({
           postId={currentPost?._id}
         />
       )}
+
       {showDeleteModal && (
         <DeleteModal
           isOpen={showDeleteModal}

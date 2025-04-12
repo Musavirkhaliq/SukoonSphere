@@ -21,7 +21,6 @@ const Video = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-
     // Playlist navigation
     const [playlist, setPlaylist] = useState(null);
     const [currentIndex, setCurrentIndex] = useState(-1);
@@ -42,11 +41,15 @@ const Video = () => {
     // References
     const videoRef = useRef(null);
     const videoContainerRef = useRef(null);
+    const stickyHeaderRef = useRef(null);
 
     // Progress tracking state
     const [progress, setProgress] = useState(0);
     const [watchStatus, setWatchStatus] = useState('not-started');
     const lastReportedProgress = useRef(0);
+
+    // Sticky video state
+    const [stickyVideoHeight, setStickyVideoHeight] = useState(0);
 
     // Use our custom hook for direct video progress tracking
     const {
@@ -118,13 +121,28 @@ const Video = () => {
         }, 1000);
     }, [videoId]);
 
-    // No custom video control functions needed as we're using YouTube's player
+    // Set up the sticky video player effect and calculate its height
+    useEffect(() => {
+        if (!isLoading && videoContainerRef.current) {
+            // Calculate the aspect ratio height for 16:9 videos
+            const updateVideoHeight = () => {
+                const width = videoContainerRef.current.offsetWidth;
+                const height = width * (9 / 16); // 16:9 aspect ratio
+                setStickyVideoHeight(height);
+            };
 
+            // Initial calculation
+            updateVideoHeight();
 
+            // Recalculate on window resize
+            window.addEventListener('resize', updateVideoHeight);
+            return () => window.removeEventListener('resize', updateVideoHeight);
+        }
+    }, [isLoading, video]);
 
     if (error) {
         return (
-            <div className="min-h-[50vh] flex items-center justify-center ">
+            <div className="min-h-[50vh] flex items-center justify-center">
                 <div className="bg-red-50 p-4 rounded-lg max-w-md w-full">
                     <h2 className="text-red-800 text-xl mb-2">Error Loading Video</h2>
                     <p className="text-red-600 mb-4">{error}</p>
@@ -140,8 +158,8 @@ const Video = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className=" py-6">
+        <div className="min-h-screen bg-gray-50 relative">
+            <div className="py-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Navigation */}
                     <nav className="mb-4">
@@ -156,12 +174,17 @@ const Video = () => {
                         </Link>
                     </nav>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Main Video Content */}
                         <div className="lg:col-span-2">
-                            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                                {/* Video Player */}
-                                <div className="relative w-full" ref={videoContainerRef}>
+                            {/* Sticky Video Container */}
+                            <div
+                                ref={stickyHeaderRef}
+                                className="sticky top-16 z-30 bg-white shadow-md rounded-t-xl overflow-hidden"
+                                style={{ marginBottom: isLoadingPlaylist || playlist ? 0 : '1rem' }}
+                            >
+                                {/* Video Player - Fixed at top */}
+                                <div ref={videoContainerRef} className="w-full">
                                     {isLoading ? (
                                         <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                                             <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
@@ -251,7 +274,7 @@ const Video = () => {
                                     )}
                                 </div>
 
-                                {/* Playlist Navigation */}
+                                {/* Playlist Navigation - Also sticky with video */}
                                 {isLoadingPlaylist && (
                                     <div className="bg-gray-50 p-3 border-t border-b flex items-center justify-center">
                                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--primary)]"></div>
@@ -302,7 +325,10 @@ const Video = () => {
                                         </div>
                                     </div>
                                 )}
+                            </div>
 
+                            {/* Scrollable Content - Below the sticky video */}
+                            <div className="bg-white rounded-b-xl shadow-lg overflow-hidden">
                                 {/* Video Info - Reorganized */}
                                 {video && (
                                     <div className="p-4">
@@ -376,7 +402,7 @@ const Video = () => {
                             {/* 6. Comments Section - Collapsible */}
                             {video && (
                                 <div className="mt-4">
-                                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-lg">
                                         <button
                                             onClick={() => setShowComments(!showComments)}
                                             className="w-full p-3 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
@@ -399,8 +425,8 @@ const Video = () => {
                         </div>
 
                         {/* Recommendations */}
-                        <div className="lg:col-span-1">
-                            <div className="space-y-6">
+                        <div className="lg:col-span-1 md:relative ">
+                            <div className="space-y-6 md:sticky md:top-16 md:z-30">
                                 {/* Achievements - Collapsible */}
                                 <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
                                     <button

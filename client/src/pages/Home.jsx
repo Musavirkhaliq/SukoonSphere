@@ -36,9 +36,7 @@ const Home = () => {
     <div className="homogeneous-container">
       {/* Hero Section */}
       <section className="homogeneous-section hero-section">
-        <Suspense fallback={<LoadingSpinner />}>
-          <HeroSection />
-        </Suspense>
+        <HeroSection />
       </section>
 
       {/* Mental Health Statistics Section */}

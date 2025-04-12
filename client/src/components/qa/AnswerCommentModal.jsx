@@ -1,75 +1,104 @@
 import React, { useState, useEffect } from "react";
-import { FaTimes, FaRegHeart, FaHeart, FaRegComment, FaShare } from "react-icons/fa";
-import { FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { FaTimes } from "react-icons/fa";
 import AnswerComments from "./AnswerComments";
 import UserAvatar from "../shared/UserAvatar";
 import { formatDistanceToNow } from "date-fns";
 import customFetch from "@/utils/customFetch";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
+import AnswerActions from "./AnswerActions";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 const AnswerCommentModal = ({ isOpen, onClose, answerId }) => {
     const { user } = useUser();
     const [answer, setAnswer] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isLiked, setIsLiked] = useState(false);
-    const [likesCount, setLikesCount] = useState(0);
-    const [isLikeLoading, setIsLikeLoading] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false); // State for expand/collapse
-    const [shouldTruncate, setShouldTruncate] = useState(false); // State to determine if truncation is needed
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedContext, setEditedContext] = useState("");
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [shouldTruncate, setShouldTruncate] = useState(false);
 
-    const MAX_CHARS = 300; // Character limit for truncation, matching Answer component
+    const MAX_CHARS = 300;
 
-    const handleLike = async () => {
-        if (!user) {
-            toast.error("Please login to like this answer!");
-            return;
-        }
+    const fetchAnswer = async () => {
+        if (!answerId) return;
+
         try {
-            setIsLikeLoading(true);
-            await customFetch.patch(`/qa-section/question/answer/${answerId}/like`);
-            setIsLiked(!isLiked);
-            setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+            setLoading(true);
+            const { data } = await customFetch.get(`/qa-section/answer/${answerId}`);
+            setAnswer(data.answer);
+            setEditedContext(data.answer.context);
+
+            // Check if truncation is needed
+            if (data.answer.context && data.answer.context.length > MAX_CHARS) {
+                setShouldTruncate(true);
+            }
         } catch (error) {
-            console.error("Error liking answer:", error);
-            toast.error("Failed to like answer");
+            console.error("Error fetching answer:", error);
+            toast.error("Failed to load answer");
         } finally {
-            setIsLikeLoading(false);
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        const fetchAnswer = async () => {
-            if (!answerId) return;
-
-            try {
-                setLoading(true);
-                const { data } = await customFetch.get(`/qa-section/answer/${answerId}`);
-                setAnswer(data.answer);
-
-                // Set initial like state
-                if (user && data.answer.likes) {
-                    setIsLiked(data.answer.likes.includes(user._id));
-                    setLikesCount(data.answer.totalLikes || data.answer.likes.length || 0);
-                } else {
-                    setLikesCount(data.answer.totalLikes || data.answer.likes?.length || 0);
-                }
-
-                // Check if truncation is needed
-                if (data.answer.context && data.answer.context.length > MAX_CHARS) {
-                    setShouldTruncate(true);
-                }
-            } catch (error) {
-                console.error("Error fetching answer:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (isOpen) {
             fetchAnswer();
         }
-    }, [answerId, isOpen, user]);
+    }, [answerId, isOpen]);
+
+    const handleLikeUpdate = (newIsLiked, newLikesCount) => {
+        setAnswer((prev) => ({
+            ...prev,
+            likes: newIsLiked
+                ? [...(prev.likes || []), user?.id]
+                : (prev.likes || []).filter((id) => id !== user?.id),
+            totalLikes: newLikesCount,
+        }));
+        // Refetch to ensure server sync
+        fetchAnswer();
+    };
+
+    const handleEdit = () => {
+        setIsEditing(true);
+        setEditedContext(answer.context);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+        setEditedContext(answer.context);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editedContext.trim()) {
+            toast.error("Answer cannot be empty");
+            return;
+        }
+
+        try {
+            const response = await customFetch.patch(`/qa-section/answer/${answer._id}`, {
+                context: editedContext,
+            });
+            setAnswer(response.data.answer);
+            setIsEditing(false);
+            toast.success("Answer updated successfully");
+            fetchAnswer(); // Refresh data
+        } catch (error) {
+            console.error("Error updating answer:", error);
+            toast.error(error.response?.data?.msg || "Failed to update answer");
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            await customFetch.delete(`/qa-section/question/answer/${answer._id}`);
+            toast.success("Answer deleted successfully");
+            onClose(); // Close modal after deletion
+        } catch (error) {
+            console.error("Error deleting answer:", error);
+            toast.error("Failed to delete answer");
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -113,6 +142,14 @@ const AnswerCommentModal = ({ isOpen, onClose, answerId }) => {
                                             createdAt={answer.createdAt}
                                             size="medium"
                                         />
+                                        {user?.id && String(user.id) === String(answer.createdBy) && (
+                                            <AnswerActions
+                                                answerId={answer._id}
+                                                handleEdit={handleEdit}
+                                                handleDelete={handleDelete}
+                                                isEditDeleteOnly={true}
+                                            />
+                                        )}
                                     </div>
 
                                     {answer.imageUrl && (
@@ -124,63 +161,76 @@ const AnswerCommentModal = ({ isOpen, onClose, answerId }) => {
                                     )}
 
                                     <div className="text-gray-800 mb-4">
-                                        <p className="text-base leading-relaxed">
-                                            {shouldTruncate && !isExpanded
-                                                ? `${answer.context.substring(0, MAX_CHARS)}...`
-                                                : answer.context}
-                                        </p>
-
-                                        {shouldTruncate && (
-                                            <button
-                                                onClick={() => setIsExpanded(!isExpanded)}
-                                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors mt-1"
-                                            >
-                                                {isExpanded ? (
-                                                    <>
-                                                        <FiChevronUp className="w-4 h-4" />
-                                                        Show less
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <FiChevronDown className="w-4 h-4" />
-                                                        Read more
-                                                    </>
-                                                )}
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {/* Answer Reactions */}
-                                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
-                                        <div className="flex items-center gap-4">
-                                            <button
-                                                onClick={handleLike}
-                                                disabled={isLikeLoading}
-                                                className={`flex items-center gap-1 ${isLiked ? "text-red-500" : "text-gray-500"
-                                                    } hover:text-red-500 transition-colors`}
-                                            >
-                                                {isLiked ? <FaHeart className="text-red-500" /> : <FaRegHeart />}
-                                                <span>{likesCount}</span>
-                                            </button>
-
-                                            <div className="flex items-center gap-1 text-gray-500">
-                                                <FaRegComment />
-                                                <span>{answer.comments?.length || 0}</span>
+                                        {isEditing ? (
+                                            <div className="space-y-3">
+                                                <textarea
+                                                    value={editedContext}
+                                                    onChange={(e) => setEditedContext(e.target.value)}
+                                                    placeholder="Edit your answer..."
+                                                    className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 min-h-[100px] resize-none"
+                                                />
+                                                <div className="flex justify-end gap-3 pt-3 border-t">
+                                                    <button onClick={handleCancelEdit} className="btn-red">
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        onClick={handleSaveEdit}
+                                                        disabled={!editedContext.trim()}
+                                                        className="btn-2"
+                                                    >
+                                                        Save Changes
+                                                    </button>
+                                                </div>
                                             </div>
+                                        ) : (
+                                            <>
+                                                <p className="text-base leading-relaxed">
+                                                    {shouldTruncate && !isExpanded
+                                                        ? `${answer.context.substring(0, MAX_CHARS)}...`
+                                                        : answer.context}
+                                                </p>
 
-                                            <button className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors">
-                                                <FaShare />
-                                                <span>Share</span>
-                                            </button>
-                                        </div>
-
-                                        {answer.editedAt && (
-                                            <span className="text-xs text-gray-400">
-                                                edited{" "}
-                                                {formatDistanceToNow(new Date(answer.editedAt), { addSuffix: true })}
-                                            </span>
+                                                {shouldTruncate && (
+                                                    <button
+                                                        onClick={() => setIsExpanded(!isExpanded)}
+                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors mt-1"
+                                                    >
+                                                        {isExpanded ? (
+                                                            <>
+                                                                <FiChevronUp className="w-4 h-4" />
+                                                                Show less
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <FiChevronDown className="w-4 h-4" />
+                                                                Read more
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                )}
+                                            </>
                                         )}
                                     </div>
+
+                                    {!isEditing && (
+                                        <AnswerActions
+                                            answerId={answerId}
+                                            initialLikesCount={answer?.totalLikes || 0}
+                                            isInitiallyLiked={answer?.likes?.includes(user?._id)}
+                                            totalComments={answer?.comments?.length || 0}
+                                            onCommentClick={() => { }}
+                                            onLikeUpdate={handleLikeUpdate}
+                                        />
+                                    )}
+
+                                    {answer.editedAt && !isEditing && (
+                                        <div className="text-xs text-gray-400 text-right mt-2">
+                                            edited{" "}
+                                            {formatDistanceToNow(new Date(answer.editedAt), {
+                                                addSuffix: true,
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 

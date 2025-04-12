@@ -109,9 +109,24 @@ const TopPublicGroups = () => {
           <FaUsers className="mr-2 text-[var(--primary)]" />
           Top Public Rooms
         </h3>
-        <Link to="/chats" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-          View All
-        </Link>
+        {!user ? (
+          <button
+            type="button"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            onClick={() => {
+              if (!user) {
+                toast.error('Please login to join a group');
+                return;
+              }
+            }}
+          >
+            View All
+          </button>
+        ) : (
+          <Link to="/chats" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            View All
+          </Link>
+        )}
       </div>
 
       {isLoading ? (
@@ -147,11 +162,10 @@ const TopPublicGroups = () => {
                 <button
                   onClick={() => handleJoinGroup(group._id)}
                   disabled={joiningGroup === group._id || pendingJoinRequests.includes(group._id)}
-                  className={`flex-shrink-0 p-2 rounded-full ${
-                    pendingJoinRequests.includes(group._id)
-                      ? 'bg-green-50 text-green-600'
-                      : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                  } transition-colors`}
+                  className={`flex-shrink-0 p-2 rounded-full ${pendingJoinRequests.includes(group._id)
+                    ? 'bg-green-50 text-green-600'
+                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                    } transition-colors`}
                   title={pendingJoinRequests.includes(group._id) ? 'Join request pending' : 'Join group'}
                 >
                   {joiningGroup === group._id ? (

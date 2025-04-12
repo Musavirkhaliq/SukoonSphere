@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 import customFetch from '@/utils/customFetch';
 import { toast } from 'react-toastify';
-import { FaHistory, FaPlus, FaSpinner, FaLightbulb, FaChartLine, FaRobot } from 'react-icons/fa';
+import { FaHistory, FaPlus, FaRobot } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import TherapyChat from '@/components/therapyComponents/TherapyChat';
 import TherapySessionList from '@/components/therapyComponents/TherapySessionList';
@@ -32,11 +32,8 @@ const SukoonAI = () => {
   useEffect(() => {
     if (!user) {
       toast.error('Please log in to access the SukoonAI');
-      navigate('/auth/sign-in');
-    } else {
-      console.log('Current user:', user);
     }
-  }, [user, navigate]);
+  }, [user]);
 
   // Fetch sessions on component mount
   useEffect(() => {
@@ -67,7 +64,6 @@ const SukoonAI = () => {
         // If there's an authentication error, redirect to auth/sign-in
         if (error.response?.status === 401) {
           toast.error('Please log in to access the SukoonAI');
-          navigate('/auth/sign-in');
         }
       } finally {
         setIsLoading(false);
@@ -77,7 +73,7 @@ const SukoonAI = () => {
     if (user) {
       fetchSessions();
     }
-  }, [user, navigate]);
+  }, [user]);
 
   // Fetch session details when active session changes
   const fetchSessionDetails = async (sessionId) => {
@@ -139,7 +135,6 @@ const SukoonAI = () => {
       // If there's an authentication error, redirect to auth/sign-in
       if (error.response?.status === 401) {
         toast.error('Please log in to access the SukoonAI');
-        navigate('/auth/sign-in');
       }
     } finally {
       setIsLoading(false);
@@ -212,7 +207,7 @@ const SukoonAI = () => {
       // If there's an authentication error, redirect to auth/sign-in
       if (error.response?.status === 401) {
         toast.error('Please log in to access the SukoonAI');
-        navigate('/auth/sign-in');
+
       }
     } finally {
       setIsLoading(false);
@@ -272,15 +267,6 @@ const SukoonAI = () => {
       return;
     }
 
-    // Check if there are any messages in the session
-    // If the first message is from the therapist, we need to ensure there's at least one user message
-    // before sending another message to avoid the Gemini API error
-    const hasUserMessage = messages.some(msg => msg.sender === 'user');
-
-    if (messages.length > 0 && !hasUserMessage) {
-      console.log('Session has messages but no user messages yet, adding a dummy user message');
-      // We'll handle this on the backend, so we don't need to do anything here
-    }
 
     // Add user message to the UI immediately
     const userMessage = { sender: 'user', text: message, timestamp: new Date().toISOString() };

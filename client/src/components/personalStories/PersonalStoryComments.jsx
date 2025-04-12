@@ -83,12 +83,8 @@ const PersonalStoryComments = ({ storyId }) => {
     <div className="space-y-6">
       {/* Comment form */}
       <form onSubmit={handleSubmitComment} className="mb-8">
-        <div className="flex gap-3 mb-3">
-          <UserAvatar
-            username={user?.name || "Guest"}
-            userAvatar={user?.avatar}
-            size="small"
-          />
+        <div className="flex flex-col gap-3 mb-3">
+          <UserAvatar username={user?.name || "Guest"} userAvatar={user?.avatar} size="small" />
           <div className="flex-1">
             <textarea
               value={commentContent}
@@ -118,7 +114,7 @@ const PersonalStoryComments = ({ storyId }) => {
           <button
             type="submit"
             disabled={!user || isSubmitting}
-            className="btn-2 flex items-center gap-2"
+            className="btn-2 !py-1 !px-2 flex items-center gap-2"
             title={user ? "Post your comment" : "Login to comment"}
           >
             {isSubmitting ? (
