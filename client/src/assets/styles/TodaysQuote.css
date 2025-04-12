@@ -56,6 +56,7 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .achievement-badge::after {
@@ -72,6 +73,39 @@
 
 .achievement-badge:hover::after {
     transform: rotate(30deg) translate(50%, 50%);
+}
+
+/* Achievement tooltip */
+.achievement-badge .achievement-tooltip {
+    visibility: hidden;
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    color: #333;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 150px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.achievement-badge:hover .achievement-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Quote collection styles */
+.quotes-progress .category-progress {
+    transition: all 0.3s ease;
+}
+
+.quotes-progress .category-progress:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Progress Bar Animation */

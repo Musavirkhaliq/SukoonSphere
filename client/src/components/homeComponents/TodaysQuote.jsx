@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"
-import { FaHeart, FaSun, FaFistRaised, FaTree, FaHandHoldingHeart, FaFeather, FaTrophy, FaFire, FaStar, FaGem, FaShareAlt, FaTwitter, FaFacebook, FaWhatsapp, FaLink } from "react-icons/fa"
+import { FaHeart, FaSun, FaFistRaised, FaTree, FaHandHoldingHeart, FaFeather, FaTrophy, FaFire, FaCalendarCheck, FaStar, FaGem, FaBook, FaCrown, FaShareAlt, FaTwitter, FaFacebook, FaWhatsapp, FaLink } from "react-icons/fa"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link } from "react-router-dom";
 import confetti from "canvas-confetti";
@@ -704,7 +704,8 @@ function TodaysQuote() {
 
   // Gamification state
   const [streak, setStreak] = useState(0)
-  const [lastSpinDate, setLastSpinDate] = useState(null)
+  // lastSpinDate is used in localStorage but not directly in the component
+  const [, setLastSpinDate] = useState(null)
   const [collectedAttributes, setCollectedAttributes] = useState([])
   const [points, setPoints] = useState(0)
   const [showAchievement, setShowAchievement] = useState(false)
@@ -758,6 +759,58 @@ function TodaysQuote() {
       icon: <FaTrophy className="text-amber-500 text-2xl" />,
       points: 100,
       condition: (state) => state.streak >= 7
+    },
+    {
+      id: 'quote-collector-10',
+      name: 'Quote Collector I',
+      description: 'Collect 10 unique inspirational quotes',
+      icon: <FaBook className="text-blue-500 text-2xl" />,
+      points: 20,
+      condition: (state) => Object.values(state.seenQuotes || {}).flat().length >= 10
+    },
+    {
+      id: 'quote-collector-25',
+      name: 'Quote Collector II',
+      description: 'Collect 25 unique inspirational quotes',
+      icon: <FaBook className="text-indigo-500 text-2xl" />,
+      points: 50,
+      condition: (state) => Object.values(state.seenQuotes || {}).flat().length >= 25
+    },
+    {
+      id: 'quote-collector-50',
+      name: 'Quote Collector III',
+      description: 'Collect 50 unique inspirational quotes',
+      icon: <FaBook className="text-violet-500 text-2xl" />,
+      points: 100,
+      condition: (state) => Object.values(state.seenQuotes || {}).flat().length >= 50
+    },
+    {
+      id: 'quote-collector-100',
+      name: 'Quote Master',
+      description: 'Collect 100 unique inspirational quotes',
+      icon: <FaBook className="text-purple-600 text-2xl" />,
+      points: 200,
+      condition: (state) => Object.values(state.seenQuotes || {}).flat().length >= 100
+    },
+    {
+      id: 'daily-wisdom-30',
+      name: 'Daily Wisdom',
+      description: 'Spin the wheel for 30 consecutive days',
+      icon: <FaCalendarCheck className="text-green-500 text-2xl" />,
+      points: 300,
+      condition: (state) => state.streak >= 30
+    },
+    {
+      id: 'category-master',
+      name: 'Category Master',
+      description: 'Collect at least 10 quotes from each category',
+      icon: <FaCrown className="text-yellow-500 text-2xl" />,
+      condition: (state) => {
+        const seenQuotes = state.seenQuotes || {}
+        return Object.keys(seenQuotes).length === attributes.length &&
+               Object.values(seenQuotes).every(quotes => quotes.length >= 10)
+      },
+      points: 150
     },
   ]
 
@@ -900,7 +953,8 @@ function TodaysQuote() {
       streak,
       spins: collectedAttributes.length,
       collected: collectedAttributes,
-      points
+      points,
+      seenQuotes
     }
 
     // Check for new achievements
@@ -930,7 +984,23 @@ function TodaysQuote() {
         localStorage.setItem('dailyInspiration', JSON.stringify(savedState))
       }
     })
-  }, [streak, collectedAttributes, points])
+  }, [streak, collectedAttributes, points, seenQuotes])
+
+  // Load and save seen quotes
+  useEffect(() => {
+    // Load seen quotes from localStorage
+    const savedSeenQuotes = localStorage.getItem('seenQuotes')
+    if (savedSeenQuotes) {
+      setSeenQuotes(JSON.parse(savedSeenQuotes))
+    }
+  }, [])
+
+  // Save seen quotes whenever they change
+  useEffect(() => {
+    if (Object.keys(seenQuotes).length > 0) {
+      localStorage.setItem('seenQuotes', JSON.stringify(seenQuotes))
+    }
+  }, [seenQuotes])
 
   // Add wheel hover animation
   const handleWheelHover = () => {
@@ -1028,36 +1098,84 @@ function TodaysQuote() {
         </motion.h1>
 
         {/* Progress indicator */}
-        <motion.div
-          className="collection-progress w-full max-w-md mb-6"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className="text-sm text-gray-600 mb-2 flex justify-between">
-            <span>Collection Progress</span>
-            <span>{collectedAttributes.length}/{attributes.length} attributes</span>
-          </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-1000 ease-out"
-              style={{ width: `${(collectedAttributes.length / attributes.length) * 100}%` }}
-            ></div>
-          </div>
-          <div className="flex justify-between mt-2">
-            {attributes.map((attr) => (
+        <div className="progress-indicators w-full max-w-md mb-6 space-y-4">
+          {/* Category collection progress */}
+          <motion.div
+            className="collection-progress"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="text-sm text-gray-600 mb-2 flex justify-between">
+              <span>Categories Collected</span>
+              <span>{collectedAttributes.length}/{attributes.length}</span>
+            </div>
+            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
-                key={attr.name}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${collectedAttributes.includes(attr.name) ? attr.color : 'bg-gray-200'}`}
-                title={attr.name}
-              >
-                <div className="text-white text-xs">
-                  {collectedAttributes.includes(attr.name) ? attr.icon : '?'}
+                className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-1000 ease-out"
+                style={{ width: `${(collectedAttributes.length / attributes.length) * 100}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between mt-2">
+              {attributes.map((attr) => (
+                <div
+                  key={attr.name}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${collectedAttributes.includes(attr.name) ? attr.color : 'bg-gray-200'}`}
+                  title={attr.name}
+                >
+                  <div className="text-white text-xs">
+                    {collectedAttributes.includes(attr.name) ? attr.icon : '?'}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Quote collection progress */}
+          <motion.div
+            className="quotes-progress"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="text-sm text-gray-600 mb-2 flex justify-between">
+              <span>Quotes Collected</span>
+              <span>{Object.values(seenQuotes).flat().length}/{attributes.reduce((total, attr) => total + attr.quotes.length, 0)}</span>
+            </div>
+            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-green-400 to-teal-500 transition-all duration-1000 ease-out"
+                style={{ width: `${(Object.values(seenQuotes).flat().length / attributes.reduce((total, attr) => total + attr.quotes.length, 0)) * 100}%` }}
+              ></div>
+            </div>
+
+            {/* Quote collection by category */}
+            <div className="grid grid-cols-3 gap-2 mt-3">
+              {attributes.map((attr) => {
+                const categoryQuotes = seenQuotes[attr.name] || [];
+                const totalQuotes = attr.quotes.length;
+                const percentage = (categoryQuotes.length / totalQuotes) * 100;
+
+                return (
+                  <div key={attr.name} className="text-center">
+                    <div className="flex items-center justify-center mb-1">
+                      <div className={`w-6 h-6 rounded-full ${attr.color} flex items-center justify-center mr-1`}>
+                        <div className="text-white text-xs">{attr.icon}</div>
+                      </div>
+                      <span className="text-xs">{categoryQuotes.length}/{totalQuotes}</span>
+                    </div>
+                    <div className="h-1 bg-gray-200 rounded-full overflow-hidden w-full">
+                      <div
+                        className={`h-full ${attr.color} transition-all duration-500 ease-out`}
+                        style={{ width: `${percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </div>
 
         <div className="relative w-full max-w-md aspect-square mb-12">
           {/* Center circle with improved depth */}
@@ -1227,28 +1345,45 @@ function TodaysQuote() {
 
         {/* Achievement badges section */}
         <motion.div
-          className="achievements-section w-full max-w-md"
+          className="achievements-section w-full max-w-md mb-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <div className="text-sm text-gray-600 mb-2">Achievements</div>
-          <div className="flex justify-center gap-2 flex-wrap">
+          <div className="flex justify-between items-center mb-2">
+            <div className="text-sm text-gray-600">Achievements</div>
+            <div className="text-xs text-gray-500">
+              {localStorage.getItem('earnedAchievements')
+                ? JSON.parse(localStorage.getItem('earnedAchievements')).length
+                : 0}/{achievements.length} unlocked
+            </div>
+          </div>
+
+          <div className="grid grid-cols-5 gap-2">
             {achievements.map((achievement) => {
               const earned = localStorage.getItem('earnedAchievements')
                 ? JSON.parse(localStorage.getItem('earnedAchievements')).includes(achievement.id)
                 : false;
 
               return (
-                <div
+                <motion.div
                   key={achievement.id}
-                  className={`achievement-badge w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${earned ? 'bg-gradient-to-br from-yellow-400 to-amber-600' : 'bg-gray-200'}`}
-                  title={earned ? achievement.name : '???'}
+                  className={`achievement-badge w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-300 ${earned ? 'bg-gradient-to-br from-yellow-400 to-amber-600' : 'bg-gray-200'}`}
+                  title={earned ? `${achievement.name}: ${achievement.description}` : 'Achievement locked'}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <div className={`${earned ? 'text-white' : 'text-gray-400'}`}>
                     {earned ? achievement.icon : '?'}
                   </div>
-                </div>
+
+                  {/* Tooltip on hover */}
+                  <div className="achievement-tooltip">
+                    <div className="font-bold">{earned ? achievement.name : 'Locked'}</div>
+                    {earned && <div className="text-gray-600">{achievement.description}</div>}
+                    {earned && <div className="text-yellow-500 mt-1">+{achievement.points} points</div>}
+                  </div>
+                </motion.div>
               );
             })}
           </div>
