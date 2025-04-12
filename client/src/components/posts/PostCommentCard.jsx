@@ -130,23 +130,14 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
               size="verySmall"
             />
           </div>
-          {/* Debug info */}
-          {console.log('Comment auth check:', {
-            userId: user?._id,
-            commentCreatedBy: comment.createdBy,
-            commentRealCreator: comment.realCreator,
-            isCreator: String(user?._id) === String(comment.createdBy),
-            isRealCreator: String(user?._id) === String(comment.realCreator),
-            isAnonymous: comment.isAnonymous
-          })}
 
           {user && (
             // Show edit/delete options if user is the creator OR the real creator of an anonymous comment
             (String(user._id) === String(comment.createdBy)) ||
             (comment.isAnonymous && comment.realCreator && String(user._id) === String(comment.realCreator))
           ) && (
-            <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
-          )}
+              <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
+            )}
         </div>
 
         {/* Comment Content */}
@@ -196,11 +187,10 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
         <div className="flex items-center gap-4 text-sm">
           <button
             onClick={handleLike}
-            className={`flex items-center gap-1 ${
-              user && comment.likes.includes(user._id)
+            className={`flex items-center gap-1 ${user && comment.likes.includes(user._id)
                 ? "text-[var(--secondary)]"
                 : "text-gray-500"
-            } hover:text-[var(--secondary-hover)] transition-colors duration-200`}
+              } hover:text-[var(--secondary-hover)] transition-colors duration-200`}
           >
             <FaThumbsUp />
             <span>{comment.likes.length}</span>
@@ -258,9 +248,8 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
             >
               {showReplies
                 ? "Hide Replies"
-                : `Show ${comment.replies.length} ${
-                    comment.replies.length === 1 ? "Reply" : "Replies"
-                  }`}
+                : `Show ${comment.replies.length} ${comment.replies.length === 1 ? "Reply" : "Replies"
+                }`}
             </button>
           </div>
         )}

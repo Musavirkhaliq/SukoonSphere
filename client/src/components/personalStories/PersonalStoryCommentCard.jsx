@@ -10,12 +10,13 @@ import {
   FaTrash,
   FaSpinner,
   FaUserSecret,
-  FaPaperPlane
 } from "react-icons/fa";
 import UserAvatar from "../shared/UserAvatar";
 import customFetch from "@/utils/customFetch";
+import PersonalStoryCommentReply from "./PersonalStoryCommentReply";
+import PostActions from "../shared/PostActions";
 
-const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
+const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
   const { user } = useUser();
   const [showReplies, setShowReplies] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -56,7 +57,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
     }
     try {
       await customFetch.patch(`/personal-stories/comments/${comment._id}/like`);
-      onCommentUpdate();
+      refetch();
     } catch (error) {
       toast.error("Failed to like comment");
     }
@@ -94,7 +95,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
         content: editContent,
       });
       setIsEditing(false);
-      onCommentUpdate();
+      refetch();
       toast.success("Comment updated successfully!");
     } catch (error) {
       toast.error(error.response?.data?.msg || "Failed to update comment");
@@ -123,7 +124,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
 
     try {
       await customFetch.delete(`/personal-stories/comments/${comment._id}`);
-      onCommentUpdate();
+      refetch();
       toast.success("Comment deleted successfully!");
     } catch (error) {
       toast.error(error.response?.data?.msg || "Failed to delete comment");
@@ -152,7 +153,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
       setIsAnonymous(false);
       setShowReplyForm(false);
       fetchReplies();
-      onCommentUpdate();
+      refetch();
       toast.success("Reply added successfully!");
     } catch (error) {
       console.error("Error submitting reply:", error);
@@ -162,40 +163,8 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
     }
   };
 
-  // Handle like reply
-  const handleLikeReply = async (replyId) => {
-    if (!user) {
-      toast.error("Please login to like replies!");
-      return;
-    }
-    try {
-      await customFetch.patch(`/personal-stories/replies/${replyId}/like`);
-      fetchReplies();
-    } catch (error) {
-      toast.error("Failed to like reply");
-    }
-  };
 
-  // Handle delete reply
-  const handleDeleteReply = async (replyId) => {
-    if (!user) {
-      toast.error("Please login to delete replies!");
-      return;
-    }
 
-    if (!window.confirm("Are you sure you want to delete this reply?")) {
-      return;
-    }
-
-    try {
-      await customFetch.delete(`/personal-stories/replies/${replyId}`);
-      fetchReplies();
-      onCommentUpdate();
-      toast.success("Reply deleted successfully!");
-    } catch (error) {
-      toast.error(error.response?.data?.msg || "Failed to delete reply");
-    }
-  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-4">
@@ -210,20 +179,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
         />
 
         {user && (user._id === comment.createdBy || (comment.isAnonymous && user._id === comment.realCreator)) && (
-          <div className="flex gap-2">
-            <button
-              onClick={handleEdit}
-              className="text-blue-600 hover:text-blue-800"
-            >
-              <FaEdit />
-            </button>
-            <button
-              onClick={handleDelete}
-              className="text-red-600 hover:text-red-800"
-            >
-              <FaTrash />
-            </button>
-          </div>
+          <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
         )}
       </div>
 
@@ -238,13 +194,13 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
           <div className="flex justify-end gap-2 mt-2">
             <button
               onClick={() => setIsEditing(false)}
-              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+              className="btn-red !py-2"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmitEdit}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="btn-2 !py-2"
             >
               Update
             </button>
@@ -298,11 +254,6 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
         <div className="mt-3 pl-8 border-l-2 border-gray-200">
           <form onSubmit={handleSubmitReply}>
             <div className="flex gap-2 mb-2">
-              {/* <UserAvatar
-                username={user?.name || "Guest"}
-                userAvatar={user?.avatar}
-                size="verySmall"
-              /> */}
               <div className="flex-1">
                 <textarea
                   value={replyContent}
@@ -360,51 +311,14 @@ const PersonalStoryCommentCard = ({ comment, storyId, onCommentUpdate }) => {
             <div className="flex justify-center py-2">
               <FaSpinner className="animate-spin text-blue-500" />
             </div>
-          ) : replies.length > 0 ? (
+          ) : replies.length > 0 && !isLoadingReplies ? (
             replies.map((reply) => (
-              <div key={reply._id} className="bg-gray-50 p-3 rounded">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-2">
-                    <UserAvatar
-                      username={reply.username}
-                      userAvatar={reply.userAvatar}
-                      createdBy={reply.createdBy}
-                      createdAt={reply.createdAt}
-                      size="verySmall"
-                    />
-                    {reply.replyToUsername && reply.replyToUsername !== comment.username && (
-                      <span className="text-xs text-gray-500">
-                        replying to <span className="font-medium">{reply.replyToUsername}</span>
-                      </span>
-                    )}
-                  </div>
-
-                  {user && (user._id === reply.createdBy || (reply.isAnonymous && user._id === reply.realCreator)) && (
-                    <button
-                      onClick={() => handleDeleteReply(reply._id)}
-                      className="text-red-600 hover:text-red-800 text-xs"
-                    >
-                      <FaTrash size={12} />
-                    </button>
-                  )}
-                </div>
-
-                <p className="text-gray-800 text-sm mt-1">{reply.content}</p>
-
-                <div className="flex items-center gap-3 mt-2">
-                  <button
-                    onClick={() => handleLikeReply(reply._id)}
-                    className="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors"
-                  >
-                    {reply.likes?.includes(user?._id) ? (
-                      <FaHeart className="text-red-500" size={12} />
-                    ) : (
-                      <FaRegHeart size={12} />
-                    )}
-                    <span className="text-xs">{reply.totalLikes || 0}</span>
-                  </button>
-                </div>
-              </div>
+              <PersonalStoryCommentReply
+                key={reply._id}
+                reply={reply}
+                commentId={comment._id}
+                onReplyUpdate={fetchReplies}
+              />
             ))
           ) : (
             <p className="text-sm text-gray-500 py-2">No replies yet</p>
