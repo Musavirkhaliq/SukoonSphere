@@ -155,7 +155,7 @@ const PersonalStoryComments = ({ storyId }) => {
                 <PersonalStoryCommentCard
                   comment={comment}
                   storyId={storyId}
-                  onCommentUpdate={refetch}
+                  refetch={refetch}
                 />
               </div>
             ))}

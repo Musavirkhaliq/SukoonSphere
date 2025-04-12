@@ -62,7 +62,7 @@ export const createPersonalStoryComment = async (req, res) => {
         userId: story.author,
         createdBy: userId,
         storyId: storyId,
-        type: 'comment',
+        type: 'personalStoryComment',
         message: `${req.user.username} commented on your personal story`,
       });
       await notification.save();
@@ -268,7 +268,7 @@ export const createPersonalStoryReply = async (req, res) => {
         createdBy: userId,
         storyId: comment.storyId,
         commentId: commentId,
-        type: 'storyCommentReply',
+        type: 'personalStoryCommentReply',
         message: `${req.user.username} replied to your comment`,
       });
       await notification.save();
@@ -311,7 +311,7 @@ export const getAllRepliesByCommentId = async (req, res) => {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
-          as: "userDetails",
+          as: "createdByDetails",
         },
       },
       {
@@ -324,21 +324,16 @@ export const getAllRepliesByCommentId = async (req, res) => {
       },
       {
         $addFields: {
-          username: {
-            $cond: [
-              "$isAnonymous",
-              "Anonymous",
-              { $arrayElemAt: ["$userDetails.name", 0] }
-            ]
+          createdBy: {
+            _id: { $arrayElemAt: ["$createdByDetails._id", 0] },
+            name: { $arrayElemAt: ["$createdByDetails.name", 0] },
+            avatar: { $arrayElemAt: ["$createdByDetails.avatar", 0] },
           },
-          userAvatar: {
-            $cond: [
-              "$isAnonymous",
-              null,
-              { $arrayElemAt: ["$userDetails.avatar", 0] }
-            ]
+          replyTo: {
+            _id: { $arrayElemAt: ["$replyToDetails._id", 0] },
+            name: { $arrayElemAt: ["$replyToDetails.name", 0] },
+            avatar: { $arrayElemAt: ["$replyToDetails.avatar", 0] },
           },
-          replyToUsername: { $arrayElemAt: ["$replyToDetails.name", 0] },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
         },
       },
@@ -347,7 +342,7 @@ export const getAllRepliesByCommentId = async (req, res) => {
       { $limit: limit },
       {
         $project: {
-          userDetails: 0,
+          createdByDetails: 0,
           replyToDetails: 0,
         },
       },
@@ -398,7 +393,7 @@ export const deletePersonalStoryComment = async (req, res) => {
       userId: comment.storyUserId,
       createdBy: userId,
       storyId: comment.storyId,
-      type: 'storyComment',
+      type: 'personalStoryComment',
     });
 
     if (notification) {
@@ -445,7 +440,7 @@ export const deletePersonalStoryReply = async (req, res) => {
         userId: comment.createdBy,
         createdBy: userId,
         commentId: reply.commentId,
-        type: 'storyCommentReply',
+        type: 'personalStoryCommentReply',
       });
 
       if (notification) {
@@ -490,7 +485,7 @@ export const likePersonalStoryComment = async (req, res) => {
           createdBy: userId,
           storyId: comment.storyId,
           commentId: commentId,
-          type: 'storyCommentLike',
+          type: 'personalStoryCommentLiked',
           message: `${req.user.username} liked your comment`,
         });
         await notification.save();
@@ -544,7 +539,7 @@ export const likePersonalStoryReply = async (req, res) => {
           userId: reply.createdBy,
           createdBy: userId,
           commentId: reply.commentId,
-          type: 'storyReplyLike',
+          type: 'personalStoryCommentReplyLiked',
           message: `${req.user.username} liked your reply`,
         });
         await notification.save();

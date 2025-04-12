@@ -58,9 +58,13 @@ const postNotificationSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: ['like', 'comment', 'reply', 'commentLiked', 'replyLiked',
-       "answered", "answerLiked","answerCommentLiked","answerCommentReplyLiked","answerComment" ,"answerReply",
-       "articleLiked", "articleCommentLiked", "articleCommentReplyLiked","articleComment","articleReply",
-       "follow","unfollow" , "requestChat", "roomInvitation", "roomJoinRequest", "roomJoinRequestApproved", "roomJoinRequestRejected"
+        "answered", "answerLiked", "answerCommentLiked", "answerCommentReplyLiked", "answerComment", "answerReply",
+        "articleLiked", "articleCommentLiked", "articleCommentReplyLiked", "articleComment", "articleReply",
+        "follow", "unfollow", "requestChat", "roomInvitation", "roomJoinRequest", "roomJoinRequestApproved", "roomJoinRequestRejected",
+        'personalStoryComment',
+        'personalStoryCommentReply',
+        'personalStoryCommentLiked',
+        'personalStoryCommentReplyLiked'
       ],
       required: true,
     },
