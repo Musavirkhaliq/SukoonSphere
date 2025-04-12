@@ -79,6 +79,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
       setIsFollowing(user.followers.includes(currentUser._id));
     }
   }, [user?.followers, currentUser?._id]);
+  console.log({ user });
 
   return (
     <div className=" mx-auto bg-white rounded-lg shadow-sm p-6">
@@ -89,7 +90,7 @@ const ProfileCard = ({ user, fetchUserById }) => {
             <img
               src={
                 user?.avatar ||
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || "Anonymous")}`
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "Anonymous")}`
               }
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover ring-2 ring-gray-100"

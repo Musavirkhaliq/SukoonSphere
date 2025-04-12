@@ -211,10 +211,13 @@ const AllQuestionAnswers = () => {
         )}
       </div>
 
-      <AnswerFilter
-        activeFilter={activeFilter}
-        onFilterChange={handleFilterChange}
-      />
+      {allAnswers.length > 0 && (
+        <AnswerFilter
+          activeFilter={activeFilter}
+          onFilterChange={handleFilterChange}
+        />
+
+      )}
 
       {/* Answers List */}
       <div className="space-y-4">

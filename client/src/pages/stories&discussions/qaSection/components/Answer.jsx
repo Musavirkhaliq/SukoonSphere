@@ -1,30 +1,23 @@
+import AnswerActions from "@/components/qa/AnswerActions";
 import AnswerCommentModal from "@/components/qa/AnswerCommentModal";
-import AnswersCommentSlide from "@/components/qa/AnswersCommentSlide";
 import DeleteModal from "@/components/shared/DeleteModal";
-import PostActions from "@/components/shared/PostActions";
 import UserAvatar from "@/components/shared/UserAvatar";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
 import { useState, useEffect } from "react";
-import { FaRegComment, FaRegHeart } from "react-icons/fa";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, preview }) => {
   const navigate = useNavigate();
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [showAnswerDeleteModal, setShowAnswerDeleteModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [isLiked, setIsLiked] = useState(
-    initialAnswer.likes?.includes(user?._id)
-  );
-  const [likeCount, setLikeCount] = useState(initialAnswer.totalLikes || 0);
-  const [answer, setAnswer] = useState(initialAnswer);
-  const [editedContext, setEditedContext] = useState(answer.context);
   const [isEditing, setIsEditing] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(!!mostLikedAnswer); // Auto-expand the most liked answer
+  const [isExpanded, setIsExpanded] = useState(!!mostLikedAnswer);
   const [shouldTruncate, setShouldTruncate] = useState(false);
+  const [answer, setAnswer] = useState(initialAnswer);
+  const [editedContext, setEditedContext] = useState(initialAnswer.context);
 
   // Use a shorter character limit for preview mode
   const MAX_CHARS = preview ? 150 : 300;
@@ -40,25 +33,11 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
     try {
       await customFetch.delete(`/qa-section/question/answer/${answer._id}`);
       setShowAnswerDeleteModal(false);
-
       toast.success("Answer deleted successfully");
       answerCount === 1 ? navigate("/qa-section") : window.location.reload();
     } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleLikeAnswer = async () => {
-    if (!user) {
-      toast.error("Please login to like an answer");
-      return;
-    }
-    try {
-      await customFetch.patch(`/qa-section/question/answer/${answer._id}/like`);
-      setIsLiked((prev) => !prev);
-      setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
-    } catch (error) {
-      console.log(error);
+      console.error("Error deleting answer:", error);
+      toast.error("Failed to delete answer");
     }
   };
 
@@ -79,36 +58,53 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
     }
 
     try {
-      const response = await customFetch.patch(
-        `/qa-section/answer/${answer._id}`,
-        { context: editedContext }
-      );
+      const response = await customFetch.patch(`/qa-section/answer/${answer._id}`, {
+        context: editedContext,
+      });
       setAnswer(response.data.answer);
       setIsEditing(false);
       toast.success("Answer updated successfully");
     } catch (error) {
-      console.log(error);
+      console.error("Error updating answer:", error);
       toast.error(error.response?.data?.msg || "Failed to update answer");
     }
   };
 
+  const handleLikeUpdate = (newIsLiked, newLikesCount) => {
+    setAnswer((prev) => ({
+      ...prev,
+      likes: newIsLiked
+        ? [...(prev.likes || []), user?.id]
+        : (prev.likes || []).filter((id) => id !== user?.id),
+      totalLikes: newLikesCount,
+    }));
+  };
+  console.log({ answer });
+
   return (
-    <div className={`mt-2 ${preview ? 'p-3' : 'p-4'} bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 ${preview ? 'border-gray-50' : ''}`}>
+    <div
+      className={`mt-2 ${preview ? "p-3" : "p-4"} bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 ${preview ? "border-gray-50" : ""
+        }`}
+    >
       <div className="flex items-center justify-between mb-2">
         <UserAvatar
           createdBy={answer?.author?.userId}
           username={answer?.author?.username}
           userAvatar={answer?.author?.userAvatar}
           createdAt={answer?.createdAt}
-          compact={preview} // Use compact avatar for preview mode
+        // compact={preview}
         />
-        {!preview && user && answer.author?.userId === user?._id && (
-          <PostActions
+        {user?.id && String(user.id) === String(answer?.author?.userId) && (
+          <AnswerActions
+            answerId={answer._id}
             handleEdit={handleEdit}
             handleDelete={() => setShowAnswerDeleteModal(true)}
+            isEditDeleteOnly={true}
+            preview={preview}
           />
         )}
       </div>
+
       <div className="prose max-w-none mb-2">
         {isEditing ? (
           <div className="space-y-3">
@@ -133,7 +129,10 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
           </div>
         ) : (
           <div>
-            <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">
+            <p
+              className={`text-base mb-2 leading-relaxed text-[var(--grey--800)] ${preview ? "text-sm" : ""
+                }`}
+            >
               {shouldTruncate && !isExpanded
                 ? `${answer.context.substring(0, MAX_CHARS)}...`
                 : answer.context}
@@ -142,16 +141,17 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
             {shouldTruncate && (
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors mt-1"
+                className={`flex items-center gap-1 text-blue-600 hover:text-blue-800 ${preview ? "text-xs" : "text-sm"
+                  } font-medium transition-colors mt-1`}
               >
                 {isExpanded ? (
                   <>
-                    <FiChevronUp className="w-4 h-4" />
+                    <FiChevronUp className={preview ? "w-3 h-3" : "w-4 h-4"} />
                     Show less
                   </>
                 ) : (
                   <>
-                    <FiChevronDown className="w-4 h-4" />
+                    <FiChevronDown className={preview ? "w-3 h-3" : "w-4 h-4"} />
                     Read more
                   </>
                 )}
@@ -160,32 +160,29 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
           </div>
         )}
       </div>
-      {/* Show interaction buttons in a more compact way for preview mode */}
-      <div className="flex items-center gap-4 text-gray-500">
-        <button
-          className={`flex items-center gap-1 ${isLiked ? "text-red-500" : ""
-            } hover:text-red-500 transition-colors ${preview ? 'text-sm' : ''}`}
-          onClick={handleLikeAnswer}
-        >
-          <FaRegHeart className={`${isLiked ? "fill-current" : ""} ${preview ? 'w-3 h-3' : ''}`} />
-          <span>{likeCount}</span>
-        </button>
-        <div
-          onClick={() => setShowCommentModal(true)}
-          className={`flex items-center ${preview ? 'gap-1 text-sm' : 'gap-2'} hover:text-blue-500 transition-colors cursor-pointer`}
-        >
-          <FaRegComment className={preview ? 'w-3 h-3' : ''} />
-          <span>{answer.totalComments}</span>
+
+      {/* Interaction Actions */}
+      {!isEditing && (
+        <AnswerActions
+          answerId={answer._id}
+          initialLikesCount={answer.totalLikes || 0}
+          isInitiallyLiked={answer.likes?.includes(user?._id)}
+          totalComments={answer.totalComments || 0}
+          onCommentClick={() => setShowCommentModal(true)}
+          preview={preview}
+          isEditDeleteOnly={false}
+          onLikeUpdate={handleLikeUpdate}
+        />
+      )}
+
+      {answer.editedAt && !preview && !isEditing && (
+        <div className="text-xs text-gray-400 text-right mt-2">
+          edited{" "}
+          {formatDistanceToNow(new Date(answer.editedAt), {
+            addSuffix: true,
+          })}
         </div>
-        {answer.editedAt && !preview && (
-          <span className="text-xs text-gray-400 ml-auto">
-            edited{" "}
-            {formatDistanceToNow(new Date(answer.editedAt), {
-              addSuffix: true,
-            })}
-          </span>
-        )}
-      </div>
+      )}
 
       {showCommentModal && (
         <AnswerCommentModal

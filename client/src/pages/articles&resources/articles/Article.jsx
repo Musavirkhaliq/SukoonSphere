@@ -129,7 +129,6 @@ const Article = () => {
     const currentUser = JSON.parse(localStorage.getItem("user"));
     if (!currentUser) {
       toast.info("Please login to like this article");
-      navigate("/auth/sign-up");
       return;
     }
 
@@ -567,11 +566,10 @@ const Article = () => {
                         {/* Female Voice Button */}
                         <button
                           onClick={() => setVoiceGender("female")}
-                          className={`flex items-center justify-center rounded-full w-8 h-8 transition-all duration-300 ${
-                            voiceGender === "female"
-                              ? "bg-pink-500 text-white scale-110"
-                              : "text-pink-500 hover:bg-pink-50"
-                          }`}
+                          className={`flex items-center justify-center rounded-full w-8 h-8 transition-all duration-300 ${voiceGender === "female"
+                            ? "bg-pink-500 text-white scale-110"
+                            : "text-pink-500 hover:bg-pink-50"
+                            }`}
                           title="Female Voice"
                         >
                           <FaFemale
@@ -581,11 +579,10 @@ const Article = () => {
                         {/* Male Voice Button */}
                         <button
                           onClick={() => setVoiceGender("male")}
-                          className={`flex items-center justify-center rounded-full w-8 h-8 transition-all duration-300 ${
-                            voiceGender === "male"
-                              ? "bg-blue-500 text-white scale-110"
-                              : "text-blue-500 hover:bg-blue-50"
-                          }`}
+                          className={`flex items-center justify-center rounded-full w-8 h-8 transition-all duration-300 ${voiceGender === "male"
+                            ? "bg-blue-500 text-white scale-110"
+                            : "text-blue-500 hover:bg-blue-50"
+                            }`}
                           title="Male Voice"
                         >
                           <FaMale
@@ -599,11 +596,10 @@ const Article = () => {
                       {/* Play/Stop Button */}
                       <button
                         onClick={handleTextToSpeech}
-                        className={`flex items-center justify-center space-x-2 px-4 py-1.5 rounded-full transition-all duration-300 ${
-                          isPlaying
-                            ? "bg-red-500 text-white hover:bg-red-600"
-                            : "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
-                        }`}
+                        className={`flex items-center justify-center space-x-2 px-4 py-1.5 rounded-full transition-all duration-300 ${isPlaying
+                          ? "bg-red-500 text-white hover:bg-red-600"
+                          : "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
+                          }`}
                         title={isPlaying ? "Stop Reading" : "Start Reading"}
                       >
                         <div className="flex items-center gap-2">

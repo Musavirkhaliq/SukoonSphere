@@ -62,7 +62,7 @@ export const createPersonalStoryComment = async (req, res) => {
         userId: story.author,
         createdBy: userId,
         storyId: storyId,
-        type: 'storyComment',
+        type: 'comment',
         message: `${req.user.username} commented on your personal story`,
       });
       await notification.save();

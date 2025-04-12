@@ -10,12 +10,9 @@ const Posts = () => {
 
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto px-2 sm:px-4 py-4">
+    <div className="relative w-full max-w-7xl mx-auto px-2 sm:px-4 py-2">
       <div className="grid grid-cols-12 gap-2">
-        {/* Mobile Groups - Visible on small screens */}
-        <div className="lg:hidden col-span-full mb-4 order-0">
-          <MobileGroupIcons />
-        </div>
+
         {/* Left Sidebar - Groups */}
         <div className="hidden lg:block lg:col-span-3">
           <div className="sticky top-20">
@@ -25,14 +22,13 @@ const Posts = () => {
 
         {/* Main Content */}
         <div className="col-span-12 lg:col-span-6 space-y-4 order-2 lg:order-0">
-          {/* Add Post Card */}
           <div >
             <Outlet />
           </div>
         </div>
 
         {/* Mobile User Search - Visible on small screens */}
-        <div className="lg:hidden col-span-full mb-4 order-1 lg:order-1">
+        <div className="lg:hidden col-span-full  order-0 lg:order-1">
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <div className="mb-2">
               <h3 className="text-lg font-semibold mb-2 flex items-center">
@@ -42,6 +38,10 @@ const Posts = () => {
               <UserSearchBar isMobile={true} />
             </div>
           </div>
+        </div>
+        {/* Mobile Groups - Visible on small screens */}
+        <div className="lg:hidden col-span-full mb-2 order-0">
+          <MobileGroupIcons />
         </div>
 
         {/* Right Sidebar - User Search (Desktop) */}

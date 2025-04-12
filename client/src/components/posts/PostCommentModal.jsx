@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { FaTimes, FaRegHeart, FaHeart, FaRegComment, FaShare } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import PostComments from "./PostComments";
 import customFetch from "@/utils/customFetch";
 import UserAvatar from "../shared/UserAvatar";
 import { formatDistanceToNow } from "date-fns";
 import { useUser } from "@/context/UserContext";
-import { toast } from "react-toastify";
+import PostActions from "./PostActions";
 
 const PostCommentModal = ({ isOpen, onClose, postId }) => {
   const { user } = useUser();
@@ -13,26 +13,6 @@ const PostCommentModal = ({ isOpen, onClose, postId }) => {
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
-  const [isLikeLoading, setIsLikeLoading] = useState(false);
-
-  const handleLike = async () => {
-    if (!user) {
-      toast.error("Please login to like this post!");
-      return;
-    }
-
-    try {
-      setIsLikeLoading(true);
-      await customFetch.patch(`/posts/${postId}/like`);
-      setIsLiked(!isLiked);
-      setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
-    } catch (error) {
-      console.error("Error liking post:", error);
-      toast.error("Failed to like post");
-    } finally {
-      setIsLikeLoading(false);
-    }
-  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -130,35 +110,20 @@ const PostCommentModal = ({ isOpen, onClose, postId }) => {
                     </div>
                   )}
 
-                  {/* Post Reactions */}
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={handleLike}
-                        disabled={isLikeLoading}
-                        className={`flex items-center gap-1 ${isLiked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500 transition-colors`}
-                      >
-                        {isLiked ? <FaHeart className="text-red-500" /> : <FaRegHeart />}
-                        <span>{likesCount}</span>
-                      </button>
+                  {/* Post Actions */}
+                  <PostActions
+                    postId={postId}
+                    initialLikesCount={likesCount}
+                    isInitiallyLiked={isLiked}
+                    totalComments={post.totalComments}
+                  />
 
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <FaRegComment />
-                        <span>{post.totalComments || 0}</span>
-                      </div>
-
-                      <button className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors">
-                        <FaShare />
-                        <span>Share</span>
-                      </button>
+                  {/* Edited Timestamp */}
+                  {post.editedAt && (
+                    <div className="mt-2 text-xs text-gray-400 text-right">
+                      edited {formatDistanceToNow(new Date(post.editedAt), { addSuffix: true })}
                     </div>
-
-                    {post.editedAt && (
-                      <span className="text-xs text-gray-400">
-                        edited {formatDistanceToNow(new Date(post.editedAt), { addSuffix: true })}
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
               )}
 

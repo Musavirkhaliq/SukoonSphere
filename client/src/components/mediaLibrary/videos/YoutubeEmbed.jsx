@@ -143,7 +143,7 @@ const YoutubeEmbed = ({ embedId, onProgress, onReady, onStateChange }) => {
     };
 
     return (
-        <div className="video-responsive">
+        <div className="video-responsive" >
             <iframe
                 ref={iframeRef}
                 width="853"

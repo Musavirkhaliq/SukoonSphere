@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { useSearchParams } from "react-router-dom";
 import customFetch from "@/utils/customFetch";
@@ -12,7 +12,68 @@ import { toast } from "react-toastify";
 import { Outlet } from "react-router-dom";
 import PersonalStoryCard from "@/components/personalStories/PersonalStoryCard";
 import CreateStoryModal from "@/components/personalStories/CreateStoryModal";
-import { SearchAndFilterBar } from "@/components";
+import { BsSearch, BsX } from "react-icons/bs";
+
+// Sample SearchAndFilterBar Component
+const SearchAndFilterBar = ({
+  searchValue,
+  onSearchChange,
+  onSearchSubmit,
+  onClearSearch,
+  filterOptions,
+  currentFilter,
+  onFilterChange,
+  placeholder,
+}) => {
+  return (
+    <div className="flex flex-col md:flex-row gap-2 mb-8 bg-white p-2 rounded-lg">
+      {/* Search Form */}
+      <form onSubmit={onSearchSubmit} className="flex-1">
+        <div className="flex items-center border rounded-lg overflow-hidden">
+          <input
+            type="text"
+            value={searchValue}
+            onChange={onSearchChange}
+            placeholder={placeholder}
+            className="w-full bg-[var(--white-color)] p-2  outline-none focus:outline-none focus:ring-[var(--primary)] focus:border-transparent"
+          />
+          {searchValue && (
+            <button
+              type="button"
+              onClick={onClearSearch}
+              className="px-2 text-gray-500 hover:text-gray-700"
+            >
+              <BsX className="w-4 h-4" />
+            </button>
+          )}
+          <button
+            type="submit"
+            className="p-3 rounded-md text-white bg-[var(--primary)]"
+          >
+            <BsSearch />
+          </button>
+        </div>
+      </form>
+
+      {/* Filter Buttons */}
+      <div className="flex  gap-2 md:flex-nowrap ">
+        {filterOptions.map((option) => (
+          <button
+            key={option.value}
+            onClick={() => onFilterChange(option.value)}
+            className={`flex items-center gap-2 p-1 md:px-4 md:py-2 rounded-lg ${currentFilter === option.value
+              ? "bg-[var(--primary)] text-white"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              } md:w-auto w-full`}
+          >
+            {option.icon}
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const PersonalStories = () => {
   const { user } = useUser();
@@ -22,6 +83,7 @@ const PersonalStories = () => {
   const [searchInput, setSearchInput] = useState(searchQuery);
   const [showModal, setShowModal] = useState(false);
   const { ref, inView } = useInView();
+  const queryClient = useQueryClient(); // For cache invalidation
 
   // Filter options
   const filterOptions = [
@@ -49,26 +111,29 @@ const PersonalStories = () => {
 
   // Handle filter change
   const handleFilterChange = (value) => {
+    console.log("Changing filter to:", value);
     setSearchParams({
       ...(searchQuery && { search: searchQuery }),
-      filter: value
+      filter: value,
     });
   };
 
   // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
+    console.log("Searching for:", searchInput);
     setSearchParams({
       ...(currentFilter !== "newest" && { filter: currentFilter }),
-      ...(searchInput && { search: searchInput })
+      ...(searchInput && { search: searchInput }),
     });
   };
 
   // Clear search
   const clearSearch = () => {
+    console.log("Clearing search");
     setSearchInput("");
     setSearchParams({
-      ...(currentFilter !== "newest" && { filter: currentFilter })
+      ...(currentFilter !== "newest" && { filter: currentFilter }),
     });
   };
 
@@ -78,8 +143,8 @@ const PersonalStories = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isLoading,
     status,
-    refetch,
   } = useInfiniteQuery({
     queryKey: ["personalStories", currentFilter, searchQuery],
     queryFn: async ({ pageParam = 1 }) => {
@@ -89,7 +154,9 @@ const PersonalStories = () => {
         sortBy: currentFilter,
         ...(searchQuery && { search: searchQuery }),
       });
+      console.log("Fetching stories with URL:", `personal-stories?${params}`);
       const response = await customFetch.get(`personal-stories?${params}`);
+      console.log("API Response:", response.data);
       return response.data;
     },
     getNextPageParam: (lastPage) => {
@@ -99,17 +166,20 @@ const PersonalStories = () => {
     },
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    cacheTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000, // 1 minute
+    cacheTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Reset infinite query when filter changes
+  // Invalidate queries when filter or search changes
   useEffect(() => {
-    refetch();
-  }, [currentFilter, refetch]);
+    console.log("Invalidating queries for filter:", currentFilter, "search:", searchQuery);
+    queryClient.invalidateQueries(["personalStories", currentFilter, searchQuery]);
+  }, [currentFilter, searchQuery, queryClient]);
 
   // Fetch next page when last element is in view
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
+      console.log("Fetching next page");
       fetchNextPage();
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
@@ -128,10 +198,11 @@ const PersonalStories = () => {
   const featuredStory = featuredData?.stories?.[0];
   const allStories = data?.pages.flatMap((page) => page.stories) || [];
 
-  // Filter out the featured story from the grid if it exists
-  const filteredStories = featuredStory && currentFilter === "newest" && !searchQuery
-    ? allStories.filter(story => story._id !== featuredStory._id)
-    : allStories;
+  // Filter out the featured story from the grid if it exists (only for newest, no search)
+  const filteredStories =
+    featuredStory && currentFilter === "newest" && !searchQuery
+      ? allStories.filter((story) => story._id !== featuredStory._id)
+      : allStories;
 
   // Animation variants
   const containerVariants = {
@@ -139,9 +210,9 @@ const PersonalStories = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
@@ -149,8 +220,8 @@ const PersonalStories = () => {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.5 }
-    }
+      transition: { duration: 0.5 },
+    },
   };
 
   return (
@@ -205,7 +276,7 @@ const PersonalStories = () => {
       )}
 
       {/* Story grid */}
-      {status === "loading" && !allStories.length ? (
+      {isLoading && !allStories.length ? (
         <div className="flex justify-center items-center py-12">
           <FaSpinner className="w-8 h-8 text-blue-500 animate-spin" />
         </div>
@@ -229,12 +300,12 @@ const PersonalStories = () => {
             {searchQuery
               ? `Search Results for "${searchQuery}"`
               : currentFilter === "popular"
-              ? "Popular Stories"
-              : currentFilter === "oldest"
-              ? "Oldest Stories"
-              : currentFilter === "title"
-              ? "Stories A-Z"
-              : "Recent Stories"}
+                ? "Popular Stories"
+                : currentFilter === "oldest"
+                  ? "Oldest Stories"
+                  : currentFilter === "title"
+                    ? "Stories A-Z"
+                    : "Recent Stories"}
           </h2>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -261,7 +332,9 @@ const PersonalStories = () => {
       {showModal && (
         <CreateStoryModal
           onClose={() => setShowModal(false)}
-          onStoryCreated={() => refetch()}
+          onStoryCreated={() => {
+            queryClient.invalidateQueries(["personalStories"]);
+          }}
         />
       )}
 

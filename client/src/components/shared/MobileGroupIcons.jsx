@@ -51,7 +51,7 @@ const MobileGroupIcons = () => {
   // Handle joining a group
   const handleJoinGroup = async (groupId, e) => {
     e.stopPropagation(); // Prevent navigation when clicking the join button
-    
+
     if (!user) {
       toast.error('Please login to join a group');
       return;
@@ -111,9 +111,24 @@ const MobileGroupIcons = () => {
           <FaUsers className="mr-1 text-[var(--primary)]" />
           Rooms
         </h3>
-        <Link to="/chats" className="text-xs text-blue-600 hover:text-blue-800 font-medium">
-          All
-        </Link>
+        {!user ? (
+          <button
+            type="button"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            onClick={() => {
+              if (!user) {
+                toast.error('Please login to join a group');
+                return;
+              }
+            }}
+          >
+            View All
+          </button>
+        ) : (
+          <Link to="/chats" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            View All
+          </Link>
+        )}
       </div>
 
       {isLoading ? (
@@ -124,8 +139,8 @@ const MobileGroupIcons = () => {
         <div className="flex overflow-x-auto pb-2 gap-3 scrollbar-hide">
           {publicGroups.length > 0 ? (
             publicGroups.map((group) => (
-              <Link 
-                to={`/chats?room=${group._id}`} 
+              <Link
+                to={`/chats?room=${group._id}`}
                 key={group._id}
                 className="flex-shrink-0 group"
               >
@@ -140,16 +155,15 @@ const MobileGroupIcons = () => {
                         </span>
                       )}
                     </div>
-                    
+
                     {/* Join button overlay */}
                     <button
                       onClick={(e) => handleJoinGroup(group._id, e)}
                       disabled={joiningGroup === group._id || pendingJoinRequests.includes(group._id)}
-                      className={`absolute -bottom-1 -right-1 p-1.5 rounded-full ${
-                        pendingJoinRequests.includes(group._id)
+                      className={`absolute -bottom-1 -right-1 p-1.5 rounded-full ${pendingJoinRequests.includes(group._id)
                           ? 'bg-green-500 text-white'
                           : 'bg-blue-500 text-white'
-                      } shadow-md transition-colors`}
+                        } shadow-md transition-colors`}
                       title={pendingJoinRequests.includes(group._id) ? 'Join request pending' : 'Join group'}
                     >
                       {joiningGroup === group._id ? (

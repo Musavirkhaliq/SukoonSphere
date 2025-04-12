@@ -10,6 +10,7 @@ const CreateStoryModal = ({ onClose, onStoryCreated }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const editorRef = useRef(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -77,8 +78,6 @@ const CreateStoryModal = ({ onClose, onStoryCreated }) => {
     }
   };
 
-
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-10 px-4 py-6 overflow-y-auto">
       <div className="bg-[var(--body)] rounded-2xl p-4 md:p-6 w-full max-w-3xl shadow-2xl transform transition-all duration-300 max-h-[90vh] overflow-y-auto">
@@ -115,21 +114,61 @@ const CreateStoryModal = ({ onClose, onStoryCreated }) => {
             />
           </div>
 
-          <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-[var(--grey--700)] mb-2">
               Content
             </label>
-            <div className="min-h-[200px]">
+            <div className="h-auto">
               <JoditEditor
+                ref={editorRef}
                 value={content}
-                onChange={newContent => setContent(newContent)}
                 config={{
                   readonly: false,
                   placeholder: "Share your personal experience or story...",
                   height: "auto",
                   minHeight: "300px",
                   maxHeight: "auto",
+                  toolbarButtonSize: "medium",
+                  showXPathInStatusbar: false,
+                  showCharsCounter: false,
+                  showWordsCounter: false,
+                  showTooltip: true,
+                  showStatusbar: true,
+                  buttons: [
+                    'bold',
+                    'italic',
+                    'underline',
+                    'strikethrough',
+                    'ul',
+                    'ol',
+                    'outdent',
+                    'indent',
+                    'align',
+                    'image',
+                    'link',
+                    'video',
+                    'table',
+                    'hr',
+                    'eraser',
+                    'undo',
+                    'redo'
+                  ],
+                  imageUploadURL: '/api/upload/image',
+                  imageUploadMethod: 'POST',
+                  imageUploadFieldName: 'image',
+                  imageUploadUseFormData: true,
+                  imageUploadHeaders: {
+                    'X-CSRF-TOKEN': 'your-csrf-token-here'
+                  },
+                  imageUpload: true,
+                  imageDefaultWidth: 100,
+                  imageDefaultHeight: 100,
+                  imageEditor: true,
+                  imageEditorInsertToEditor: true,
+                  removeButtons: ['brush', 'eraser', 'about', 'print', 'fullsize', 'fontsize', 'fontfamily', 'fontcolor', 'backgroundcolor', 'superscript', 'subscript', 'underline', 'strikethrough', 'outdent', 'indent', 'align', 'image', 'link', 'video', 'table', 'hr', 'eraser', 'undo', 'redo']
                 }}
+                tabIndex={1}
+                onBlur={(newContent) => setContent(newContent)}
               />
             </div>
           </div>

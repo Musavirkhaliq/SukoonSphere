@@ -3,25 +3,19 @@ import { FaTimes } from "react-icons/fa";
 import PersonalStoryComments from "./PersonalStoryComments";
 
 const PersonalStoryCommentPopup = ({ isOpen, onClose, storyId }) => {
+  if (!isOpen) return null;
+
   return (
     <>
-      {/* Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 z-[70] transition-opacity duration-300 custom-scrollbar ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className="fixed inset-0 bg-black/70 z-[90] transition-opacity duration-300 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Slide-out panel */}
-      <div
-        className={`fixed top-0 left-0 w-full sm:w-[450px] h-screen bg-white z-[80] transform transition-transform duration-300 ease-in-out custom-scrollbar ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="h-full flex flex-col">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all duration-300 animate-modalFadeIn">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-4 border-b bg-white z-10 rounded-t-xl">
             <h2 className="text-xl font-bold text-gray-900">Comments</h2>
             <button
               onClick={onClose}
@@ -32,11 +26,9 @@ const PersonalStoryCommentPopup = ({ isOpen, onClose, storyId }) => {
             </button>
           </div>
 
-          {/* Comments content */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <div className="px-4">
-              <PersonalStoryComments storyId={storyId} />
-            </div>
+          {/* Scrollable Comments Section */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-white">
+            <PersonalStoryComments storyId={storyId} />
           </div>
         </div>
       </div>
