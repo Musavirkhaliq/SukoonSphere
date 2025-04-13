@@ -6,6 +6,9 @@ import socket from "@/utils/socket/socket";
 import {
   PostLikeNotification,
   PostReplyLikeNotification,
+  PostReactionNotification,
+  PostCommentReactionNotification,
+  PostReplyReactionNotification,
 } from "../notifications/PostNotificationCards";
 import {
   PostCommentLikeNotification,
@@ -70,11 +73,11 @@ const Dropdown = ({ user, onClose }) => {
         ></div>
       )}
       <div
-        className={`fixed top-0 right-0 
+        className={`fixed top-0 right-0
                   w-full sm:w-[85%] md:w-[450px] lg:w-[450px] xl:w-[500px] 2xl:w-[550px]
                   h-screen sm:h-screen md:max-h-[20vh] lg:max-h-[60vh] xl:max-h-[50vh] 2xl:max-h-[60vh]
                   xl:top-[70px] 2xl:top-[80px]
-                  bg-white z-[80] 
+                  bg-white z-[80]
                   transform transition-transform duration-300 ease-in-out
                   overflow-hidden
                   shadow-xl rounded-none xl:rounded-lg
@@ -120,6 +123,13 @@ const Dropdown = ({ user, onClose }) => {
                       return (
                         <PostReplyLikeNotification key={index} item={item} />
                       );
+                    // New reaction notification cases
+                    case "reaction":
+                      return <PostReactionNotification key={index} item={item} />;
+                    case "commentReaction":
+                      return <PostCommentReactionNotification key={index} item={item} />;
+                    case "replyReaction":
+                      return <PostReplyReactionNotification key={index} item={item} />;
 
                     // QaSection Notification cases
                     case "answered":

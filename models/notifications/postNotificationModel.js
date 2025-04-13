@@ -57,14 +57,25 @@ const postNotificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['like', 'comment', 'reply', 'commentLiked', 'replyLiked',
+      enum: [
+        // Basic types
+        'like', 'comment', 'reply', 'commentLiked', 'replyLiked',
         "answered", "answerLiked", "answerCommentLiked", "answerCommentReplyLiked", "answerComment", "answerReply",
         "articleLiked", "articleCommentLiked", "articleCommentReplyLiked", "articleComment", "articleReply",
         "follow", "unfollow", "requestChat", "roomInvitation", "roomJoinRequest", "roomJoinRequestApproved", "roomJoinRequestRejected",
         'personalStoryComment',
         'personalStoryCommentReply',
         'personalStoryCommentLiked',
-        'personalStoryCommentReplyLiked'
+        'personalStoryCommentReplyLiked',
+
+        // New reaction types
+        'reaction',  // Generic reaction notification
+        'reactionHeart', 'reactionHaha', 'reactionWow', 'reactionSupport',
+        'reactionRelate', 'reactionAgree', 'reactionSad', 'reactionAngry', 'reactionInsightful',
+
+        // Content-specific reaction types
+        'commentReaction', 'replyReaction', 'articleReaction', 'videoReaction',
+        'answerReaction', 'personalStoryReaction'
       ],
       required: true,
     },

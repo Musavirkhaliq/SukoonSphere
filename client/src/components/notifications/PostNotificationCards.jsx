@@ -34,6 +34,22 @@ const NOTIFICATION_TYPES = {
     iconColor: "text-red-500",
     message: "liked your reply",
   },
+  // New reaction notification types
+  REACTION: {
+    icon: IoHeart,
+    iconColor: "text-red-500",
+    message: "reacted to your post",
+  },
+  COMMENT_REACTION: {
+    icon: IoHeart,
+    iconColor: "text-red-500",
+    message: "reacted to your comment",
+  },
+  REPLY_REACTION: {
+    icon: IoHeart,
+    iconColor: "text-red-500",
+    message: "reacted to your reply",
+  },
 };
 
 const NotificationItem = ({ item, type }) => {
@@ -116,4 +132,17 @@ export const PostCommentLikeNotification = ({ item }) => (
 
 export const PostReplyLikeNotification = ({ item }) => (
   <NotificationItem item={item} type="REPLY_LIKE" />
+);
+
+// New reaction notification components
+export const PostReactionNotification = ({ item }) => (
+  <NotificationItem item={item} type="REACTION" />
+);
+
+export const PostCommentReactionNotification = ({ item }) => (
+  <NotificationItem item={item} type="COMMENT_REACTION" />
+);
+
+export const PostReplyReactionNotification = ({ item }) => (
+  <NotificationItem item={item} type="REPLY_REACTION" />
 );

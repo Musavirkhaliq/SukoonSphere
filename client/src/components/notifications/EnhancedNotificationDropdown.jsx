@@ -20,6 +20,9 @@ import {
   PostCommentLikeNotification,
   PostCommentNotification,
   PostReplyNotification,
+  PostReactionNotification,
+  PostCommentReactionNotification,
+  PostReplyReactionNotification,
 } from './PostNotificationCards';
 
 import {
@@ -170,6 +173,13 @@ const EnhancedNotificationDropdown = () => {
               return <PostCommentLikeNotification {...notificationProps} />;
             case "replyLiked":
               return <PostReplyLikeNotification {...notificationProps} />;
+            // New reaction notification cases
+            case "reaction":
+              return <PostReactionNotification {...notificationProps} />;
+            case "commentReaction":
+              return <PostCommentReactionNotification {...notificationProps} />;
+            case "replyReaction":
+              return <PostReplyReactionNotification {...notificationProps} />;
             case "answered":
               return <QuestionAnsweredNotification {...notificationProps} />;
             case "answerLiked":
@@ -230,22 +240,22 @@ const EnhancedNotificationDropdown = () => {
           ref={dropdownRef}
           className="
             fixed top-0 left-0 w-full h-full bg-white overflow-y-auto no-scrollbar z-50
-            
+
             /* Mobile First Approach */
-            
+
             /* Tablet & Above Styling */
             md:absolute md:top-12 md:left-auto md:right-0 md:w-80 md:h-auto
             md:max-h-[80vh] md:rounded-xl md:shadow-2xl md:border md:border-slate-200
-            
+
             /* Laptop Styling */
             lg:w-96 lg:max-h-[85vh]
-            
+
             /* Desktop Styling */
             xl:w-[450px] xl:max-h-[90vh]
-            
+
             /* Large Screen/TV Styling */
             2xl:w-[500px] 2xl:max-h-[95vh]
-            
+
 
           "
           variants={dropdownVariants}
