@@ -3,8 +3,6 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import { formatDistanceToNow } from "date-fns";
 import {
-  FaRegHeart,
-  FaHeart,
   FaReply,
   FaEdit,
   FaTrash,
@@ -15,6 +13,7 @@ import UserAvatar from "../shared/UserAvatar";
 import customFetch from "@/utils/customFetch";
 import PersonalStoryCommentReply from "./PersonalStoryCommentReply";
 import PostActions from "../shared/PostActions";
+import ReactionButton from "../shared/Reactions/ReactionButton";
 
 const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
   const { user } = useUser();
@@ -49,18 +48,10 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
     }
   }, [showReplies]);
 
-  // Handle like comment
-  const handleLike = async () => {
-    if (!user) {
-      toast.error("Please login to like comments!");
-      return;
-    }
-    try {
-      await customFetch.patch(`/personal-stories/comments/${comment._id}/like`);
-      refetch();
-    } catch (error) {
-      toast.error("Failed to like comment");
-    }
+  // Handle reaction change
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    // When reaction changes, refetch to update the UI
+    refetch();
   };
 
   // Handle edit comment
@@ -212,17 +203,13 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
 
       {/* Comment actions */}
       <div className="flex items-center gap-4 mt-3">
-        <button
-          onClick={handleLike}
-          className="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors"
-        >
-          {comment.likes?.includes(user?._id) ? (
-            <FaHeart className="text-red-500" />
-          ) : (
-            <FaRegHeart />
-          )}
-          <span className="text-xs">{comment.totalLikes || 0}</span>
-        </button>
+        <ReactionButton
+          contentId={comment._id}
+          contentType="personalStoryComment"
+          initialReactions={{ like: comment.totalLikes || 0 }}
+          initialUserReaction={user && comment.likes?.includes(user?._id) ? 'like' : null}
+          onReactionChange={handleReactionChange}
+        />
 
         <button
           onClick={() => {

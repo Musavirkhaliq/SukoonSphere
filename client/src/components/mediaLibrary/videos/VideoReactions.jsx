@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaThumbsUp, FaThumbsDown, FaShare, FaEllipsisH } from 'react-icons/fa';
+import { FaThumbsDown, FaShare, FaEllipsisH } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useUser } from '@/context/UserContext';
 import customFetch from '@/utils/customFetch';
+import ReactionButton from '../../shared/Reactions/ReactionButton';
 
 const VideoReactions = ({ videoId, videoTitle }) => {
   const { user } = useUser();
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [initialReactions, setInitialReactions] = useState({ like: 0 });
+  const [initialUserReaction, setInitialUserReaction] = useState(null);
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
 
@@ -16,16 +16,27 @@ const VideoReactions = ({ videoId, videoTitle }) => {
   const shareMenuRef = useRef(null);
   const moreOptionsMenuRef = useRef(null);
 
-  // Fetch video data including likes
+  // Fetch video data including reactions
   const fetchVideoData = async () => {
     try {
-      const { data } = await customFetch.get(`/videos/video/${videoId}`);
-      if (data.video) {
-        setLikeCount(data.video.likes?.length || 0);
-        setIsLiked(user && data.video.likes?.includes(user._id));
-      }
+      // Get reactions from the API
+      const { data } = await customFetch.get(`/reactions/video/${videoId}`);
+      console.log('Fetched video reactions:', data);
+      setInitialReactions(data.reactionCounts || { like: 0 });
+      setInitialUserReaction(data.userReaction);
     } catch (error) {
-      console.error('Error fetching video data:', error);
+      console.error('Error fetching video reactions:', error);
+      // If the reaction API fails, try to get likes from the video API
+      try {
+        const { data } = await customFetch.get(`/videos/video/${videoId}`);
+        if (data.video) {
+          console.log('Fetched video data:', data.video);
+          setInitialReactions({ like: data.video.likes?.length || 0 });
+          setInitialUserReaction(user && data.video.likes?.includes(user._id) ? 'like' : null);
+        }
+      } catch (videoError) {
+        console.error('Error fetching video data:', videoError);
+      }
     }
   };
 
@@ -52,42 +63,12 @@ const VideoReactions = ({ videoId, videoTitle }) => {
     };
   }, []);
 
-  // Handle like
-  const handleLike = async () => {
-    if (!user) {
-      toast.info('Please log in to like videos');
-      return;
-    }
-
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      // Store current state before API call
-      const wasLiked = isLiked;
-
-      // Optimistically update UI
-      setIsLiked(!wasLiked);
-      setLikeCount(prevCount => wasLiked ? prevCount - 1 : prevCount + 1);
-
-      // Make API call
-      const { data } = await customFetch.patch(`/videos/video/${videoId}/like`);
-
-      // Update with actual server data
-      setLikeCount(data.likes.length);
-
-      // Show success message
-      toast.success(wasLiked ? 'Video unliked' : 'Video liked');
-    } catch (error) {
-      console.error('Error liking video:', error);
-      toast.error('Failed to like video');
-
-      // Revert optimistic update on error
-      setIsLiked(isLiked);
-      fetchVideoData(); // Refresh data from server
-    } finally {
-      setIsLoading(false);
-    }
+  // Handle reaction change
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    console.log('Video reaction updated:', { reactionCounts, userReaction });
+    // Update the state with the new reaction data
+    setInitialReactions(reactionCounts || { like: 0 });
+    setInitialUserReaction(userReaction);
   };
 
   // Handle share
@@ -127,43 +108,31 @@ const VideoReactions = ({ videoId, videoTitle }) => {
     <div className="py-2">
       {/* YouTube-style reaction bar */}
       <div className="flex flex-wrap items-center gap-2">
-        {/* Like/Dislike group */}
-        <div className="flex items-center">
-          <div className="flex items-center bg-gray-100 rounded-full overflow-hidden">
-            {/* Like button */}
-            <button
-              onClick={handleLike}
-              className={`flex items-center px-3 py-1.5 ${isLiked ? 'text-blue-600 font-medium' : 'text-gray-700'} hover:bg-gray-200 transition-colors relative ${isLoading ? 'opacity-70' : ''}`}
-              aria-label="Like video"
-              disabled={isLoading}
-            >
-              <FaThumbsUp className={`${isLiked ? 'text-blue-600 fill-current' : 'text-gray-700'} mr-2 transition-colors`} />
-              <span className="text-sm font-medium">{likeCount > 0 ? likeCount : '0'}</span>
-              {isLoading && (
-                <span className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-30">
-                  <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-                </span>
-              )}
-            </button>
+        {/* Reactions */}
+        <div className="flex items-center gap-2">
+          {/* Reaction button */}
+          <ReactionButton
+            contentId={videoId}
+            contentType="video"
+            initialReactions={initialReactions}
+            initialUserReaction={initialUserReaction}
+            onReactionChange={handleReactionChange}
+          />
 
-            {/* Divider */}
-            <div className="h-5 w-px bg-gray-300"></div>
-
-            {/* Dislike button (visual only) */}
-            <button
-              className="flex items-center px-3 py-1.5 text-gray-700 hover:bg-gray-200 transition-colors"
-              aria-label="Dislike video"
-              onClick={() => {
-                if (!user) {
-                  toast.info('Please log in to dislike videos');
-                  return;
-                }
-                toast.info('Dislike feature coming soon!');
-              }}
-            >
-              <FaThumbsDown className="text-gray-700" />
-            </button>
-          </div>
+          {/* Dislike button (visual only) */}
+          <button
+            className="flex items-center px-3 py-1.5 text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+            aria-label="Dislike video"
+            onClick={() => {
+              if (!user) {
+                toast.info('Please log in to dislike videos');
+                return;
+              }
+              toast.info('Dislike feature coming soon!');
+            }}
+          >
+            <FaThumbsDown className="text-gray-700" />
+          </button>
         </div>
 
         {/* Share Button */}
@@ -257,13 +226,22 @@ const VideoReactions = ({ videoId, videoTitle }) => {
         </div>
       </div>
 
-      {/* Total Likes - YouTube style */}
+      {/* Total Reactions - YouTube style */}
       <div className="mt-2 text-xs text-gray-500">
-        {likeCount > 0 ? (
-          <span>{likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}</span>
-        ) : (
-          <span>Be the first to like this video</span>
-        )}
+        {(() => {
+          // Calculate total reactions only once (excluding the 'total' property if it exists)
+          const totalCount = Object.entries(initialReactions)
+            .filter(([key]) => key !== 'total')
+            .reduce((sum, [_, count]) => sum + count, 0);
+
+          return totalCount > 0 ? (
+            <span>
+              {totalCount.toLocaleString()} {totalCount === 1 ? 'reaction' : 'reactions'}
+            </span>
+          ) : (
+            <span>Be the first to react to this video</span>
+          );
+        })()}
       </div>
     </div>
   );

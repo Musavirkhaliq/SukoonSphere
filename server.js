@@ -36,6 +36,7 @@ import AnalyticsRouter from "./routes/analyticsRouter.js";
 import RoomRouter from "./routes/roomRouter.js";
 import RoomMessageRouter from "./routes/roomMessageRouter.js";
 import PersonalStoryRouter from "./routes/personalStoryRouter.js";
+import ReactionRouter from "./routes/reactionRouter.js";
 
 // models
 import Notification from "./models/notifications/postNotificationModel.js";
@@ -109,6 +110,7 @@ app.use("/api/v1/analytics", AnalyticsRouter);
 app.use("/api/v1/rooms", RoomRouter);
 app.use("/api/v1/room-messages", RoomMessageRouter);
 app.use("/api/v1/personal-stories", PersonalStoryRouter);
+app.use("/api/v1/reactions", ReactionRouter);
 
 // Serve Static Files
 app.use("/public", express.static(path.resolve(__dirname, "./public")));

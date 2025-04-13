@@ -457,7 +457,7 @@ export const deletePersonalStoryReply = async (req, res) => {
   }
 };
 
-// Like comment
+// Like comment (Legacy method - kept for backward compatibility)
 export const likePersonalStoryComment = async (req, res) => {
   try {
     const { commentId } = req.params;
@@ -500,6 +500,40 @@ export const likePersonalStoryComment = async (req, res) => {
 
     await comment.save();
 
+    // Also update the reaction in the new reaction system
+    try {
+      const Reaction = mongoose.model('Reaction');
+
+      if (alreadyLiked) {
+        // Remove reaction if unliked
+        await Reaction.findOneAndDelete({
+          contentId: commentId,
+          contentType: 'personalStoryComment',
+          user: userId
+        });
+      } else {
+        // Add reaction if liked
+        // First check if reaction already exists
+        const existingReaction = await Reaction.findOne({
+          contentId: commentId,
+          contentType: 'personalStoryComment',
+          user: userId
+        });
+
+        if (!existingReaction) {
+          await Reaction.create({
+            contentId: commentId,
+            contentType: 'personalStoryComment',
+            user: userId,
+            type: 'like'
+          });
+        }
+      }
+    } catch (reactionError) {
+      console.error("Error updating reaction:", reactionError);
+      // Continue even if reaction update fails
+    }
+
     res.status(StatusCodes.OK).json({
       msg: alreadyLiked ? "Comment unliked" : "Comment liked",
       likes: comment.likes,
@@ -512,7 +546,7 @@ export const likePersonalStoryComment = async (req, res) => {
   }
 };
 
-// Like reply
+// Like reply (Legacy method - kept for backward compatibility)
 export const likePersonalStoryReply = async (req, res) => {
   try {
     const { replyId } = req.params;
@@ -553,6 +587,40 @@ export const likePersonalStoryReply = async (req, res) => {
     }
 
     await reply.save();
+
+    // Also update the reaction in the new reaction system
+    try {
+      const Reaction = mongoose.model('Reaction');
+
+      if (alreadyLiked) {
+        // Remove reaction if unliked
+        await Reaction.findOneAndDelete({
+          contentId: replyId,
+          contentType: 'personalStoryReply',
+          user: userId
+        });
+      } else {
+        // Add reaction if liked
+        // First check if reaction already exists
+        const existingReaction = await Reaction.findOne({
+          contentId: replyId,
+          contentType: 'personalStoryReply',
+          user: userId
+        });
+
+        if (!existingReaction) {
+          await Reaction.create({
+            contentId: replyId,
+            contentType: 'personalStoryReply',
+            user: userId,
+            type: 'like'
+          });
+        }
+      }
+    } catch (reactionError) {
+      console.error("Error updating reaction:", reactionError);
+      // Continue even if reaction update fails
+    }
 
     res.status(StatusCodes.OK).json({
       msg: alreadyLiked ? "Reply unliked" : "Reply liked",

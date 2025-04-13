@@ -21,7 +21,8 @@ import SimilarArticles from "../../../components/articleComponents/SimilarArticl
 import CommentPopup from "@/components/articleComponents/CommentPopup";
 import DeleteModal from "@/components/shared/DeleteModal";
 import { toast } from "react-toastify";
-import { BiUpvote } from "react-icons/bi";
+
+import ReactionButton from "@/components/shared/Reactions/ReactionButton";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
 
 const Article = () => {
@@ -40,7 +41,7 @@ const Article = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
-  const [isLikeLoading, setIsLikeLoading] = useState(false);
+
   const [isOwner, setIsOwner] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -125,33 +126,10 @@ const Article = () => {
     fetchArticle();
   }, [id]);
 
-  const handleLike = async () => {
-    const currentUser = JSON.parse(localStorage.getItem("user"));
-    if (!currentUser) {
-      toast.info("Please login to like this article");
-      return;
-    }
-
-    if (isLikeLoading) return;
-
-    setIsLikeLoading(true);
-    try {
-      const response = await customFetch.patch(`articles/${id}/like`);
-      const updatedArticle = response.data.article;
-
-      setIsLiked(!isLiked);
-      setLikeCount(updatedArticle.likes.length);
-
-      setArticle((prev) => ({
-        ...prev,
-        likes: updatedArticle.likes,
-      }));
-    } catch (error) {
-      console.error("Error liking article:", error);
-      toast.error("Failed to like article. Please try again.");
-    } finally {
-      setIsLikeLoading(false);
-    }
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    // Update the article state with the new reaction data
+    setIsLiked(!!userReaction);
+    setLikeCount(Object.values(reactionCounts).reduce((sum, count) => sum + count, 0));
   };
 
   const handleScroll = () => {
@@ -525,23 +503,15 @@ const Article = () => {
                 {/* Action Buttons */}
                 <div className="flex items-center gap-6 mt-4">
                   <div className="flex items-center gap-4">
-                    {/* Upvote Button */}
-                    <div
-                      className={`meta-item upvote-button ${isLikeLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                      onClick={handleLike}
-                    >
-                      <div className="flex items-center justify-center gap-2 w-8 h-8 rounded-full border border-gray-300 hover:border-gray-400 transition-colors">
-                        {isLikeLoading ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[var(--primary)]"></div>
-                        ) : isLiked ? (
-                          <BiUpvote className="meta-icon liked text-[var(--ternery)]" />
-                        ) : (
-                          <BiUpvote className="meta-icon text-[var(--primary)]" />
-                        )}
-                      </div>
-                      <span className="text-sm text-[var(--grey--800)]">
-                        {likeCount}
-                      </span>
+                    {/* Reaction Button */}
+                    <div className="meta-item">
+                      <ReactionButton
+                        contentId={id}
+                        contentType="article"
+                        initialReactions={{ like: likeCount }}
+                        initialUserReaction={isLiked ? 'like' : null}
+                        onReactionChange={handleReactionChange}
+                      />
                     </div>
 
                     {/* Comment Button */}

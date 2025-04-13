@@ -1,0 +1,335 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  FaThumbsUp,
+  FaHeart,
+  FaLaugh,
+  FaSurprise,
+  FaHandsHelping,
+  FaCheck,
+  FaSadTear,
+  FaAngry,
+  FaLightbulb
+} from 'react-icons/fa';
+import { MdOutlinePeopleAlt } from 'react-icons/md';
+import { useUser } from '@/context/UserContext';
+import { toast } from 'react-toastify';
+import customFetch from '@/utils/customFetch';
+import ReactionUsersList from './ReactionUsersList';
+
+const reactionIcons = {
+  like: <FaThumbsUp className="text-blue-500" />,
+  heart: <FaHeart className="text-red-500" />,
+  haha: <FaLaugh className="text-yellow-500" />,
+  wow: <FaSurprise className="text-yellow-500" />,
+  support: <FaHandsHelping className="text-purple-500" />,
+  relate: <MdOutlinePeopleAlt className="text-green-500" />,
+  agree: <FaCheck className="text-green-500" />,
+  sad: <FaSadTear className="text-blue-700" />,
+  angry: <FaAngry className="text-red-700" />,
+  insightful: <FaLightbulb className="text-yellow-400" />
+};
+
+const reactionLabels = {
+  like: 'Like',
+  heart: 'Heart',
+  haha: 'Haha',
+  wow: 'Wow',
+  support: 'Support',
+  relate: 'I relate to it',
+  agree: 'Agree',
+  sad: 'Sad',
+  angry: 'Angry',
+  insightful: 'Insightful'
+};
+
+const ReactionSelector = ({
+  contentId,
+  contentType,
+  initialReactions = {},
+  initialUserReaction = null,
+  onReactionChange
+}) => {
+  const { user } = useUser();
+  const [showReactionSelector, setShowReactionSelector] = useState(false);
+  const [showReactionUsers, setShowReactionUsers] = useState(false);
+  const [selectedReactionType, setSelectedReactionType] = useState(null);
+  const [reactionCounts, setReactionCounts] = useState(initialReactions);
+  const [userReaction, setUserReaction] = useState(initialUserReaction);
+  const [isLoading, setIsLoading] = useState(false);
+  const selectorRef = useRef(null);
+  const usersListRef = useRef(null);
+
+  // Calculate total reactions (excluding the 'total' property if it exists)
+  const totalReactions = Object.entries(reactionCounts)
+    .filter(([key]) => key !== 'total')
+    .reduce((sum, [_, count]) => sum + count, 0);
+
+  // Get the most common reaction type (excluding the 'total' property if it exists)
+  const getMostCommonReaction = () => {
+    if (totalReactions === 0) return 'like';
+    return Object.entries(reactionCounts)
+      .filter(([key]) => key !== 'total')
+      .sort((a, b) => b[1] - a[1])
+      .map(([type]) => type)[0];
+  };
+
+  // Close selectors when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (selectorRef.current && !selectorRef.current.contains(event.target)) {
+        setShowReactionSelector(false);
+      }
+      if (usersListRef.current && !usersListRef.current.contains(event.target)) {
+        setShowReactionUsers(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Fetch reactions when component mounts
+  useEffect(() => {
+    if (contentId && contentType) {
+      fetchReactions();
+    }
+  }, [contentId, contentType]);
+
+  // Update local state when props change
+  useEffect(() => {
+    setReactionCounts(initialReactions);
+    setUserReaction(initialUserReaction);
+  }, [initialReactions, initialUserReaction]);
+
+
+
+  // Use the appropriate API endpoint based on content type
+  const getApiEndpoint = (contentType, contentId) => {
+    // Use the new unified reactions API for all content types
+    // Note: Don't include /api/v1/ prefix as customFetch already has baseURL set to /api/v1
+    return `/reactions/${contentType}/${contentId}`;
+  };
+
+  // Fetch reactions from API
+  const fetchReactions = async () => {
+    try {
+      // Get the appropriate API endpoint
+      const endpoint = getApiEndpoint(contentType, contentId);
+      console.log(`Fetching reactions from ${endpoint}`);
+
+      // Use the new reaction system
+      const { data } = await customFetch.get(endpoint);
+      console.log('Reaction data:', data);
+      setReactionCounts(data.reactionCounts || {});
+      setUserReaction(data.userReaction);
+    } catch (error) {
+      console.error('Error fetching reactions:', error);
+      // Log detailed error information
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+
+      // Set default values on error
+      setReactionCounts({});
+      setUserReaction(null);
+
+      // Only show toast for non-401 errors (401 is handled by customFetch interceptor)
+      if (error.response && error.response.status !== 401) {
+        toast.error('Failed to load reactions');
+      }
+    }
+  };
+
+  // Handle reaction click
+  const handleReaction = async (type) => {
+    if (!user) {
+      toast.info('Please log in to react');
+      return;
+    }
+
+    if (isLoading) return;
+
+    // Store current state for rollback if needed - declare outside try block
+    const prevUserReaction = userReaction;
+    const prevReactionCounts = { ...reactionCounts };
+
+    try {
+      setIsLoading(true);
+
+      // Optimistically update UI
+      if (userReaction === type) {
+        // Remove reaction if clicking the same type
+        setUserReaction(null);
+        setReactionCounts({
+          ...reactionCounts,
+          [type]: Math.max(0, (reactionCounts[type] || 0) - 1)
+        });
+      } else {
+        // Add new reaction and remove old one if exists
+        if (userReaction) {
+          setReactionCounts({
+            ...reactionCounts,
+            [userReaction]: Math.max(0, (reactionCounts[userReaction] || 0) - 1),
+            [type]: (reactionCounts[type] || 0) + 1
+          });
+        } else {
+          setReactionCounts({
+            ...reactionCounts,
+            [type]: (reactionCounts[type] || 0) + 1
+          });
+        }
+        setUserReaction(type);
+      }
+
+      // Close selector
+      setShowReactionSelector(false);
+
+      // Get the appropriate API endpoint
+      const endpoint = getApiEndpoint(contentType, contentId);
+      console.log(`Sending reaction: ${type} to ${endpoint}`);
+      console.log('Request payload:', { type });
+
+      // Use the new reaction system
+      const response = await customFetch.post(endpoint, { type });
+      const data = response.data;
+      console.log('Reaction response:', data);
+
+      // Update with actual server data
+      setReactionCounts(data.reactionCounts || {});
+      setUserReaction(data.userReaction);
+
+      // Notify parent component
+      if (onReactionChange) {
+        onReactionChange(data.reactionCounts || {}, data.userReaction);
+      }
+    } catch (error) {
+      console.error('Error updating reaction:', error);
+
+      // Show detailed error message
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        toast.error(`Failed to update reaction: ${error.response.data?.message || error.message}`);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        toast.error('No response received from server');
+      } else {
+        console.error('Error message:', error.message);
+        toast.error(`Error: ${error.message}`);
+      }
+
+      // Revert to previous state on error
+      setUserReaction(prevUserReaction);
+      setReactionCounts(prevReactionCounts);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle click on main reaction button
+  const handleMainButtonClick = () => {
+    if (!user) {
+      toast.info('Please log in to react');
+      return;
+    }
+
+    if (userReaction) {
+      // If user already reacted, toggle it off
+      handleReaction(userReaction);
+    } else {
+      // If no reaction yet, show selector or use default (like)
+      if (window.innerWidth >= 768) {
+        setShowReactionSelector(!showReactionSelector);
+      } else {
+        handleReaction('like');
+      }
+    }
+  };
+
+  // Handle showing users who reacted
+  const handleShowUsers = (type = null) => {
+    setSelectedReactionType(type);
+    setShowReactionUsers(true);
+  };
+
+  return (
+    <div className="relative">
+      {/* Main reaction button */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleMainButtonClick}
+          className={`flex items-center gap-1 px-2 py-1 rounded-md transition-colors ${
+            userReaction
+              ? 'bg-gray-100 hover:bg-gray-200'
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
+          disabled={isLoading}
+        >
+          <span className="text-lg">
+            {userReaction ? reactionIcons[userReaction] : reactionIcons.like}
+          </span>
+          <span className="text-sm font-medium">
+            {userReaction ? reactionLabels[userReaction] : 'React'}
+          </span>
+        </button>
+
+        {/* Reaction counts */}
+        {totalReactions > 0 && (
+          <button
+            className="text-sm text-gray-500 hover:underline flex items-center gap-1"
+            onClick={() => handleShowUsers()}
+          >
+            <span className="text-lg">
+              {reactionIcons[getMostCommonReaction()]}
+            </span>
+            <span>{totalReactions}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Reaction selector */}
+      {showReactionSelector && (
+        <div
+          ref={selectorRef}
+          className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-lg z-50 p-2 flex flex-wrap gap-2 border border-gray-200 w-auto min-w-[300px]"
+        >
+          {Object.entries(reactionIcons).map(([type, icon]) => (
+            <button
+              key={type}
+              onClick={() => handleReaction(type)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-transform hover:scale-110 flex flex-col items-center"
+              title={reactionLabels[type]}
+            >
+              <span className="text-xl">{icon}</span>
+              <span className="text-xs mt-1">{reactionLabels[type]}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Users who reacted */}
+      {showReactionUsers && (
+        <div
+          ref={usersListRef}
+          className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-lg z-50 border border-gray-200 w-64"
+        >
+          <ReactionUsersList
+            contentId={contentId}
+            contentType={contentType}
+            reactionType={selectedReactionType}
+            onClose={() => setShowReactionUsers(false)}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ReactionSelector;

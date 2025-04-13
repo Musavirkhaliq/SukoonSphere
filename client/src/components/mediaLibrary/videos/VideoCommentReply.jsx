@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
-import { FaThumbsUp } from "react-icons/fa";
 import DeleteModal from "../../shared/DeleteModal";
 import PostActions from "../../shared/PostActions";
 import UserAvatar from "../../shared/UserAvatar";
+import ReactionButton from "../../shared/Reactions/ReactionButton";
 
 const VideoCommentReply = ({ reply, commentId, videoId, onReplyUpdate }) => {
   const { user } = useUser();
@@ -14,19 +14,9 @@ const VideoCommentReply = ({ reply, commentId, videoId, onReplyUpdate }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleLike = async () => {
-    if (!user) {
-      toast.error("Please login to like replies!");
-      return;
-    }
-    try {
-      await customFetch.patch(`/video-comments/replies/${reply._id}/like`, {
-        videoId,
-      });
-      onReplyUpdate();
-    } catch (error) {
-      toast.error("Failed to like reply");
-    }
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    // When reaction changes, update the parent component
+    onReplyUpdate();
   };
 
   const handleEdit = () => {
@@ -126,17 +116,13 @@ const VideoCommentReply = ({ reply, commentId, videoId, onReplyUpdate }) => {
 
         {/* Reply Actions */}
         <div className="flex items-center gap-4 mt-2 text-sm">
-          <button
-            onClick={handleLike}
-            className={`flex items-center gap-1 ${
-              user && reply.likes?.includes(user._id)
-                ? "text-primary"
-                : "text-gray-500"
-            }`}
-          >
-            <FaThumbsUp />
-            <span>{reply.likes?.length || reply.totalLikes || 0}</span>
-          </button>
+          <ReactionButton
+            contentId={reply._id}
+            contentType="videoReply"
+            initialReactions={{ like: reply.likes?.length || reply.totalLikes || 0 }}
+            initialUserReaction={user && reply.likes?.includes(user._id) ? 'like' : null}
+            onReactionChange={handleReactionChange}
+          />
         </div>
       </div>
 

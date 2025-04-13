@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaRegHeart, FaHeart, FaRegComment, FaUser } from "react-icons/fa";
+import { FaRegComment, FaUser } from "react-icons/fa";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import UserAvatar from "../shared/UserAvatar";
@@ -8,6 +8,7 @@ import { useUser } from "@/context/UserContext";
 import customFetch from "@/utils/customFetch";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import ReactionButton from "../shared/Reactions/ReactionButton";
 
 const PersonalStoryCard = ({ story, index }) => {
   const { user } = useUser();
@@ -42,27 +43,16 @@ const PersonalStoryCard = ({ story, index }) => {
     }
   };
 
-  const handleLike = async (e) => {
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    // Update the story state with the new reaction data
+    setIsLiked(!!userReaction);
+    setLikesCount(Object.values(reactionCounts).reduce((sum, count) => sum + count, 0));
+  };
+
+  const handleReactionClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (!user) {
-      toast.error("Please login to like this story!");
-      navigate("/auth/sign-up");
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      await customFetch.patch(`/personal-stories/${story._id}/like`);
-      setIsLiked(!isLiked);
-      setLikesCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to like story");
-    } finally {
-      setIsLoading(false);
-    }
+    // The actual reaction handling is done by the ReactionButton component
   };
 
   return (
@@ -101,7 +91,7 @@ const PersonalStoryCard = ({ story, index }) => {
             <h2 className="text-xl font-bold leading-tight line-clamp-2">
               {story.title}
             </h2>
-            
+
             <div className="flex items-center justify-between text-xs mt-2">
               <div className="flex items-center gap-2">
                 <span>{calculateReadingTime(story.content)}</span>
@@ -139,18 +129,16 @@ const PersonalStoryCard = ({ story, index }) => {
             </div>
 
             <div className="flex items-center gap-3">
-              <button 
-                onClick={handleLike}
-                className="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors"
-              >
-                {isLiked ? (
-                  <FaHeart className="text-red-500" />
-                ) : (
-                  <FaRegHeart />
-                )}
-                <span className="text-xs">{likesCount}</span>
-              </button>
-              
+              <div onClick={handleReactionClick}>
+                <ReactionButton
+                  contentId={story._id}
+                  contentType="personalStory"
+                  initialReactions={{ like: likesCount }}
+                  initialUserReaction={isLiked ? 'like' : null}
+                  onReactionChange={handleReactionChange}
+                />
+              </div>
+
               <div className="flex items-center gap-1 text-gray-500">
                 <FaRegComment />
                 <span className="text-xs">{story.totalComments || 0}</span>

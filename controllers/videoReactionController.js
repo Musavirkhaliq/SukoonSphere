@@ -28,25 +28,25 @@ export const reactToVideo = async (req, res) => {
       // If same reaction type, remove it (toggle off)
       if (existingReaction.type === type) {
         await VideoReaction.findByIdAndDelete(existingReaction._id);
-        
+
         // Get updated reaction counts
         const reactionCounts = await getReactionCounts(videoId);
-        
-        return res.status(StatusCodes.OK).json({ 
+
+        return res.status(StatusCodes.OK).json({
           message: "Reaction removed",
           reactionCounts,
           userReaction: null
         });
-      } 
-      
+      }
+
       // If different reaction type, update it
       existingReaction.type = type;
       await existingReaction.save();
-      
+
       // Get updated reaction counts
       const reactionCounts = await getReactionCounts(videoId);
-      
-      return res.status(StatusCodes.OK).json({ 
+
+      return res.status(StatusCodes.OK).json({
         message: "Reaction updated",
         reactionCounts,
         userReaction: existingReaction.type
@@ -63,7 +63,7 @@ export const reactToVideo = async (req, res) => {
     // Get updated reaction counts
     const reactionCounts = await getReactionCounts(videoId);
 
-    res.status(StatusCodes.CREATED).json({ 
+    res.status(StatusCodes.CREATED).json({
       message: "Reaction added",
       reactionCounts,
       userReaction: reaction.type
@@ -78,7 +78,7 @@ export const reactToVideo = async (req, res) => {
 export const getVideoReactions = async (req, res) => {
   const { videoId } = req.params;
   const { userId } = req.user || {};
-  
+
   // Check if video exists
   const videoExists = await Video.findById(videoId);
   if (!videoExists) {
@@ -87,7 +87,7 @@ export const getVideoReactions = async (req, res) => {
 
   // Get reaction counts
   const reactionCounts = await getReactionCounts(videoId);
-  
+
   // Get user's reaction if logged in
   let userReaction = null;
   if (userId) {
@@ -97,7 +97,7 @@ export const getVideoReactions = async (req, res) => {
     }
   }
 
-  res.status(StatusCodes.OK).json({ 
+  res.status(StatusCodes.OK).json({
     reactionCounts,
     userReaction
   });
@@ -106,7 +106,7 @@ export const getVideoReactions = async (req, res) => {
 // Helper function to get reaction counts
 async function getReactionCounts(videoId) {
   const reactions = await VideoReaction.find({ video: videoId });
-  
+
   const counts = {
     like: 0,
     love: 0,
@@ -114,10 +114,10 @@ async function getReactionCounts(videoId) {
     insightful: 0,
     total: reactions.length
   };
-  
+
   reactions.forEach(reaction => {
     counts[reaction.type]++;
   });
-  
+
   return counts;
 }

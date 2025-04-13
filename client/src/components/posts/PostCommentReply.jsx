@@ -3,11 +3,12 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
-import { FaReply, FaThumbsUp, FaUserSecret } from "react-icons/fa";
+import { FaReply, FaUserSecret } from "react-icons/fa";
 import DeleteModal from "../shared/DeleteModal";
 import PostActions from "../shared/PostActions";
 import UserAvatar from "../shared/UserAvatar";
 import { Link } from "react-router-dom";
+import ReactionButton from "../shared/Reactions/ReactionButton";
 
 const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
   const { user } = useUser();
@@ -45,19 +46,9 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
     }
   };
 
-  const handleLike = async () => {
-    if (!user) {
-      toast.error("Please login to like replies!");
-      return;
-    }
-    try {
-      await customFetch.patch(`/posts/comments/replies/${reply._id}/like`, {
-        postId,
-      });
-      onReplyUpdate();
-    } catch (error) {
-      toast.error("Failed to like reply");
-    }
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    // When reaction changes, update the parent component
+    onReplyUpdate();
   };
 
   const handleEdit = () => {
@@ -194,17 +185,13 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
 
         {/* Reply Actions */}
         <div className="flex items-center gap-4 mt-2 text-xs">
-          <button
-            onClick={handleLike}
-            className={`flex items-center gap-1 ${
-              user && reply.likes.includes(user._id)
-                ? "text-primary"
-                : "text-gray-500"
-            }`}
-          >
-            <FaThumbsUp />
-            <span>{reply.likes.length}</span>
-          </button>
+          <ReactionButton
+            contentId={reply._id}
+            contentType="reply"
+            initialReactions={{ like: reply.likes.length }}
+            initialUserReaction={user && reply.likes.includes(user._id) ? 'like' : null}
+            onReactionChange={handleReactionChange}
+          />
           <button
             onClick={() => setShowReplyForm(!showReplyForm)}
             className="flex items-center gap-1 text-gray-500 hover:text-primary"

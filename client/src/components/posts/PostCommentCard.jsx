@@ -3,11 +3,12 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
-import { FaReply, FaThumbsUp, FaUserSecret } from "react-icons/fa";
+import { FaReply, FaUserSecret } from "react-icons/fa";
 import DeleteModal from "../shared/DeleteModal";
 import PostActions from "../shared/PostActions";
 import UserAvatar from "../shared/UserAvatar";
 import PostCommentReply from "./PostCommentReply";
+import ReactionButton from "../shared/Reactions/ReactionButton";
 
 const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
   const { user } = useUser();
@@ -34,17 +35,9 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
     fetchReplies();
   }, []);
 
-  const handleLike = async () => {
-    if (!user) {
-      toast.error("Please login to like comments!");
-      return;
-    }
-    try {
-      await customFetch.patch(`/posts/comments/${comment._id}/like`);
-      onCommentUpdate();
-    } catch (error) {
-      toast.error("Failed to like comment");
-    }
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    // When reaction changes, update the parent component
+    onCommentUpdate();
   };
 
   const handleEdit = () => {
@@ -185,16 +178,13 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
 
         {/* Comment Actions */}
         <div className="flex items-center gap-4 text-sm">
-          <button
-            onClick={handleLike}
-            className={`flex items-center gap-1 ${user && comment.likes.includes(user._id)
-                ? "text-[var(--secondary)]"
-                : "text-gray-500"
-              } hover:text-[var(--secondary-hover)] transition-colors duration-200`}
-          >
-            <FaThumbsUp />
-            <span>{comment.likes.length}</span>
-          </button>
+          <ReactionButton
+            contentId={comment._id}
+            contentType="comment"
+            initialReactions={{ like: comment.likes.length }}
+            initialUserReaction={user && comment.likes.includes(user._id) ? 'like' : null}
+            onReactionChange={handleReactionChange}
+          />
           <button
             onClick={() => setShowReplyForm(!showReplyForm)}
             className="flex items-center gap-1 text-gray-500 hover:text-[var(--secondary)] transition-colors duration-200"

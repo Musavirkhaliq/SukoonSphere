@@ -189,7 +189,7 @@ export const getPersonalStoriesByUserId = async (req, res) => {
 export const getSinglePersonalStory = async (req, res) => {
   try {
     const { id: storyId } = req.params;
-    
+
     const story = await PersonalStory.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(storyId), deleted: { $ne: true } },
@@ -253,7 +253,7 @@ export const getSinglePersonalStory = async (req, res) => {
 export const createPersonalStory = async (req, res) => {
   try {
     const { title, content, isAnonymous } = req.body;
-    
+
     // Convert isAnonymous from string to boolean if needed
     const isAnonymousValue = typeof isAnonymous === 'string'
       ? isAnonymous === 'true'
@@ -281,8 +281,8 @@ export const createPersonalStory = async (req, res) => {
     if (isAnonymousValue) {
       const anonymousUserId = await getAnonymousUserId();
       if (!anonymousUserId) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
-          msg: 'Failed to create anonymous story' 
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          msg: 'Failed to create anonymous story'
         });
       }
       storyData.author = anonymousUserId;
@@ -300,7 +300,7 @@ export const createPersonalStory = async (req, res) => {
     await updateUserPoints(req.user.userId, "story");
     const earnedBadges = await awardBadges(req.user.userId, "story");
 
-    res.status(StatusCodes.CREATED).json({ 
+    res.status(StatusCodes.CREATED).json({
       msg: "Personal story created successfully",
       story
     });
@@ -317,49 +317,49 @@ export const updatePersonalStory = async (req, res) => {
   try {
     const { id: storyId } = req.params;
     const { title, content, isAnonymous } = req.body;
-    
+
     // Find the story
     const story = await PersonalStory.findById(storyId);
-    
+
     if (!story) {
       return res.status(StatusCodes.NOT_FOUND).json({ msg: "Personal story not found" });
     }
-    
+
     // Check if user is authorized to update this story
-    const isAuthorized = 
-      (story.author.toString() === req.user.userId) || 
+    const isAuthorized =
+      (story.author.toString() === req.user.userId) ||
       (story.isAnonymous && story.realCreator && story.realCreator.toString() === req.user.userId);
-    
+
     if (!isAuthorized) {
       return res.status(StatusCodes.UNAUTHORIZED).json({ msg: "Not authorized to update this story" });
     }
-    
+
     // Update fields
     if (title) story.title = title;
     if (content) story.content = content;
-    
+
     // Handle image upload if present
     if (req.file) {
       // Delete old image if exists
       if (story.imagePublicId) {
         // Add code to delete old image from storage
       }
-      
+
       story.imageUrl = `${process.env.BACKEND_URL}/public/uploads/${req.file.filename}`;
       story.imagePublicId = req.file.filename;
     }
-    
+
     // Handle image removal
     if (req.body.removeImage === 'true' && story.imagePublicId) {
       // Add code to delete image from storage
       story.imageUrl = null;
       story.imagePublicId = null;
     }
-    
+
     // Save updated story
     await story.save();
-    
-    res.status(StatusCodes.OK).json({ 
+
+    res.status(StatusCodes.OK).json({
       msg: "Personal story updated successfully",
       story
     });
@@ -375,27 +375,27 @@ export const updatePersonalStory = async (req, res) => {
 export const deletePersonalStory = async (req, res) => {
   try {
     const { id: storyId } = req.params;
-    
+
     // Find the story
     const story = await PersonalStory.findById(storyId);
-    
+
     if (!story) {
       return res.status(StatusCodes.NOT_FOUND).json({ msg: "Personal story not found" });
     }
-    
+
     // Check if user is authorized to delete this story
-    const isAuthorized = 
-      (story.author.toString() === req.user.userId) || 
+    const isAuthorized =
+      (story.author.toString() === req.user.userId) ||
       (story.isAnonymous && story.realCreator && story.realCreator.toString() === req.user.userId);
-    
+
     if (!isAuthorized) {
       return res.status(StatusCodes.UNAUTHORIZED).json({ msg: "Not authorized to delete this story" });
     }
-    
+
     // Soft delete the story
     story.deleted = true;
     await story.save();
-    
+
     res.status(StatusCodes.OK).json({ msg: "Personal story deleted successfully" });
   } catch (error) {
     console.error("Error in deletePersonalStory:", error);
@@ -405,29 +405,29 @@ export const deletePersonalStory = async (req, res) => {
   }
 };
 
-// Like a personal story
+// Like a personal story (Legacy method - kept for backward compatibility)
 export const likePersonalStory = async (req, res) => {
   try {
     const { id: storyId } = req.params;
     const userId = req.user.userId;
-    
+
     // Find the story
     const story = await PersonalStory.findById(storyId);
-    
+
     if (!story) {
       return res.status(StatusCodes.NOT_FOUND).json({ msg: "Personal story not found" });
     }
-    
+
     // Check if user has already liked the story
     const alreadyLiked = story.likes.includes(userId);
-    
+
     if (alreadyLiked) {
       // Unlike the story
       story.likes = story.likes.filter(id => id.toString() !== userId);
     } else {
       // Like the story
       story.likes.push(userId);
-      
+
       // Create notification if the story is not by the current user
       if (story.author.toString() !== userId && !story.isAnonymous) {
         const notification = new Notification({
@@ -438,19 +438,53 @@ export const likePersonalStory = async (req, res) => {
           message: `${req.user.username} liked your personal story`,
         });
         await notification.save();
-        
+
         // Send real-time notification
         io.to(story.author.toString()).emit('newNotification', notification);
       }
-      
+
       // Update user points and badges for liking
       await updateUserPoints(userId, "like");
       const earnedBadges = await awardBadges(userId, "like");
     }
-    
+
     await story.save();
-    
-    res.status(StatusCodes.OK).json({ 
+
+    // Also update the reaction in the new reaction system
+    try {
+      const Reaction = mongoose.model('Reaction');
+
+      if (alreadyLiked) {
+        // Remove reaction if unliked
+        await Reaction.findOneAndDelete({
+          contentId: storyId,
+          contentType: 'personalStory',
+          user: userId
+        });
+      } else {
+        // Add reaction if liked
+        // First check if reaction already exists
+        const existingReaction = await Reaction.findOne({
+          contentId: storyId,
+          contentType: 'personalStory',
+          user: userId
+        });
+
+        if (!existingReaction) {
+          await Reaction.create({
+            contentId: storyId,
+            contentType: 'personalStory',
+            user: userId,
+            type: 'like'
+          });
+        }
+      }
+    } catch (reactionError) {
+      console.error("Error updating reaction:", reactionError);
+      // Continue even if reaction update fails
+    }
+
+    res.status(StatusCodes.OK).json({
       msg: alreadyLiked ? "Personal story unliked" : "Personal story liked",
       likes: story.likes
     });
@@ -466,7 +500,7 @@ export const likePersonalStory = async (req, res) => {
 export const getMostLikedPersonalStories = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
-    
+
     const stories = await PersonalStory.aggregate([
       { $match: { deleted: { $ne: true } } },
       {
@@ -505,7 +539,7 @@ export const getMostLikedPersonalStories = async (req, res) => {
         },
       },
     ]);
-    
+
     res.status(StatusCodes.OK).json({ stories });
   } catch (error) {
     console.error("Error in getMostLikedPersonalStories:", error);

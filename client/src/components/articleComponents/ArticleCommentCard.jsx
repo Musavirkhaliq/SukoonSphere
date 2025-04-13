@@ -3,11 +3,12 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
-import { FaReply, FaThumbsUp } from "react-icons/fa";
+import { FaReply } from "react-icons/fa";
 import ArticleCommentReply from "./ArticleCommentReply";
 import DeleteModal from "../shared/DeleteModal";
 import PostActions from "../shared/PostActions";
 import UserAvatar from "../shared/UserAvatar";
+import ReactionButton from "../shared/Reactions/ReactionButton";
 
 const ArticleCommentCard = ({ comment, articleId, onCommentUpdate }) => {
   const { user } = useUser();
@@ -19,17 +20,9 @@ const ArticleCommentCard = ({ comment, articleId, onCommentUpdate }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleLike = async () => {
-    if (!user) {
-      toast.error("Please login to like comments!");
-      return;
-    }
-    try {
-      await customFetch.patch(`/articles/comments/${comment._id}/like`);
-      onCommentUpdate();
-    } catch (error) {
-      toast.error("Failed to like comment");
-    }
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    // When reaction changes, update the parent component
+    onCommentUpdate();
   };
 
   const handleEdit = () => {
@@ -147,17 +140,13 @@ const ArticleCommentCard = ({ comment, articleId, onCommentUpdate }) => {
 
         {/* Comment Actions */}
         <div className="flex items-center gap-4 mt-3 text-sm">
-          <button
-            onClick={handleLike}
-            className={`flex items-center gap-1 ${
-              user && comment.likes.includes(user._id)
-                ? "text-primary"
-                : "text-gray-500"
-            }`}
-          >
-            <FaThumbsUp />
-            <span>{comment.likes.length}</span>
-          </button>
+          <ReactionButton
+            contentId={comment._id}
+            contentType="articleComment"
+            initialReactions={{ like: comment.likes.length }}
+            initialUserReaction={user && comment.likes.includes(user._id) ? 'like' : null}
+            onReactionChange={handleReactionChange}
+          />
           <button
             onClick={() => setShowReplyForm(!showReplyForm)}
             className="flex items-center gap-1 text-gray-500 hover:text-primary"

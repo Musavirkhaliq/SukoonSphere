@@ -3,11 +3,12 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
-import { FaReply, FaThumbsUp, FaUserSecret } from "react-icons/fa";
+import { FaReply, FaUserSecret } from "react-icons/fa";
 import DeleteModal from "../shared/DeleteModal";
 import PostActions from "../shared/PostActions";
 import UserAvatar from "../shared/UserAvatar";
 import { Link } from "react-router-dom";
+import ReactionButton from "../shared/Reactions/ReactionButton";
 
 const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
     const { user } = useUser();
@@ -46,18 +47,9 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
         }
     };
 
-    const handleLike = async () => {
-        if (!user) {
-            toast.error("Please login to like replies!");
-            return;
-        }
-        try {
-            await customFetch.patch(`/personal-stories/replies/${reply._id}/like`);
-            onReplyUpdate();
-        } catch (error) {
-            console.error("Error liking reply:", error);
-            toast.error("Failed to like reply");
-        }
+    const handleReactionChange = (reactionCounts, userReaction) => {
+        // When reaction changes, update the parent component
+        onReplyUpdate();
     };
 
     const handleEdit = () => {
@@ -205,14 +197,13 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
 
                 {/* Reply Actions */}
                 <div className="flex items-center gap-4 mt-2 text-xs">
-                    <button
-                        onClick={handleLike}
-                        className={`flex items-center gap-1 ${user && reply.likes.includes(user._id) ? "text-primary" : "text-gray-500"
-                            }`}
-                    >
-                        <FaThumbsUp />
-                        <span>{reply.likes.length}</span>
-                    </button>
+                    <ReactionButton
+                        contentId={reply._id}
+                        contentType="personalStoryReply"
+                        initialReactions={{ like: reply.likes.length }}
+                        initialUserReaction={user && reply.likes.includes(user._id) ? 'like' : null}
+                        onReactionChange={handleReactionChange}
+                    />
                     <button
                         onClick={() => setShowReplyForm(!showReplyForm)}
                         className="flex items-center gap-1 text-gray-500 hover:text-primary"

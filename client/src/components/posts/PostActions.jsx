@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaRegHeart, FaHeart, FaRegComment, FaShare, FaEllipsisH } from "react-icons/fa";
+import { FaRegComment, FaShare, FaEllipsisH } from "react-icons/fa";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 import { useUser } from "@/context/UserContext";
+import ReactionButton from "../shared/Reactions/ReactionButton";
 
 const PostActions = ({
     postId,
@@ -15,45 +16,15 @@ const PostActions = ({
     isEditDeleteOnly = false,
 }) => {
     const { user } = useUser();
-    const [isLiked, setIsLiked] = useState(isInitiallyLiked);
-    const [likesCount, setLikesCount] = useState(initialLikesCount);
-    const [isLikeLoading, setIsLikeLoading] = useState(false);
     const [showShareOptions, setShowShareOptions] = useState(false);
     const [showMoreOptions, setShowMoreOptions] = useState(false);
     const shareMenuRef = useRef(null);
     const moreOptionsMenuRef = useRef(null);
 
-    // Handle like
-    const handleLike = async () => {
-        if (!user) {
-            toast.error("Please login to like this post!");
-            return;
-        }
-
-        if (isLikeLoading) return;
-
-        try {
-            setIsLikeLoading(true);
-            const wasLiked = isLiked;
-
-            // Optimistically update UI
-            setIsLiked(!wasLiked);
-            setLikesCount((prev) => (wasLiked ? prev - 1 : prev + 1));
-
-            // Make API call
-            await customFetch.patch(`/posts/${postId}/like`);
-
-            // Show success message
-            toast.success(wasLiked ? "Post unliked" : "Post liked");
-        } catch (error) {
-            console.error("Error liking post:", error);
-            toast.error("Failed to like post");
-            // Revert optimistic update
-            setIsLiked(isInitiallyLiked);
-            setLikesCount(initialLikesCount);
-        } finally {
-            setIsLikeLoading(false);
-        }
+    // Handle reaction change
+    const handleReactionChange = (reactionCounts, userReaction) => {
+        // This function can be used to update parent components if needed
+        console.log('Reaction updated:', { reactionCounts, userReaction });
     };
 
     // Handle share
@@ -144,20 +115,14 @@ const PostActions = ({
     return (
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
             <div className="flex items-center gap-4">
-                {/* Like Button */}
-                <button
-                    onClick={handleLike}
-                    disabled={isLikeLoading}
-                    className={`flex items-center gap-1 ${isLiked ? "text-red-500" : "text-gray-500"} hover:text-red-500 transition-colors relative`}
-                >
-                    {isLiked ? <FaHeart className="text-red-500" /> : <FaRegHeart />}
-                    <span>{likesCount}</span>
-                    {isLikeLoading && (
-                        <span className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-30">
-                            <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-                        </span>
-                    )}
-                </button>
+                {/* Reaction Button */}
+                <ReactionButton
+                    contentId={postId}
+                    contentType="post"
+                    initialReactions={{ like: initialLikesCount }}
+                    initialUserReaction={isInitiallyLiked ? 'like' : null}
+                    onReactionChange={handleReactionChange}
+                />
 
                 {/* Comment Button */}
                 <button

@@ -6,8 +6,6 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 import {
-  FaRegHeart,
-  FaHeart,
   FaRegComment,
   FaUser,
   FaEdit,
@@ -21,6 +19,7 @@ import {
   FaMale,
   FaFemale,
 } from "react-icons/fa";
+import ReactionButton from "@/components/shared/Reactions/ReactionButton";
 import { LuTableOfContents } from "react-icons/lu";
 import { FaArrowTrendDown } from "react-icons/fa6";
 
@@ -43,7 +42,7 @@ const SinglePersonalStory = () => {
   const [toc, setToc] = useState([]);
   const [isTocOpen, setIsTocOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [isLikeLoading, setIsLikeLoading] = useState(false);
+
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [utterance, setUtterance] = useState(null);
@@ -230,27 +229,11 @@ const SinglePersonalStory = () => {
     };
   }, [utterance]);
 
-  // Handle like
-  const handleLike = async () => {
-    if (!user) {
-      toast.info("Please login to like this story");
-      navigate("/auth/sign-up");
-      return;
-    }
-
-    if (isLikeLoading) return;
-
-    setIsLikeLoading(true);
-    try {
-      await customFetch.patch(`/personal-stories/${id}/like`);
-      setIsLiked(!isLiked);
-      setLikesCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to like story");
-    } finally {
-      setIsLikeLoading(false);
-    }
+  // Handle reaction change
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    // Update the story state with the new reaction data
+    setIsLiked(!!userReaction);
+    setLikesCount(Object.values(reactionCounts).reduce((sum, count) => sum + count, 0));
   };
 
   // Handle delete
@@ -477,23 +460,15 @@ const SinglePersonalStory = () => {
                 {/* Action Buttons */}
                 <div className="flex items-center gap-6 mt-4">
                   <div className="flex items-center gap-4">
-                    {/* Like Button */}
-                    <div
-                      className={`meta-item upvote-button ${isLikeLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                      onClick={handleLike}
-                    >
-                      <div className="flex items-center justify-center gap-2 w-8 h-8 rounded-full border border-gray-300 hover:border-gray-400 transition-colors">
-                        {isLikeLoading ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[var(--primary)]"></div>
-                        ) : isLiked ? (
-                          <FaHeart className="meta-icon liked text-red-500" />
-                        ) : (
-                          <FaRegHeart className="meta-icon text-[var(--primary)]" />
-                        )}
-                      </div>
-                      <span className="text-sm text-[var(--grey--800)]">
-                        {likesCount}
-                      </span>
+                    {/* Reaction Button */}
+                    <div className="meta-item">
+                      <ReactionButton
+                        contentId={id}
+                        contentType="personalStory"
+                        initialReactions={{ like: likesCount }}
+                        initialUserReaction={isLiked ? 'like' : null}
+                        onReactionChange={handleReactionChange}
+                      />
                     </div>
 
                     {/* Comment Button */}
