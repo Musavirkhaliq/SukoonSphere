@@ -127,9 +127,9 @@ const Article = () => {
   }, [id]);
 
   const handleReactionChange = (reactionCounts, userReaction) => {
-    // Update the article state with the new reaction data
-    setIsLiked(!!userReaction);
-    setLikeCount(Object.values(reactionCounts).reduce((sum, count) => sum + count, 0));
+    // Don't update local state here as ReactionSelector already updates the UI optimistically
+    // This prevents the double-counting issue
+    console.log('Article reaction updated:', { reactionCounts, userReaction });
   };
 
   const handleScroll = () => {

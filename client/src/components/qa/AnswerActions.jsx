@@ -25,11 +25,14 @@ const AnswerActions = ({
 
     // Handle reaction change
     const handleReactionChange = (reactionCounts, userReaction) => {
-        // Notify parent of reaction change if callback provided
+        // Don't update parent state here as ReactionSelector already updates the UI optimistically
+        // This prevents the double-counting issue
+        console.log('Answer reaction updated:', { reactionCounts, userReaction });
+
+        // If we need to notify parent for other reasons (not for UI updates), we can do it here
+        // but we should not pass the reaction counts for UI updates
         if (onLikeUpdate) {
-            // Calculate total reactions
-            const totalReactions = Object.values(reactionCounts).reduce((sum, count) => sum + count, 0);
-            onLikeUpdate(!!userReaction, totalReactions);
+            onLikeUpdate(!!userReaction, null);
         }
     };
 

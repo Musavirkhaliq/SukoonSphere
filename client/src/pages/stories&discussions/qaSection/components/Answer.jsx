@@ -71,13 +71,9 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
   };
 
   const handleLikeUpdate = (newIsLiked, newLikesCount) => {
-    setAnswer((prev) => ({
-      ...prev,
-      likes: newIsLiked
-        ? [...(prev.likes || []), user?.id]
-        : (prev.likes || []).filter((id) => id !== user?.id),
-      totalLikes: newLikesCount,
-    }));
+    // Don't update local state here as ReactionSelector already updates the UI optimistically
+    // This prevents the double-counting issue
+    console.log('Answer reaction updated:', { newIsLiked, newLikesCount });
   };
   console.log({ answer });
 

@@ -23,7 +23,8 @@ const ArticleActions = ({
 
     // Handle reaction change
     const handleReactionChange = (reactionCounts, userReaction) => {
-        // This function can be used to update parent components if needed
+        // Don't update parent state here as ReactionSelector already updates the UI optimistically
+        // This prevents the double-counting issue
         console.log('Article reaction updated:', { reactionCounts, userReaction });
     };
 
