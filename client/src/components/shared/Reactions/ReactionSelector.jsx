@@ -233,6 +233,39 @@ const ReactionSelector = ({
     }
   };
 
+  // Track long press for mobile devices
+  const [longPressTimer, setLongPressTimer] = useState(null);
+
+  // Handle touch start (for mobile long press)
+  const handleTouchStart = () => {
+    if (!user) return;
+
+    // Start a timer for long press
+    const timer = setTimeout(() => {
+      setShowReactionSelector(true);
+    }, 500); // 500ms long press to show reaction selector
+
+    setLongPressTimer(timer);
+  };
+
+  // Handle touch end (for mobile long press)
+  const handleTouchEnd = () => {
+    // Clear the timer if touch ends before long press is detected
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
+  // Handle touch move (for mobile long press)
+  const handleTouchMove = () => {
+    // Clear the timer if user moves finger before long press is detected
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
   // Handle click on main reaction button
   const handleMainButtonClick = () => {
     if (!user) {
@@ -244,12 +277,8 @@ const ReactionSelector = ({
       // If user already reacted, toggle it off
       handleReaction(userReaction);
     } else {
-      // If no reaction yet, show selector or use default (like)
-      if (window.innerWidth >= 768) {
-        setShowReactionSelector(!showReactionSelector);
-      } else {
-        handleReaction('like');
-      }
+      // If no reaction yet, show selector
+      setShowReactionSelector(!showReactionSelector);
     }
   };
 
@@ -265,6 +294,9 @@ const ReactionSelector = ({
       <div className="flex items-center gap-2">
         <button
           onClick={handleMainButtonClick}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchMove={handleTouchMove}
           className={`flex items-center gap-1 px-2 py-1 rounded-md transition-colors ${
             userReaction
               ? 'bg-gray-100 hover:bg-gray-200'
@@ -298,13 +330,16 @@ const ReactionSelector = ({
       {showReactionSelector && (
         <div
           ref={selectorRef}
-          className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-lg z-50 p-2 flex flex-wrap gap-2 border border-gray-200 w-auto min-w-[300px]"
+          className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-lg z-50 p-2 flex flex-wrap gap-2 border border-gray-200 w-auto min-w-[300px] max-w-[95vw] md:max-w-none"
         >
+          <div className="w-full text-center text-xs text-gray-500 mb-2 md:hidden">
+            Tap a reaction below
+          </div>
           {Object.entries(reactionIcons).map(([type, icon]) => (
             <button
               key={type}
               onClick={() => handleReaction(type)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-transform hover:scale-110 flex flex-col items-center"
+              className="p-2 hover:bg-gray-100 rounded-full transition-transform hover:scale-110 flex flex-col items-center min-w-[50px] min-h-[50px] md:min-w-0 md:min-h-0"
               title={reactionLabels[type]}
             >
               <span className="text-xl">{icon}</span>
