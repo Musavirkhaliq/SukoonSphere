@@ -388,6 +388,12 @@ export const deletePersonalStoryComment = async (req, res) => {
     comment.deleted = true;
     await comment.save();
 
+    // Remove the comment from the story's comments array
+    await PersonalStory.findByIdAndUpdate(
+      comment.storyId,
+      { $pull: { comments: commentId } }
+    );
+
     // Delete notification if exists
     const notification = await Notification.findOne({
       userId: comment.storyUserId,
@@ -432,6 +438,12 @@ export const deletePersonalStoryReply = async (req, res) => {
     // Soft delete the reply
     reply.deleted = true;
     await reply.save();
+
+    // Remove the reply from the comment's replies array
+    await PersonalStoryComment.findByIdAndUpdate(
+      reply.commentId,
+      { $pull: { replies: replyId } }
+    );
 
     // Delete notification if exists
     const comment = await PersonalStoryComment.findById(reply.commentId);

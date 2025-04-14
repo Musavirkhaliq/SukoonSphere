@@ -214,9 +214,6 @@ async function getReactionCounts(contentId, contentType) {
     counts[reaction.type]++;
   });
 
-  // Ensure total is always set correctly
-  counts.total = reactions.length;
-
   return counts;
 }
 

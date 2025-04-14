@@ -74,6 +74,7 @@ export const getAllPersonalStories = async (req, res) => {
             ]
           },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
+          // Only count non-deleted comments
           totalComments: { $size: { $ifNull: ["$comments", []] } },
         },
       },
@@ -152,6 +153,7 @@ export const getPersonalStoriesByUserId = async (req, res) => {
             ]
           },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
+          // Only count non-deleted comments
           totalComments: { $size: { $ifNull: ["$comments", []] } },
         },
       },
@@ -219,6 +221,7 @@ export const getSinglePersonalStory = async (req, res) => {
             ]
           },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
+          // Only count non-deleted comments
           totalComments: { $size: { $ifNull: ["$comments", []] } },
           isLiked: {
             $cond: [
@@ -528,6 +531,7 @@ export const getMostLikedPersonalStories = async (req, res) => {
             ]
           },
           likesCount: { $size: { $ifNull: ["$likes", []] } },
+          // Only count non-deleted comments
           commentsCount: { $size: { $ifNull: ["$comments", []] } },
         },
       },
