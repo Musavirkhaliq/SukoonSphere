@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { useUser } from "@/context/UserContext";
@@ -8,7 +8,7 @@ import { FaUserSecret, FaSpinner, FaPaperPlane } from "react-icons/fa";
 import UserAvatar from "../shared/UserAvatar";
 import PersonalStoryCommentCard from "./PersonalStoryCommentCard";
 
-const PersonalStoryComments = ({ storyId }) => {
+const PersonalStoryComments = memo(({ storyId }) => {
   const { user } = useUser();
   const [commentContent, setCommentContent] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -48,7 +48,7 @@ const PersonalStoryComments = ({ storyId }) => {
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   // Submit a new comment
-  const handleSubmitComment = async (e) => {
+  const handleSubmitComment = useCallback(async (e) => {
     e.preventDefault();
     if (!user) {
       toast.info("Please login to comment on this story");
@@ -74,7 +74,7 @@ const PersonalStoryComments = ({ storyId }) => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [user, commentContent, isAnonymous, storyId, refetch]);
 
   // Flatten comments data from all pages
   const allComments = data?.pages.flatMap((page) => page.comments) || [];
@@ -175,6 +175,6 @@ const PersonalStoryComments = ({ storyId }) => {
       )}
     </div>
   );
-};
+});  // Close the memo wrapper
 
 export default PersonalStoryComments;

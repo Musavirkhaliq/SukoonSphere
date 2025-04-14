@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import { formatDistanceToNow } from "date-fns";
@@ -15,7 +15,7 @@ import PersonalStoryCommentReply from "./PersonalStoryCommentReply";
 import PostActions from "../shared/PostActions";
 import ReactionButton from "../shared/Reactions/ReactionButton";
 
-const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
+const PersonalStoryCommentCard = memo(({ comment, storyId, refetch }) => {
   const { user } = useUser();
   const [showReplies, setShowReplies] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -28,7 +28,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
 
   // Fetch replies for this comment
-  const fetchReplies = async () => {
+  const fetchReplies = useCallback(async () => {
     if (comment.totalReplies > 0) {
       setIsLoadingReplies(true);
       try {
@@ -40,22 +40,20 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
         setIsLoadingReplies(false);
       }
     }
-  };
+  }, [comment._id, comment.totalReplies]);
 
   useEffect(() => {
     if (showReplies && replies.length === 0 && comment.totalReplies > 0) {
       fetchReplies();
     }
-  }, [showReplies]);
+  }, [showReplies, replies.length, comment.totalReplies, fetchReplies]);
 
   // State to track reaction counts and user reaction
   const [reactionCounts, setReactionCounts] = useState({ like: comment.totalLikes || 0 });
   const [userReaction, setUserReaction] = useState(user && comment.likes?.includes(user?._id) ? 'like' : null);
 
   // Handle reaction change
-  const handleReactionChange = (newReactionCounts, newUserReaction) => {
-    console.log('Personal story comment reaction updated:', { newReactionCounts, newUserReaction });
-
+  const handleReactionChange = useCallback((newReactionCounts, newUserReaction) => {
     // Calculate total reactions (use the 'total' property if it exists, otherwise sum all reaction counts)
     const totalCount = newReactionCounts.total !== undefined
       ? newReactionCounts.total
@@ -70,14 +68,12 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
     });
     setUserReaction(newUserReaction);
 
-    // When reaction changes, refetch to update the UI
-    if (refetch) {
-      refetch();
-    }
-  };
+    // Don't call refetch here to prevent unnecessary re-renders
+    // The reaction is already updated in the UI through local state
+  }, []);
 
   // Handle edit comment
-  const handleEdit = () => {
+  const handleEdit = useCallback(() => {
     if (!user) {
       toast.error("Please login to edit comments!");
       return;
@@ -94,10 +90,10 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
 
     setIsEditing(true);
     setEditContent(comment.content);
-  };
+  }, [user, comment]);
 
   // Submit edited comment
-  const handleSubmitEdit = async () => {
+  const handleSubmitEdit = useCallback(async () => {
     if (!editContent.trim()) {
       toast.error("Comment cannot be empty!");
       return;
@@ -113,10 +109,10 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
     } catch (error) {
       toast.error(error.response?.data?.msg || "Failed to update comment");
     }
-  };
+  }, [comment._id, editContent, refetch]);
 
   // Handle delete comment
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!user) {
       toast.error("Please login to delete comments!");
       return;
@@ -142,10 +138,10 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
     } catch (error) {
       toast.error(error.response?.data?.msg || "Failed to delete comment");
     }
-  };
+  }, [user, comment, refetch]);
 
   // Submit reply
-  const handleSubmitReply = async (e) => {
+  const handleSubmitReply = useCallback(async (e) => {
     e.preventDefault();
     if (!user) {
       toast.error("Please login to reply!");
@@ -174,7 +170,7 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
     } finally {
       setIsSubmittingReply(false);
     }
-  };
+  }, [user, replyContent, isAnonymous, comment._id, fetchReplies, refetch]);
 
 
 
@@ -339,6 +335,6 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
       )}
     </div>
   );
-};
+});  // Close the memo wrapper
 
 export default PersonalStoryCommentCard;

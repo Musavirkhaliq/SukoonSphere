@@ -1,8 +1,8 @@
-import React from "react";
+import React, { memo } from "react";
 import { FaTimes } from "react-icons/fa";
 import PersonalStoryComments from "./PersonalStoryComments";
 
-const PersonalStoryCommentPopup = ({ isOpen, onClose, storyId }) => {
+const PersonalStoryCommentPopup = memo(({ isOpen, onClose, storyId }) => {
   if (!isOpen) return null;
 
   return (
@@ -34,6 +34,6 @@ const PersonalStoryCommentPopup = ({ isOpen, onClose, storyId }) => {
       </div>
     </>
   );
-};
+});  // Close the memo wrapper
 
 export default PersonalStoryCommentPopup;

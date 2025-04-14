@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, memo } from "react";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
@@ -10,7 +10,7 @@ import UserAvatar from "../shared/UserAvatar";
 import { Link } from "react-router-dom";
 import ReactionButton from "../shared/Reactions/ReactionButton";
 
-const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
+const PersonalStoryCommentReply = memo(({ reply, commentId, onReplyUpdate }) => {
     const { user } = useUser();
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(reply.content);
@@ -21,7 +21,7 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
     const [replyContent, setReplyContent] = useState("");
     const [isAnonymous, setIsAnonymous] = useState(false);
 
-    const handleSubmitReply = async () => {
+    const handleSubmitReply = useCallback(async () => {
         if (!user) {
             toast.error("Please login to reply!");
             return;
@@ -45,15 +45,13 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
             console.error("Error adding reply:", error);
             toast.error(error.response?.data?.msg || "Failed to add reply");
         }
-    };
+    }, [user, replyContent, commentId, reply.createdBy, isAnonymous, onReplyUpdate]);
 
     // State to track reaction counts and user reaction
     const [reactionCounts, setReactionCounts] = useState({ like: reply.likes?.length || 0 });
     const [userReaction, setUserReaction] = useState(user && reply.likes?.includes(user?._id) ? 'like' : null);
 
-    const handleReactionChange = (newReactionCounts, newUserReaction) => {
-        console.log('Personal story reply reaction updated:', { newReactionCounts, newUserReaction });
-
+    const handleReactionChange = useCallback((newReactionCounts, newUserReaction) => {
         // Calculate total reactions (use the 'total' property if it exists, otherwise sum all reaction counts)
         const totalCount = newReactionCounts.total !== undefined
             ? newReactionCounts.total
@@ -68,13 +66,11 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
         });
         setUserReaction(newUserReaction);
 
-        // When reaction changes, update the parent component
-        if (onReplyUpdate) {
-            onReplyUpdate();
-        }
-    };
+        // Don't call onReplyUpdate here to prevent unnecessary re-renders
+        // The reaction is already updated in the UI through local state
+    }, []);
 
-    const handleEdit = () => {
+    const handleEdit = useCallback(() => {
         const creatorId = reply.isAnonymous ? reply.realCreator : reply.createdBy._id || reply.createdBy;
         if (!user || String(user._id) !== String(creatorId)) {
             toast.error("You can only edit your own replies!");
@@ -83,9 +79,9 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
         setIsEditing(true);
         setEditContent(reply.content);
         setIsEditAnonymous(reply.isAnonymous || false);
-    };
+    }, [user, reply]);
 
-    const handleSaveEdit = async () => {
+    const handleSaveEdit = useCallback(async () => {
         if (!editContent.trim()) {
             toast.error("Reply cannot be empty!");
             return;
@@ -102,13 +98,13 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
             console.error("Error updating reply:", error);
             toast.error(error.response?.data?.msg || "Failed to update reply");
         }
-    };
+    }, [editContent, isEditAnonymous, reply._id, onReplyUpdate]);
 
-    const handleDelete = () => {
+    const handleDelete = useCallback(() => {
         setShowDeleteModal(true);
-    };
+    }, []);
 
-    const confirmDelete = async () => {
+    const confirmDelete = useCallback(async () => {
         setIsDeleting(true);
         try {
             await customFetch.delete(`/personal-stories/replies/${reply._id}`);
@@ -121,10 +117,10 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
         } finally {
             setIsDeleting(false);
         }
-    };
+    }, [reply._id, onReplyUpdate]);
 
 
-    console.log({ reply })
+    // Remove console.log to prevent unnecessary renders
 
     return (
         <>
@@ -142,15 +138,7 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
                         />
                     </div>
 
-                    {/* Debug info */}
-                    {console.log("Reply auth check:", {
-                        userId: user?._id,
-                        replyCreatedBy: reply.createdBy,
-                        replyRealCreator: reply.realCreator,
-                        isCreator: String(user?._id) === String(reply.createdBy._id || reply.createdBy),
-                        isRealCreator: reply.isAnonymous && String(user?._id) === String(reply.realCreator),
-                        isAnonymous: reply.isAnonymous,
-                    })}
+                    {/* Remove debug info to prevent unnecessary renders */}
 
                     {user &&
                         ((String(user._id) === String(reply.createdBy._id || reply.createdBy)) ||
@@ -296,6 +284,6 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
             />
         </>
     );
-};
+});  // Close the memo wrapper
 
 export default PersonalStoryCommentReply;
