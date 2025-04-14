@@ -46,9 +46,21 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
     }
   };
 
-  const handleReactionChange = (reactionCounts, userReaction) => {
+  // State to track reaction counts and user reaction
+  const [reactionCounts, setReactionCounts] = useState({ like: reply.likes?.length || 0 });
+  const [userReaction, setUserReaction] = useState(user && reply.likes?.includes(user._id) ? 'like' : null);
+
+  const handleReactionChange = (newReactionCounts, newUserReaction) => {
+    console.log('Reply reaction updated:', { newReactionCounts, newUserReaction });
+
+    // Update local state
+    setReactionCounts(newReactionCounts);
+    setUserReaction(newUserReaction);
+
     // When reaction changes, update the parent component
-    onReplyUpdate();
+    if (onReplyUpdate) {
+      onReplyUpdate();
+    }
   };
 
   const handleEdit = () => {

@@ -21,11 +21,17 @@ const ArticleActions = ({
     const shareMenuRef = useRef(null);
     const moreOptionsMenuRef = useRef(null);
 
+    // State to track reaction counts and user reaction
+    const [reactionCounts, setReactionCounts] = useState({ like: initialLikesCount || 0 });
+    const [userReaction, setUserReaction] = useState(isInitiallyLiked ? 'like' : null);
+
     // Handle reaction change
-    const handleReactionChange = (reactionCounts, userReaction) => {
-        // Don't update parent state here as ReactionSelector already updates the UI optimistically
-        // This prevents the double-counting issue
-        console.log('Article reaction updated:', { reactionCounts, userReaction });
+    const handleReactionChange = (newReactionCounts, newUserReaction) => {
+        console.log('Article reaction updated:', { newReactionCounts, newUserReaction });
+
+        // Update local state
+        setReactionCounts(newReactionCounts);
+        setUserReaction(newUserReaction);
     };
 
     // Handle share

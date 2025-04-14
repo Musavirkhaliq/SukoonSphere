@@ -16,9 +16,21 @@ const ArticleCommentReply = ({ reply, commentId, onReplyUpdate }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleReactionChange = (reactionCounts, userReaction) => {
+  // State to track reaction counts and user reaction
+  const [reactionCounts, setReactionCounts] = useState({ like: reply.likes?.length || 0 });
+  const [userReaction, setUserReaction] = useState(user && reply.likes?.includes(user._id) ? 'like' : null);
+
+  const handleReactionChange = (newReactionCounts, newUserReaction) => {
+    console.log('Article reply reaction updated:', { newReactionCounts, newUserReaction });
+
+    // Update local state
+    setReactionCounts(newReactionCounts);
+    setUserReaction(newUserReaction);
+
     // When reaction changes, update the parent component
-    onReplyUpdate();
+    if (onReplyUpdate) {
+      onReplyUpdate();
+    }
   };
 
   const handleEdit = () => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactionSelector from './ReactionSelector';
 
 /**
@@ -21,9 +21,25 @@ const ReactionButton = ({
   className = ''
 }) => {
   // Show mobile tooltip only on small screens
-  const [showMobileTooltip, setShowMobileTooltip] = React.useState(false);
+  const [showMobileTooltip, setShowMobileTooltip] = useState(false);
 
-  React.useEffect(() => {
+  // Track the latest reaction data to avoid duplicate updates
+  const [currentReactions, setCurrentReactions] = useState(initialReactions);
+  const [currentUserReaction, setCurrentUserReaction] = useState(initialUserReaction);
+
+  // Handle reaction changes from the selector
+  const handleReactionChange = (reactionCounts, userReaction) => {
+    // Update our local state
+    setCurrentReactions(reactionCounts);
+    setCurrentUserReaction(userReaction);
+
+    // Notify parent component
+    if (onReactionChange) {
+      onReactionChange(reactionCounts, userReaction);
+    }
+  };
+
+  useEffect(() => {
     // Only show the tooltip on mobile devices
     if (window.innerWidth < 768 && !localStorage.getItem('reaction-tooltip-shown')) {
       setShowMobileTooltip(true);
@@ -51,7 +67,7 @@ const ReactionButton = ({
         contentType={contentType}
         initialReactions={initialReactions}
         initialUserReaction={initialUserReaction}
-        onReactionChange={onReactionChange}
+        onReactionChange={handleReactionChange}
       />
     </div>
   );

@@ -48,10 +48,22 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
     }
   }, [showReplies]);
 
+  // State to track reaction counts and user reaction
+  const [reactionCounts, setReactionCounts] = useState({ like: comment.totalLikes || 0 });
+  const [userReaction, setUserReaction] = useState(user && comment.likes?.includes(user?._id) ? 'like' : null);
+
   // Handle reaction change
-  const handleReactionChange = (reactionCounts, userReaction) => {
+  const handleReactionChange = (newReactionCounts, newUserReaction) => {
+    console.log('Personal story comment reaction updated:', { newReactionCounts, newUserReaction });
+
+    // Update local state
+    setReactionCounts(newReactionCounts);
+    setUserReaction(newUserReaction);
+
     // When reaction changes, refetch to update the UI
-    refetch();
+    if (refetch) {
+      refetch();
+    }
   };
 
   // Handle edit comment

@@ -35,9 +35,21 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
     fetchReplies();
   }, []);
 
-  const handleReactionChange = (reactionCounts, userReaction) => {
+  // State to track reaction counts and user reaction
+  const [reactionCounts, setReactionCounts] = useState({ like: comment.likes?.length || 0 });
+  const [userReaction, setUserReaction] = useState(user && comment.likes?.includes(user._id) ? 'like' : null);
+
+  const handleReactionChange = (newReactionCounts, newUserReaction) => {
+    console.log('Comment reaction updated:', { newReactionCounts, newUserReaction });
+
+    // Update local state
+    setReactionCounts(newReactionCounts);
+    setUserReaction(newUserReaction);
+
     // When reaction changes, update the parent component
-    onCommentUpdate();
+    if (onCommentUpdate) {
+      onCommentUpdate();
+    }
   };
 
   const handleEdit = () => {

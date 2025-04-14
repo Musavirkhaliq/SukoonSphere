@@ -43,10 +43,12 @@ const PersonalStoryCard = ({ story, index }) => {
     }
   };
 
-  const handleReactionChange = (reactionCounts, userReaction) => {
-    // Don't update local state here as ReactionSelector already updates the UI optimistically
-    // This prevents the double-counting issue
-    console.log('Personal story reaction updated:', { reactionCounts, userReaction });
+  const handleReactionChange = (newReactionCounts, newUserReaction) => {
+    console.log('Personal story reaction updated:', { newReactionCounts, newUserReaction });
+
+    // Update local state
+    setLikesCount(newReactionCounts.total || Object.values(newReactionCounts).reduce((sum, count) => sum + count, 0));
+    setIsLiked(!!newUserReaction);
   };
 
   const handleReactionClick = (e) => {

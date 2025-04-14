@@ -90,29 +90,14 @@ const ReactionSelector = ({
     };
   }, []);
 
-  // Fetch reactions when component mounts
+  // Fetch reactions when component mounts or when contentId/contentType changes
   useEffect(() => {
     if (contentId && contentType) {
       fetchReactions();
     }
   }, [contentId, contentType]);
 
-  // Update local state when props change
-  useEffect(() => {
-    setReactionCounts(initialReactions);
-    setUserReaction(initialUserReaction);
-  }, [initialReactions, initialUserReaction]);
-
-
-
-  // Use the appropriate API endpoint based on content type
-  const getApiEndpoint = (contentType, contentId) => {
-    // Use the new unified reactions API for all content types
-    // Note: Don't include /api/v1/ prefix as customFetch already has baseURL set to /api/v1
-    return `/reactions/${contentType}/${contentId}`;
-  };
-
-  // Fetch reactions from API
+  // Create a memoized fetchReactions function that won't change on re-renders
   const fetchReactions = async () => {
     try {
       // Get the appropriate API endpoint
@@ -122,8 +107,15 @@ const ReactionSelector = ({
       // Use the new reaction system
       const { data } = await customFetch.get(endpoint);
       console.log('Reaction data:', data);
+
+      // Update local state with fetched data
       setReactionCounts(data.reactionCounts || {});
       setUserReaction(data.userReaction);
+
+      // Notify parent component of the updated reaction data
+      if (onReactionChange) {
+        onReactionChange(data.reactionCounts || {}, data.userReaction);
+      }
     } catch (error) {
       console.error('Error fetching reactions:', error);
       // Log detailed error information
@@ -147,6 +139,38 @@ const ReactionSelector = ({
     }
   };
 
+  // Update local state when props change, but only if we haven't fetched data yet
+  useEffect(() => {
+    // Only update from props if we haven't fetched data yet or if the props have meaningful data
+    // This prevents overwriting fetched data with incomplete initial data
+    const hasInitialReactionData = Object.values(initialReactions).some(count => count > 0);
+
+    if (hasInitialReactionData) {
+      setReactionCounts(prevCounts => {
+        // If we already have fetched data with multiple reaction types, don't overwrite with just 'like' count
+        const hasFetchedMultipleReactions =
+          Object.entries(prevCounts).filter(([key, val]) => key !== 'total' && val > 0).length > 1;
+
+        if (hasFetchedMultipleReactions) {
+          return prevCounts;
+        }
+        return initialReactions;
+      });
+    }
+
+    // Always update user reaction from props as it's user-specific
+    setUserReaction(initialUserReaction);
+  }, [initialReactions, initialUserReaction]);
+
+
+
+  // Use the appropriate API endpoint based on content type
+  const getApiEndpoint = (contentType, contentId) => {
+    // Use the new unified reactions API for all content types
+    // Note: Don't include /api/v1/ prefix as customFetch already has baseURL set to /api/v1
+    return `/reactions/${contentType}/${contentId}`;
+  };
+
   // Handle reaction click
   const handleReaction = async (type) => {
     if (!user) {
@@ -160,32 +184,44 @@ const ReactionSelector = ({
     const prevUserReaction = userReaction;
     const prevReactionCounts = { ...reactionCounts };
 
+    // Calculate optimistic update values
+    let optimisticUserReaction;
+    let optimisticReactionCounts;
+
+    if (userReaction === type) {
+      // Remove reaction if clicking the same type
+      optimisticUserReaction = null;
+      optimisticReactionCounts = {
+        ...reactionCounts,
+        [type]: Math.max(0, (reactionCounts[type] || 0) - 1)
+      };
+    } else {
+      // Add new reaction and remove old one if exists
+      optimisticUserReaction = type;
+      if (userReaction) {
+        optimisticReactionCounts = {
+          ...reactionCounts,
+          [userReaction]: Math.max(0, (reactionCounts[userReaction] || 0) - 1),
+          [type]: (reactionCounts[type] || 0) + 1
+        };
+      } else {
+        optimisticReactionCounts = {
+          ...reactionCounts,
+          [type]: (reactionCounts[type] || 0) + 1
+        };
+      }
+    }
+
     try {
       setIsLoading(true);
 
       // Optimistically update UI
-      if (userReaction === type) {
-        // Remove reaction if clicking the same type
-        setUserReaction(null);
-        setReactionCounts({
-          ...reactionCounts,
-          [type]: Math.max(0, (reactionCounts[type] || 0) - 1)
-        });
-      } else {
-        // Add new reaction and remove old one if exists
-        if (userReaction) {
-          setReactionCounts({
-            ...reactionCounts,
-            [userReaction]: Math.max(0, (reactionCounts[userReaction] || 0) - 1),
-            [type]: (reactionCounts[type] || 0) + 1
-          });
-        } else {
-          setReactionCounts({
-            ...reactionCounts,
-            [type]: (reactionCounts[type] || 0) + 1
-          });
-        }
-        setUserReaction(type);
+      setUserReaction(optimisticUserReaction);
+      setReactionCounts(optimisticReactionCounts);
+
+      // Notify parent component of optimistic update
+      if (onReactionChange) {
+        onReactionChange(optimisticReactionCounts, optimisticUserReaction);
       }
 
       // Close selector
@@ -205,7 +241,7 @@ const ReactionSelector = ({
       setReactionCounts(data.reactionCounts || {});
       setUserReaction(data.userReaction);
 
-      // Notify parent component
+      // Notify parent component with server data
       if (onReactionChange) {
         onReactionChange(data.reactionCounts || {}, data.userReaction);
       }
@@ -228,6 +264,11 @@ const ReactionSelector = ({
       // Revert to previous state on error
       setUserReaction(prevUserReaction);
       setReactionCounts(prevReactionCounts);
+
+      // Notify parent component of reversion
+      if (onReactionChange) {
+        onReactionChange(prevReactionCounts, prevUserReaction);
+      }
     } finally {
       setIsLoading(false);
     }

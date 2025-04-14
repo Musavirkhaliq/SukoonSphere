@@ -21,10 +21,20 @@ const PostActions = ({
     const shareMenuRef = useRef(null);
     const moreOptionsMenuRef = useRef(null);
 
+    // State to track reaction counts and user reaction
+    const [reactionCounts, setReactionCounts] = useState({ like: initialLikesCount || 0 });
+    const [userReaction, setUserReaction] = useState(isInitiallyLiked ? 'like' : null);
+
     // Handle reaction change
-    const handleReactionChange = (reactionCounts, userReaction) => {
-        // This function can be used to update parent components if needed
-        console.log('Reaction updated:', { reactionCounts, userReaction });
+    const handleReactionChange = (newReactionCounts, newUserReaction) => {
+        console.log('Reaction updated:', { newReactionCounts, newUserReaction });
+
+        // Update local state
+        setReactionCounts(newReactionCounts);
+        setUserReaction(newUserReaction);
+
+        // If there's a parent callback, call it
+        // This could be used to update the post in a parent component
     };
 
     // Handle share
