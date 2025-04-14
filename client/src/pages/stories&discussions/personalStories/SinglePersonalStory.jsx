@@ -231,9 +231,19 @@ const SinglePersonalStory = () => {
 
   // Handle reaction change
   const handleReactionChange = (reactionCounts, userReaction) => {
+    console.log('Story reaction updated:', { reactionCounts, userReaction });
+
     // Update the story state with the new reaction data
     setIsLiked(!!userReaction);
-    setLikesCount(Object.values(reactionCounts).reduce((sum, count) => sum + count, 0));
+
+    // Calculate total reactions (use the 'total' property if it exists, otherwise sum all reaction counts)
+    const totalCount = reactionCounts.total !== undefined
+      ? reactionCounts.total
+      : Object.entries(reactionCounts)
+          .filter(([key]) => key !== 'total')
+          .reduce((sum, [_, count]) => sum + count, 0);
+
+    setLikesCount(totalCount);
   };
 
   // Handle delete
@@ -465,7 +475,10 @@ const SinglePersonalStory = () => {
                       <ReactionButton
                         contentId={id}
                         contentType="personalStory"
-                        initialReactions={{ like: likesCount }}
+                        initialReactions={{
+                          like: likesCount,
+                          total: likesCount
+                        }}
                         initialUserReaction={isLiked ? 'like' : null}
                         onReactionChange={handleReactionChange}
                       />

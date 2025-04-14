@@ -56,8 +56,18 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
   const handleReactionChange = (newReactionCounts, newUserReaction) => {
     console.log('Personal story comment reaction updated:', { newReactionCounts, newUserReaction });
 
-    // Update local state
-    setReactionCounts(newReactionCounts);
+    // Calculate total reactions (use the 'total' property if it exists, otherwise sum all reaction counts)
+    const totalCount = newReactionCounts.total !== undefined
+      ? newReactionCounts.total
+      : Object.entries(newReactionCounts)
+          .filter(([key]) => key !== 'total')
+          .reduce((sum, [_, count]) => sum + count, 0);
+
+    // Update local state with the new reaction data
+    setReactionCounts({
+      ...newReactionCounts,
+      total: totalCount
+    });
     setUserReaction(newUserReaction);
 
     // When reaction changes, refetch to update the UI
@@ -218,7 +228,10 @@ const PersonalStoryCommentCard = ({ comment, storyId, refetch }) => {
         <ReactionButton
           contentId={comment._id}
           contentType="personalStoryComment"
-          initialReactions={{ like: comment.totalLikes || 0 }}
+          initialReactions={{
+            like: comment.totalLikes || 0,
+            total: comment.totalLikes || 0
+          }}
           initialUserReaction={user && comment.likes?.includes(user?._id) ? 'like' : null}
           onReactionChange={handleReactionChange}
         />

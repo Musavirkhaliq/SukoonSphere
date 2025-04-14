@@ -29,13 +29,24 @@ const ReactionButton = ({
 
   // Handle reaction changes from the selector
   const handleReactionChange = (reactionCounts, userReaction) => {
+    // Calculate total reactions if not already included
+    let updatedReactionCounts = { ...reactionCounts };
+
+    if (updatedReactionCounts.total === undefined) {
+      const totalCount = Object.entries(updatedReactionCounts)
+        .filter(([key]) => key !== 'total')
+        .reduce((sum, [_, count]) => sum + count, 0);
+
+      updatedReactionCounts.total = totalCount;
+    }
+
     // Update our local state
-    setCurrentReactions(reactionCounts);
+    setCurrentReactions(updatedReactionCounts);
     setCurrentUserReaction(userReaction);
 
     // Notify parent component
     if (onReactionChange) {
-      onReactionChange(reactionCounts, userReaction);
+      onReactionChange(updatedReactionCounts, userReaction);
     }
   };
 

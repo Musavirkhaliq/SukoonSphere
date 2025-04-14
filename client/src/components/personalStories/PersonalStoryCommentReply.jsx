@@ -47,9 +47,31 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
         }
     };
 
-    const handleReactionChange = (reactionCounts, userReaction) => {
+    // State to track reaction counts and user reaction
+    const [reactionCounts, setReactionCounts] = useState({ like: reply.likes?.length || 0 });
+    const [userReaction, setUserReaction] = useState(user && reply.likes?.includes(user?._id) ? 'like' : null);
+
+    const handleReactionChange = (newReactionCounts, newUserReaction) => {
+        console.log('Personal story reply reaction updated:', { newReactionCounts, newUserReaction });
+
+        // Calculate total reactions (use the 'total' property if it exists, otherwise sum all reaction counts)
+        const totalCount = newReactionCounts.total !== undefined
+            ? newReactionCounts.total
+            : Object.entries(newReactionCounts)
+                .filter(([key]) => key !== 'total')
+                .reduce((sum, [_, count]) => sum + count, 0);
+
+        // Update local state with the new reaction data
+        setReactionCounts({
+            ...newReactionCounts,
+            total: totalCount
+        });
+        setUserReaction(newUserReaction);
+
         // When reaction changes, update the parent component
-        onReplyUpdate();
+        if (onReplyUpdate) {
+            onReplyUpdate();
+        }
     };
 
     const handleEdit = () => {
@@ -200,7 +222,10 @@ const PersonalStoryCommentReply = ({ reply, commentId, onReplyUpdate }) => {
                     <ReactionButton
                         contentId={reply._id}
                         contentType="personalStoryReply"
-                        initialReactions={{ like: reply.likes.length }}
+                        initialReactions={{
+                            like: reply.likes.length,
+                            total: reply.likes.length
+                        }}
                         initialUserReaction={user && reply.likes.includes(user._id) ? 'like' : null}
                         onReactionChange={handleReactionChange}
                     />

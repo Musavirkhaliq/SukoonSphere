@@ -59,10 +59,12 @@ const ReactionSelector = ({
   const selectorRef = useRef(null);
   const usersListRef = useRef(null);
 
-  // Calculate total reactions (excluding the 'total' property if it exists)
-  const totalReactions = Object.entries(reactionCounts)
-    .filter(([key]) => key !== 'total')
-    .reduce((sum, [_, count]) => sum + count, 0);
+  // Calculate total reactions (use the 'total' property if it exists, otherwise sum all reaction counts)
+  const totalReactions = reactionCounts.total !== undefined
+    ? reactionCounts.total
+    : Object.entries(reactionCounts)
+        .filter(([key]) => key !== 'total')
+        .reduce((sum, [_, count]) => sum + count, 0);
 
   // Get the most common reaction type (excluding the 'total' property if it exists)
   const getMostCommonReaction = () => {

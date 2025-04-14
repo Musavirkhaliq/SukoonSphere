@@ -47,7 +47,14 @@ const PersonalStoryCard = ({ story, index }) => {
     console.log('Personal story reaction updated:', { newReactionCounts, newUserReaction });
 
     // Update local state
-    setLikesCount(newReactionCounts.total || Object.values(newReactionCounts).reduce((sum, count) => sum + count, 0));
+    // Calculate total reactions (use the 'total' property if it exists, otherwise sum all reaction counts)
+    const totalCount = newReactionCounts.total !== undefined
+      ? newReactionCounts.total
+      : Object.entries(newReactionCounts)
+          .filter(([key]) => key !== 'total')
+          .reduce((sum, [_, count]) => sum + count, 0);
+
+    setLikesCount(totalCount);
     setIsLiked(!!newUserReaction);
   };
 
@@ -135,7 +142,10 @@ const PersonalStoryCard = ({ story, index }) => {
                 <ReactionButton
                   contentId={story._id}
                   contentType="personalStory"
-                  initialReactions={{ like: likesCount }}
+                  initialReactions={{
+                    like: likesCount,
+                    total: likesCount
+                  }}
                   initialUserReaction={isLiked ? 'like' : null}
                   onReactionChange={handleReactionChange}
                 />
