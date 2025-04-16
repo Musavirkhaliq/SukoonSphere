@@ -63,8 +63,8 @@ const ReactionSelector = ({
   const totalReactions = reactionCounts.total !== undefined
     ? reactionCounts.total
     : Object.entries(reactionCounts)
-        .filter(([key]) => key !== 'total')
-        .reduce((sum, [_, count]) => sum + count, 0);
+      .filter(([key]) => key !== 'total')
+      .reduce((sum, [_, count]) => sum + count, 0);
 
   // Get the most common reaction type (excluding the 'total' property if it exists)
   const getMostCommonReaction = () => {
@@ -332,7 +332,7 @@ const ReactionSelector = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-[350px]">
       {/* Main reaction button */}
       <div className="flex items-center gap-2">
         <button
@@ -340,11 +340,10 @@ const ReactionSelector = ({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           onTouchMove={handleTouchMove}
-          className={`flex items-center gap-1 px-2 py-1 rounded-md transition-colors ${
-            userReaction
-              ? 'bg-gray-100 hover:bg-gray-200'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
+          className={`flex items-center gap-1 px-2 py-1 rounded-md transition-colors ${userReaction
+            ? 'bg-gray-100 hover:bg-gray-200'
+            : 'text-gray-600 hover:bg-gray-100'
+            }`}
           disabled={isLoading}
         >
           <span className="text-lg">

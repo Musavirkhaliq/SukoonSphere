@@ -44,7 +44,7 @@ const SukoonAIPromo = () => {
               className="text-sm text-blue-600 hover:text-blue-800 font-medium flex gap-2"
               onClick={() => {
                 if (!user) {
-                  toast.error('Please login to user SukoonAI');
+                  toast.error('Please login to use SukoonAI');
                   return;
                 }
               }}

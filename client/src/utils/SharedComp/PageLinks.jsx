@@ -2,7 +2,7 @@ import React from "react";
 import { FaBrain} from "react-icons/fa";
 import { BiQuestionMark } from "react-icons/bi";
 import {  BsFillSignpostSplitFill } from "react-icons/bs";
-import { MdOutlineQuestionAnswer, MdVideoLibrary } from "react-icons/md";
+import { MdOutlineQuestionAnswer, MdOutlineAutoStories, MdVideoLibrary } from "react-icons/md";
 import { GiPodium } from "react-icons/gi";
 import { AiOutlineMail, AiOutlineInfoCircle } from "react-icons/ai";
 import { FiUsers } from "react-icons/fi";

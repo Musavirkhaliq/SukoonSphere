@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 import { useUser } from "@/context/UserContext";
 import customFetch from "@/utils/customFetch";
 import socket from "@/utils/socket/socket";
@@ -15,6 +15,7 @@ import ChatList from "./ChatList";
 import ImprovedRoomList from "./ImprovedRoomList";
 import SearchChatPersons from "./SearchChatPersons";
 import CreateRoomModal from "./CreateRoomModal";
+import { MdArrowBack } from "react-icons/md";
 
 const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen }) => {
   const { user } = useUser();
@@ -308,6 +309,14 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
       <div className="p-4 bg-[var(--primary)]  text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
+            <Link
+              to="/Posts"
+              className="md:hidden p-2 text-white hover:text-red-400 rounded-full transition-colors duration-200"
+              aria-label="Go back"
+            >
+              <MdArrowBack size={24} />
+            </Link>
+
             <div className="relative">
               <img
                 src={
@@ -336,7 +345,7 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
               className="p-2 rounded-full hover:bg-blue-600 transition-colors"
               title={sortOrder === "newest" ? "Newest first" : "Oldest first"}
             >
-              {sortOrder === "newest" ? <FaSortAmountDown size={14} /> : <FaSortAmountUp size={14} />}
+              {sortOrder === "newest" ? <FaSortAmountDown size={24} /> : <FaSortAmountUp size={24} />}
             </button>
             {/* Only show in desktop view */}
             <div className="hidden lg:block">
@@ -516,7 +525,7 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
             <div className="bg-gray-50 border-b">
               <div className="p-3 flex justify-between items-center cursor-pointer" onClick={() => toggleSection("yourRooms")}>
                 <div className="flex items-center">
-                  <FaUsers className="text-blue-500 mr-2" size={14} />
+                  <FaUsers className="text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white mr-2" size={14} />
                   <h3 className="text-sm font-medium text-gray-700">Your Rooms</h3>
                 </div>
                 <div className="flex items-center">
@@ -525,7 +534,7 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
                       e.stopPropagation();
                       setShowCreateRoomModal(true);
                     }}
-                    className="p-1 mr-2 text-blue-600 hover:bg-blue-50 rounded-full"
+                    className="p-1 mr-2 text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white rounded-full"
                     title="Create new room"
                   >
                     <FaPlus size={14} />
@@ -542,12 +551,12 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
                     </div>
                   ) : rooms.length === 0 ? (
-                    <div className="text-center text-gray-500 p-4">
+                    <div className="text-center text-gray-500 p-4 flex flex-col justify-center">
                       <p className="font-medium">No rooms yet</p>
                       <p className="text-sm mt-1">Create a room or join a public room</p>
                       <button
                         onClick={() => setShowCreateRoomModal(true)}
-                        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        className="btn-2"
                       >
                         <FaPlus className="inline mr-1" size={12} /> Create Room
                       </button>

@@ -246,16 +246,16 @@ function NavMenu({ showMobile = true }) {
             ) : (
               // If user is not logged in
               <div className="flex items-center gap-4">
-                <Link to="/sukoonai">
+                {/* <Link to="/sukoonai">
                   <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
                     <FaRobot className="text-white text-lg" />
                   </div>
-                </Link>
-                <Link to="/about/user/anonymous">
+                </Link> */}
+                {/* <Link to="/about/user/anonymous">
                   <div className="flex items-center justify-center w-8 h-8 bg-gray-800 rounded-full">
                     <FaUserSecret className="text-white text-lg" />
                   </div>
-                </Link>
+                </Link> */}
                 <Link to="/auth/sign-in">
                   <button className="bg-[var(--secondary)] px-2 py-1 text-sm rounded-[6px] hover:scale-105 transition-all duration-300 hover:bg-[var(--secondary-hover)] flex items-center">
                     <BiUserPlus className="text-xl text-gray-600 inline-block" />
