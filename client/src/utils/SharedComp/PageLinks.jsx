@@ -1,13 +1,14 @@
 import React from "react";
-import { FaHome, FaCaretRight, FaBrain, FaRobot, FaLightbulb } from "react-icons/fa";
+import { FaBrain} from "react-icons/fa";
 import { BiQuestionMark } from "react-icons/bi";
-import { BsChatDots } from "react-icons/bs";
-import { MdVideoLibrary } from "react-icons/md";
+import {  BsFillSignpostSplitFill } from "react-icons/bs";
+import { MdOutlineQuestionAnswer, MdVideoLibrary } from "react-icons/md";
 import { GiPodium } from "react-icons/gi";
 import { AiOutlineMail, AiOutlineInfoCircle } from "react-icons/ai";
 import { FiUsers } from "react-icons/fi";
 import { AiFillRead } from "react-icons/ai";
 import { RiHomeSmileFill, RiBookReadFill, RiDiscussFill, RiMovieFill, RiCustomerService2Fill } from "react-icons/ri";
+import { FaBookOpenReader } from "react-icons/fa6";
 
 const links = [
   {
@@ -15,10 +16,7 @@ const links = [
     address: "/",
     icon: <RiHomeSmileFill />,
   },
-  // {
-  //   name: "SukoonAI",
-  //   address: "/sukoonai",
-  // },
+
   {
     name: "Articles & Resources",
     address: '',
@@ -48,18 +46,26 @@ const links = [
     description: "Engage in dialogues",
     sublinks: [
       {
+        name: "Personal Stories",
+        address: "personal-stories",
+        description: "Personal stories and experiences",
+        // icon: <FaCaretRight />,
+        icon: <FaBookOpenReader />,
+      },
+      {
         name: "QA-Section",
         address: "QA-Section",
         description: "Question and answer forum",
         // icon: <FaCaretRight />,
-        icon: <BiQuestionMark />,
+        icon: <MdOutlineQuestionAnswer />,
       },
+
       {
         name: "Posts",
         address: 'Posts',
         description: "User-submitted discussions",
         // icon: <FaCaretRight />,
-        icon: <BsChatDots />,
+        icon: <BsFillSignpostSplitFill />,
       },
     ],
   },

@@ -19,7 +19,7 @@ const NavItem = ({ link, index }) => (
   <div className="group relative h-full align-middle">
     <NavLink to={link.address} className="flex group items-center justify-center ">
       <span className="ml-2">{link.name}</span>
-      {index !== 0 && index !== 1 && (
+      {index !== 0 && (
         <MdOutlineKeyboardArrowUp className="size-[1.4rem] ml-1 group-hover:rotate-180 transition-all duration-300 ease-in-out transform hover:scale-110 text-[var(--primary)] group-hover:text-[var(--ternery)] drop-shadow-sm hover:drop-shadow-md" />
       )}
     </NavLink>
