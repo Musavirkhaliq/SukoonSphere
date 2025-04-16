@@ -15,6 +15,9 @@ const UserFollowers = lazy(
 const UserFollowing = lazy(
   () => import("../components/user/userProfile/UserFollowing")
 );
+const UserAnonymousActivity = lazy(
+  () => import("../components/user/userProfile/UserAnonymousActivity")
+);
 
 // Import the loader functions
 
@@ -107,6 +110,14 @@ export const userRoutes = [
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <ContributorPodcasts />
+          </Suspense>
+        ),
+      },
+      {
+        path: "anonymous",
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <UserAnonymousActivity />
           </Suspense>
         ),
       },

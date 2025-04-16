@@ -11,6 +11,8 @@ import UserSuggestion from "../models/UserSuggestion.js";
 import { io } from "../server.js";
 import Answer from "../models/qaSection/answerModel.js";
 import { getUserProgress } from "../utils/gamification.js";
+import mongoose from "mongoose";
+import PersonalStory from "../models/personalStoryModel.js";
 
 export const getUserProfile = async (req, res) => {
   const user = await User.findById(req.user.userId).select(
@@ -829,6 +831,84 @@ export const getUserGamification = async (req, res) => {
     console.error("Error in getUserGamification:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: "An error occurred while fetching user gamification details"
+    });
+  }
+};
+
+// Get anonymous posts created by the logged-in user
+export const getAnonymousPosts = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    // Find posts where the real creator is the logged-in user and isAnonymous is true
+    const anonymousPosts = await Post.aggregate([
+      {
+        $match: {
+          realCreator: new mongoose.Types.ObjectId(userId),
+          isAnonymous: true,
+          deleted: { $ne: true }
+        }
+      },
+      {
+        $addFields: {
+          username: "Anonymous",
+          userAvatar: null,
+          totalLikes: { $size: { $ifNull: ["$likes", []] } },
+          totalComments: { $size: { $ifNull: ["$comments", []] } },
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      posts: anonymousPosts
+    });
+  } catch (error) {
+    console.error('Error fetching anonymous posts:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: "Error fetching anonymous posts"
+    });
+  }
+};
+
+// Get anonymous stories created by the logged-in user
+export const getAnonymousStories = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    // Find stories where the real creator is the logged-in user and isAnonymous is true
+    const anonymousStories = await PersonalStory.aggregate([
+      {
+        $match: {
+          realCreator: new mongoose.Types.ObjectId(userId),
+          isAnonymous: true,
+          deleted: { $ne: true }
+        }
+      },
+      {
+        $addFields: {
+          authorName: "Anonymous",
+          authorAvatar: null,
+          totalLikes: { $size: { $ifNull: ["$likes", []] } },
+          totalComments: { $size: { $ifNull: ["$comments", []] } },
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      stories: anonymousStories
+    });
+  } catch (error) {
+    console.error('Error fetching anonymous stories:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: "Error fetching anonymous stories"
     });
   }
 };

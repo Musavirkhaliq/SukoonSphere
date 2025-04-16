@@ -29,6 +29,9 @@ const ProfileDetails = ({ user }) => {
         <RenderProfileLinks name="Achievements" link="achievements" />
         <RenderProfileLinks name="Followers" link="followers" />
         <RenderProfileLinks name="Following" link="following" />
+        {logedInUser?._id === user._id && (
+          <RenderProfileLinks name="Anonymous Activity" link="anonymous" />
+        )}
       </div>
       <div className="mt-4">
         <Outlet context={user} />
