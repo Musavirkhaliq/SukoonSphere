@@ -45,7 +45,7 @@ const AnswerCommentModal = ({ isOpen, onClose, answerId }) => {
         if (isOpen) {
             fetchAnswer();
         }
-    }, [answerId]);
+    }, [answerId, isOpen]);
 
     const handleLikeUpdate = (newIsLiked, newLikesCount) => {
         setAnswer((prev) => ({
@@ -56,7 +56,7 @@ const AnswerCommentModal = ({ isOpen, onClose, answerId }) => {
             totalLikes: newLikesCount,
         }));
         // Refetch to ensure server sync
-        // fetchAnswer();
+        fetchAnswer();
     };
 
     const handleEdit = () => {

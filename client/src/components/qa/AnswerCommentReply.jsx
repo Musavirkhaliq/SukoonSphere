@@ -1,77 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUser } from "@/context/UserContext";
 import { toast } from "react-toastify";
 import customFetch from "@/utils/customFetch";
 import { formatDistanceToNow } from "date-fns";
-import { FaReply, FaThumbsUp, FaUserSecret } from "react-icons/fa";
+import { FaThumbsUp } from "react-icons/fa";
 import DeleteModal from "../shared/DeleteModal";
 import PostActions from "../shared/PostActions";
 import UserAvatar from "../shared/UserAvatar";
 import { Link } from "react-router-dom";
 
-const AnswerCommentReply = ({ reply, commentId, onReplyUpdate }) => {
+const AnswerCommnetReply = ({ reply, onReplyUpdate }) => {
   const { user } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.content);
-  const [isEditAnonymous, setIsEditAnonymous] = useState(reply.isAnonymous || false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showReplyForm, setShowReplyForm] = useState(false);
-  const [replyContent, setReplyContent] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(false);
-
-
-  console.log({ reply })
-
-  const handleSubmitReply = async () => {
-    if (!user) {
-      toast.error("Please login to reply!");
-      return;
-    }
-    if (!replyContent.trim()) {
-      toast.error("Reply cannot be empty!");
-      return;
-    }
-    try {
-      await customFetch.post(`/qa-section/answer/comments/${commentId}/replies`, {
-        content: replyContent,
-        replyToUserId: reply.createdBy._id || reply.createdBy,
-        isAnonymous,
-      });
-      setReplyContent("");
-      setShowReplyForm(false);
-      setIsAnonymous(false);
-      onReplyUpdate();
-      toast.success("Reply added successfully");
-    } catch (error) {
-      console.error("Error adding reply:", error);
-      toast.error(error.response?.data?.msg || "Failed to add reply");
-    }
-  };
 
   const handleLike = async () => {
     if (!user) {
       toast.error("Please login to like replies!");
       return;
     }
+    // /question/answer/comments/reply/:id/like
     try {
-      await customFetch.patch(`/qa-section/question/answer/comments/reply/${reply._id}/like`);
+      await customFetch.patch(
+        `/qa-section/question/answer/comments/reply/${reply._id}/like`
+      );
       onReplyUpdate();
     } catch (error) {
-      console.error("Error liking reply:", error);
       toast.error("Failed to like reply");
     }
   };
 
   const handleEdit = () => {
-    const creatorId = reply.isAnonymous ? reply.realCreator : reply.createdBy._id || reply.createdBy;
-    if (!user || String(user._id) !== String(creatorId)) {
+    if (!user || user._id !== reply.createdBy) {
       toast.error("You can only edit your own replies!");
       return;
     }
     setIsEditing(true);
-    setEditContent(reply.content);
-    setIsEditAnonymous(reply.isAnonymous || false);
   };
 
   const handleSaveEdit = async () => {
@@ -80,16 +46,18 @@ const AnswerCommentReply = ({ reply, commentId, onReplyUpdate }) => {
       return;
     }
     try {
-      await customFetch.patch(`/qa-section/answer/comments/replies/${reply._id}`, {
-        content: editContent,
-        isAnonymous: isEditAnonymous,
-      });
+      // /answer/comments/replies/:id
+      await customFetch.patch(
+        `/qa-section/answer/comments/replies/${reply._id}`,
+        {
+          content: editContent,
+        }
+      );
       setIsEditing(false);
       onReplyUpdate();
       toast.success("Reply updated successfully");
     } catch (error) {
-      console.error("Error updating reply:", error);
-      toast.error(error.response?.data?.msg || "Failed to update reply");
+      toast.error("Failed to update reply");
     }
   };
 
@@ -100,12 +68,14 @@ const AnswerCommentReply = ({ reply, commentId, onReplyUpdate }) => {
   const confirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await customFetch.delete(`/qa-section/question/answer/comments/reply/${reply._id}`);
+      // question/answer/comments/reply/:id
+      await customFetch.delete(
+        `/qa-section/question/answer/comments/reply/${reply._id}`
+      );
       onReplyUpdate();
       toast.success("Reply deleted successfully");
       setShowDeleteModal(false);
     } catch (error) {
-      console.error("Error deleting reply:", error);
       toast.error("Failed to delete reply");
     } finally {
       setIsDeleting(false);
@@ -122,78 +92,45 @@ const AnswerCommentReply = ({ reply, commentId, onReplyUpdate }) => {
           <div className="flex items-center gap-2">
             <UserAvatar
               createdBy={reply.createdBy}
-              username={reply.username || "user"}
+              username={reply.username}
               userAvatar={reply.userAvatar}
               createdAt={reply.createdAt}
               size="verySmall"
             />
           </div>
 
-          {/* Debug info */}
-          {console.log("Reply auth check:", {
-            userId: user?._id,
-            replyCreatedBy: reply.createdBy,
-            replyRealCreator: reply.realCreator,
-            isCreator: String(user?._id) === String(reply.createdBy._id || reply.createdBy),
-            isRealCreator: reply.isAnonymous && String(user?._id) === String(reply.realCreator),
-            isAnonymous: reply.isAnonymous,
-          })}
-
-          {user &&
-            ((String(user._id) === String(reply.createdBy._id || reply.createdBy)) ||
-              (reply.isAnonymous &&
-                reply.realCreator &&
-                String(user._id) === String(reply.realCreator))) && (
-              <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
-            )}
+          {user && user._id === reply.createdBy && (
+            <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
+          )}
         </div>
 
         {/* Reply Content */}
         {isEditing ? (
           <div className="mt-2">
             <textarea
-              assets
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--secondary)] focus:border-transparent resize-none text-gray-700"
+              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
               rows="2"
             />
-            <div className="flex items-center justify-between mt-2">
-              <label className="flex items-center gap-1 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isEditAnonymous}
-                  onChange={() => setIsEditAnonymous(!isEditAnonymous)}
-                  className="form-checkbox h-3 w-3 text-[var(--secondary)] rounded focus:ring-[var(--secondary)]"
-                />
-                <span className="text-xs flex items-center gap-1 text-gray-600">
-                  <FaUserSecret
-                    className={isEditAnonymous ? "text-[var(--secondary)]" : "text-gray-400"}
-                    size={12}
-                  />
-                  Post anonymously
-                </span>
-              </label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setIsEditing(false);
-                    setEditContent(reply.content);
-                    setIsEditAnonymous(reply.isAnonymous || false);
-                  }}
-                  className="btn-red !py-1 !px-4 text-sm"
-                >
-                  Cancel
-                </button>
-                <button onClick={handleSaveEdit} className="btn-2 !py-1 !px-4 text-sm">
-                  Save
-                </button>
-              </div>
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditContent(reply.content);
+                }}
+                className="btn-red !py-1 text-sm"
+              >
+                Cancel
+              </button>
+              <button onClick={handleSaveEdit} className="btn-2 !py-1 text-sm">
+                Save
+              </button>
             </div>
           </div>
         ) : (
           <p className="text-sm mt-1">
-            {reply.replyTo && (
+            {reply.replyTo && reply.replyTo._id !== reply.commentId && (
               <Link
                 to={`/about/user/${reply.commentUserId}`}
                 className="font-medium text-[var(--ternery)] hover:underline"
@@ -209,65 +146,16 @@ const AnswerCommentReply = ({ reply, commentId, onReplyUpdate }) => {
         <div className="flex items-center gap-4 mt-2 text-xs">
           <button
             onClick={handleLike}
-            className={`flex items-center gap-1 ${user && reply.likes.includes(user._id) ? "text-primary" : "text-gray-500"
-              }`}
+            className={`flex items-center gap-1 ${
+              user && reply.likes.includes(user._id)
+                ? "text-primary"
+                : "text-gray-500"
+            }`}
           >
             <FaThumbsUp />
             <span>{reply.likes.length}</span>
           </button>
-          <button
-            onClick={() => setShowReplyForm(!showReplyForm)}
-            className="flex items-center gap-1 text-gray-500 hover:text-primary"
-          >
-            <FaReply />
-            Reply
-          </button>
         </div>
-
-        {/* Reply Form */}
-        {showReplyForm && (
-          <div className="mt-4">
-            <textarea
-              value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
-              placeholder="Write your reply..."
-              className="w-full p-3 pr-14 border border-gray-100 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none text-gray-700"
-              rows="2"
-            />
-            <div className="flex items-center justify-between mt-2">
-              <label className="flex items-center gap-1 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isAnonymous}
-                  onChange={() => setIsAnonymous(!isAnonymous)}
-                  className="form-checkbox h-3 w-3 text-[var(--secondary)] rounded focus:ring-[var(--secondary)]"
-                />
-                <span className="text-xs flex items-center gap-1 text-gray-600">
-                  <FaUserSecret
-                    className={isAnonymous ? "text-[var(--secondary)]" : "text-gray-400"}
-                    size={12}
-                  />
-                  Post anonymously
-                </span>
-              </label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setShowReplyForm(false);
-                    setReplyContent("");
-                    setIsAnonymous(false);
-                  }}
-                  className="btn-red !py-1 !px-4"
-                >
-                  Cancel
-                </button>
-                <button onClick={handleSubmitReply} className="btn-2 !py-1 !px-4">
-                  Reply
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Delete Modal */}
@@ -284,4 +172,4 @@ const AnswerCommentReply = ({ reply, commentId, onReplyUpdate }) => {
   );
 };
 
-export default AnswerCommentReply;
+export default AnswerCommnetReply;

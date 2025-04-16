@@ -22,17 +22,17 @@ const NOTIFICATION_TYPES = {
   POST_REPLY: {
     icon: IoArrowUndo,
     iconColor: "text-blue-500",
-    message: "replied to your comment on post",
+    message: "replied to your comment",
   },
   COMMENT_LIKE: {
     icon: IoHeart,
     iconColor: "text-red-500",
-    message: "liked your comment on post",
+    message: "liked your comment",
   },
   REPLY_LIKE: {
     icon: IoHeart,
     iconColor: "text-red-500",
-    message: "liked your reply on post",
+    message: "liked your reply",
   },
   // New reaction notification types
   REACTION: {
@@ -62,7 +62,7 @@ const NotificationItem = ({ item, type }) => {
       `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "Anonymous")}&background=random`
     );
   };
-  console.log({ item });
+  console.log({item});
 
   return (
     <Link
@@ -85,13 +85,13 @@ const NotificationItem = ({ item, type }) => {
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center space-x-2">
           <span className="text-[var(--grey--900)]">
-            <Link to={`/about/user/${item.createdBy._id}`}>
-              <span className="text-sm font-medium text-[var(--ternery)] line-clamp-2 capitalize hover:underline block">
-                {item.createdBy?.name}{" "}
-              </span>
-            </Link>
+          <Link to={`/about/user/${item.createdBy._id}`}>
+            <span className="text-sm font-medium text-[var(--ternery)] line-clamp-2 capitalize hover:underline block">
+              {item.createdBy?.name}{" "}
+            </span>
+          </Link>
             {config.message}
-          </span>
+            </span>
         </div>
 
         <div className="flex items-center space-x-2 text-xs text-[var(--grey--800)]">

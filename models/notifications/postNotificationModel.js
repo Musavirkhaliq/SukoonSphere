@@ -67,11 +67,7 @@ const postNotificationSchema = new mongoose.Schema(
         'personalStoryCommentReply',
         'personalStoryCommentLiked',
         'personalStoryCommentReplyLiked',
-        'personalStoryLiked',
-        'personalStoryReply',
 
-        "videoComment",
-        "videoReply",
         // New reaction types
         'reaction',  // Generic reaction notification
         'reactionHeart', 'reactionHaha', 'reactionWow', 'reactionSupport',

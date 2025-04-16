@@ -33,6 +33,7 @@ const AnswerCommentCard = ({ comment, answerId, onCommentUpdate }) => {
   useEffect(() => {
     fetchReplies();
   }, []);
+  console.log({ replies });
 
   const handleLike = async () => {
     if (!user) {
@@ -175,10 +176,11 @@ const AnswerCommentCard = ({ comment, answerId, onCommentUpdate }) => {
         <div className="flex items-center gap-4 text-sm">
           <button
             onClick={handleLike}
-            className={`flex items-center gap-1 ${user && comment.likes.includes(user._id)
-              ? "text-primary"
-              : "text-gray-500"
-              }`}
+            className={`flex items-center gap-1 ${
+              user && comment.likes.includes(user._id)
+                ? "text-primary"
+                : "text-gray-500"
+            }`}
           >
             <FaThumbsUp />
             <span>{comment.likes.length}</span>
@@ -236,8 +238,9 @@ const AnswerCommentCard = ({ comment, answerId, onCommentUpdate }) => {
             >
               {showReplies
                 ? "Hide Replies"
-                : `Show ${comment.replies.length} ${comment.replies.length === 1 ? "Reply" : "Replies"
-                }`}
+                : `Show ${comment.replies.length} ${
+                    comment.replies.length === 1 ? "Reply" : "Replies"
+                  }`}
             </button>
           </div>
         )}
@@ -250,7 +253,7 @@ const AnswerCommentCard = ({ comment, answerId, onCommentUpdate }) => {
                 key={reply._id}
                 replyId={reply._id}
                 commentId={comment._id}
-                onReplyUpdate={() => fetchReplies()}
+                onReplyUpdate={fetchReplies}
               />
             ))}
           </div>

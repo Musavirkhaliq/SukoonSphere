@@ -68,9 +68,9 @@ const ReactionButton = ({
   return (
     <div className={`${className} relative`}>
       {showMobileTooltip && (
-        <div className="absolute -top-14 left-0 right-0 bg-[var(--primary)] text-white text-xs p-2 rounded text-center ">
+        <div className="absolute -top-10 left-0 right-0 bg-black text-white text-xs p-2 rounded text-center md:hidden">
           Hold to see all reactions
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-[var(--primary)]"></div>
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-black"></div>
         </div>
       )}
       <ReactionSelector

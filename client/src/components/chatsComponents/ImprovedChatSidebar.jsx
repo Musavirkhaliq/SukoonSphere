@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useUser } from "@/context/UserContext";
 import customFetch from "@/utils/customFetch";
 import socket from "@/utils/socket/socket";
@@ -15,7 +15,6 @@ import ChatList from "./ChatList";
 import ImprovedRoomList from "./ImprovedRoomList";
 import SearchChatPersons from "./SearchChatPersons";
 import CreateRoomModal from "./CreateRoomModal";
-import { MdArrowBack } from "react-icons/md";
 
 const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen }) => {
   const { user } = useUser();
@@ -309,14 +308,6 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
       <div className="p-4 bg-[var(--primary)]  text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Link
-              to="/Posts"
-              className="md:hidden p-2 text-white hover:text-red-400 rounded-full transition-colors duration-200"
-              aria-label="Go back"
-            >
-              <MdArrowBack size={24} />
-            </Link>
-
             <div className="relative">
               <img
                 src={
@@ -345,7 +336,7 @@ const ImprovedChatSidebar = ({ onClose, setPreventSidebarClose, keepSidebarOpen 
               className="p-2 rounded-full hover:bg-blue-600 transition-colors"
               title={sortOrder === "newest" ? "Newest first" : "Oldest first"}
             >
-              {sortOrder === "newest" ? <FaSortAmountDown size={24} /> : <FaSortAmountUp size={24} />}
+              {sortOrder === "newest" ? <FaSortAmountDown size={14} /> : <FaSortAmountUp size={14} />}
             </button>
             {/* Only show in desktop view */}
             <div className="hidden lg:block">

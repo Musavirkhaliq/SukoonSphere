@@ -82,7 +82,7 @@ const ReactionUsersList = ({ contentId, contentType, reactionType, onClose }) =>
   };
 
   return (
-    <div className="p-3 w-[350px] md:w-[400px] bg-white z-50">
+    <div className="p-3">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold">People who reacted</h3>
         <button
@@ -95,13 +95,14 @@ const ReactionUsersList = ({ contentId, contentType, reactionType, onClose }) =>
       </div>
 
       {/* Reaction type filters */}
-      <div className="flex flex-wrap gap-1 mb-3 ">
+      <div className="flex flex-wrap gap-1 mb-3">
         <button
           onClick={() => handleTypeChange('all')}
-          className={`px-2 py-1 text-xs rounded-full ${selectedType === 'all'
-            ? 'bg-gray-200 font-medium'
-            : 'bg-gray-100 hover:bg-gray-200'
-            }`}
+          className={`px-2 py-1 text-xs rounded-full ${
+            selectedType === 'all'
+              ? 'bg-gray-200 font-medium'
+              : 'bg-gray-100 hover:bg-gray-200'
+          }`}
         >
           All
         </button>
@@ -110,10 +111,11 @@ const ReactionUsersList = ({ contentId, contentType, reactionType, onClose }) =>
           <button
             key={type}
             onClick={() => handleTypeChange(type)}
-            className={`flex items-center px-2 py-1 text-xs rounded-full ${selectedType === type
-              ? 'bg-gray-200 font-medium'
-              : 'bg-gray-100 hover:bg-gray-200'
-              }`}
+            className={`flex items-center px-2 py-1 text-xs rounded-full ${
+              selectedType === type
+                ? 'bg-gray-200 font-medium'
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
           >
             <span className="mr-1">{icon}</span>
             <span>{reactionLabels[type]}</span>
@@ -122,7 +124,7 @@ const ReactionUsersList = ({ contentId, contentType, reactionType, onClose }) =>
       </div>
 
       {/* Users list */}
-      <div className="max-h-60 overflow-y-auto z-50">
+      <div className="max-h-60 overflow-y-auto">
         {loading ? (
           <div className="flex justify-center items-center py-4">
             <FaSpinner className="animate-spin text-gray-500 mr-2" />
@@ -139,8 +141,8 @@ const ReactionUsersList = ({ contentId, contentType, reactionType, onClose }) =>
             {users.map((user) => (
               <li key={user._id} className="py-2">
                 <Link
-                  to={`/about/user/${user._id}`}
-                  className="flex items-center hover:bg-gray-50 p-1 rounded justify-center"
+                  to={`/user-profile/${user._id}`}
+                  className="flex items-center hover:bg-gray-50 p-1 rounded"
                 >
                   <div className="flex-shrink-0 mr-2">
                     {user.avatar ? (
