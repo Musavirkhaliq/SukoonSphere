@@ -58,8 +58,8 @@ const PersonalStoryCommentCard = memo(({ comment, storyId, refetch }) => {
     const totalCount = newReactionCounts.total !== undefined
       ? newReactionCounts.total
       : Object.entries(newReactionCounts)
-        .filter(([key]) => key !== 'total')
-        .reduce((sum, [_, count]) => sum + count, 0);
+          .filter(([key]) => key !== 'total')
+          .reduce((sum, [_, count]) => sum + count, 0);
 
     // Update local state with the new reaction data
     setReactionCounts({
@@ -220,7 +220,7 @@ const PersonalStoryCommentCard = memo(({ comment, storyId, refetch }) => {
       )}
 
       {/* Comment actions */}
-      <div className="flex items-center gap-2 mt-3">
+      <div className="flex items-center gap-4 mt-3">
         <ReactionButton
           contentId={comment._id}
           contentType="personalStoryComment"
@@ -244,18 +244,16 @@ const PersonalStoryCommentCard = memo(({ comment, storyId, refetch }) => {
           <FaReply />
           <span className="text-xs">Reply</span>
         </button>
+
         {comment.totalReplies > 0 && (
-          <div className="">
-            <button
-              onClick={() => setShowReplies(!showReplies)}
-              className="text-primary text-sm"
-            >
-              {showReplies
-                ? "Hide Replies"
-                : `Show ${comment.totalReplies} ${comment.totalReplies === 1 ? "Reply" : "Replies"
-                }`}
-            </button>
-          </div>
+          <button
+            onClick={() => setShowReplies(!showReplies)}
+            className="flex items-center gap-1 text-[var(--ternery)] hover:text-blue-500 transition-colors"
+          >
+            <span className="text-xs">
+              {showReplies ? "Hide replies" : `Show ${comment.totalReplies} ${comment.totalReplies === 1 ? "reply" : "replies"}`}
+            </span>
+          </button>
         )}
       </div>
 
@@ -316,7 +314,7 @@ const PersonalStoryCommentCard = memo(({ comment, storyId, refetch }) => {
 
       {/* Replies */}
       {showReplies && (
-        <div className="mt-3 border-l-2 border-gray-200 space-y-3">
+        <div className="mt-3 pl-8 border-l-2 border-gray-200 space-y-3">
           {isLoadingReplies ? (
             <div className="flex justify-center py-2">
               <FaSpinner className="animate-spin text-blue-500" />

@@ -45,7 +45,6 @@ import {
 
 import { FollowNotification } from './UserNotificationCards';
 import { RequestChatNotification } from './RequestChatNotification';
-import { PersonalStoryCommentLikedNotification, PersonalStoryCommentNotification, PersonalStoryCommentReplyLikedNotification, PersonalStoryLikedNotification, PersonalStoryReplyNotification } from './PersonalStoriesNotifcationCard';
 
 // Enhanced dropdown animations
 const dropdownVariants = {
@@ -104,8 +103,6 @@ const EnhancedNotificationDropdown = () => {
     deleteNotification,
     closeDropdown
   } = useNotifications();
-
-  console.log({ notifications });
 
   const [filter, setFilter] = useState('all');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -211,19 +208,9 @@ const EnhancedNotificationDropdown = () => {
               return <FollowNotification {...notificationProps} />;
             case "requestChat":
               return <RequestChatNotification {...notificationProps} />;
-            case "personalStoryLiked":
-              return <PersonalStoryLikedNotification {...notificationProps} />;
-            case "personalStoryComment":
-              return <PersonalStoryCommentNotification {...notificationProps} />;
-            case "personalStoryCommentReply":
-              return <PersonalStoryReplyNotification {...notificationProps} />;
-            case "personalStoryCommentLiked":
-              return <PersonalStoryCommentLikedNotification {...notificationProps} />;
-            case "personalStoryCommentReplyLiked":
-              return <PersonalStoryCommentReplyLikedNotification {...notificationProps} />;
             default:
               return (
-                <div className={`p-3 border-b border-slate-100   cursor-pointer transition-all relative hover:bg-slate-50 z-10 ${!notification.seen ? 'bg-blue-50 hover:bg-blue-100' : ''}`}>
+                <div className={`p-3 border-b border-slate-100 cursor-pointer transition-all relative hover:bg-slate-50 z-50 ${!notification.seen ? 'bg-blue-50 hover:bg-blue-100' : ''}`}>
                   <div className="flex gap-3 mb-2">
                     <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-lg text-slate-500">
                       <IoNotifications />

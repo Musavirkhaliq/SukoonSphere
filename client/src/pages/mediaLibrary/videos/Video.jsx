@@ -180,7 +180,7 @@ const Video = () => {
                             {/* Sticky Video Container */}
                             <div
                                 ref={stickyHeaderRef}
-                                className="md:relative sticky top-0  z-30 bg-white shadow-md md:rounded-t-xl overflow-hidden"
+                                className="sticky top-16 z-30 bg-white shadow-md rounded-t-xl overflow-hidden"
                                 style={{ marginBottom: isLoadingPlaylist || playlist ? 0 : '1rem' }}
                             >
                                 {/* Video Player - Fixed at top */}

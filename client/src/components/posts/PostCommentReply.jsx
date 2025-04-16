@@ -11,7 +11,6 @@ import { Link } from "react-router-dom";
 import ReactionButton from "../shared/Reactions/ReactionButton";
 
 const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
-  console.log({ reply })
   const { user } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.content);
@@ -139,8 +138,8 @@ const PostCommentReply = ({ reply, onReplyUpdate, postId }) => {
             (String(user._id) === String(reply.createdBy)) ||
             (reply.isAnonymous && reply.realCreator && String(user._id) === String(reply.realCreator))
           ) && (
-              <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
-            )}
+            <PostActions handleEdit={handleEdit} handleDelete={handleDelete} />
+          )}
         </div>
 
         {/* Reply Content */}

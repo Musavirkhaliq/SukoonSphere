@@ -59,15 +59,7 @@ const Footer = () => {
                   Quick Links
                 </h3>
                 <ul className="space-y-3">
-                  <li>
-                    <NavLink
-                      to="/"
-                      className="text-slate-400 hover:text-amber-400 text-sm"
-                    >
-                      Home
-                    </NavLink>
-                  </li>
-                  {links.slice(1, 4).map((link, index) => (
+                  {links.slice(0, 3).map((link, index) => (
                     <li key={`${link.name}-${index}`}>
                       <span className="text-slate-300 font-medium">
                         {link.name}
