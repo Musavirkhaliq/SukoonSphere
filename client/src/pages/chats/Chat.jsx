@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Outlet, useParams, useLocation } from "react-router-dom";
+import { Outlet, useParams, useLocation, Link } from "react-router-dom";
 import ImprovedChatSidebar from "@/components/chatsComponents/ImprovedChatSidebar";
 import "@/components/chatsComponents/ChatMobile.css";
 import { FaArrowLeft } from "react-icons/fa";
@@ -67,13 +67,13 @@ const Chat = () => {
           <div className="flex-1 w-full bg-white overflow-hidden relative chat-main-content">
             {/* Mobile Back Button - Only visible when no chat is selected and on mobile */}
             {!id && !isSidebarOpen && (
-              <button
-                onClick={() => setIsSidebarOpen(true)}
-                className="absolute top-4 left-4 p-3 bg-blue-500 text-white rounded-full shadow-md lg:hidden z-10"
+              <Link
+                to={"/"}
+                className="absolute top-4 left-4 p-3  text-[var(--ternery)] rounded-full lg:hidden z-10 flex gap-2 items-center"
                 aria-label="Show sidebar"
               >
-                <FaArrowLeft />
-              </button>
+                <FaArrowLeft /> Go to home
+              </Link>
             )}
             <Outlet
               context={{
