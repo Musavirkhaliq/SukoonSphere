@@ -373,7 +373,7 @@ const ReactionSelector = ({
       {showReactionSelector && (
         <div
           ref={selectorRef}
-          className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-lg z-50 p-2 flex flex-wrap gap-2 border border-gray-200 w-auto min-w-[300px] max-w-[95vw] md:max-w-none"
+          className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-lg z-50 p-2 flex flex-wrap gap-2 border border-gray-200 w-auto min-w-[350px] max-w-[95vw] md:max-w-none"
         >
           <div className="w-full text-center text-xs text-gray-500 mb-2 md:hidden">
             Tap a reaction below
