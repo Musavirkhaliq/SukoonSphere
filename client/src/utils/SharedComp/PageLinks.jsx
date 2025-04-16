@@ -2,7 +2,7 @@ import React from "react";
 import { FaHome, FaCaretRight, FaBrain, FaRobot, FaLightbulb } from "react-icons/fa";
 import { BiQuestionMark } from "react-icons/bi";
 import { BsChatDots } from "react-icons/bs";
-import { MdVideoLibrary } from "react-icons/md";
+import { MdOutlineAutoStories, MdVideoLibrary } from "react-icons/md";
 import { GiPodium } from "react-icons/gi";
 import { AiOutlineMail, AiOutlineInfoCircle } from "react-icons/ai";
 import { FiUsers } from "react-icons/fi";
@@ -47,6 +47,13 @@ const links = [
     icon: <RiDiscussFill />,
     description: "Engage in dialogues",
     sublinks: [
+      {
+        name: "Personal Stories",
+        address: "personal-stories",
+        description: "Personal stories and experiences",
+        // icon: <FaCaretRight />,
+        icon: <MdOutlineAutoStories />,
+      },
       {
         name: "QA-Section",
         address: "QA-Section",

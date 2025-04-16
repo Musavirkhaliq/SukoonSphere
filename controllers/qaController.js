@@ -12,7 +12,7 @@ import {
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import { io } from "../server.js";
-import { updateUserPoints ,awardBadges} from "../utils/gamification.js";
+import { updateUserPoints, awardBadges } from "../utils/gamification.js";
 
 // question controllers
 export const addQuestion = async (req, res) => {
@@ -122,28 +122,28 @@ export const getAllQuestions = async (req, res) => {
     const totalCount = await Question.aggregate([
       ...(search
         ? [
-            {
-              $match: {
-                $or: [
-                  { questionText: { $regex: search, $options: "i" } },
-                  { context: { $regex: search, $options: "i" } },
-                  { tags: { $regex: search, $options: "i" } },
-                ],
-              },
+          {
+            $match: {
+              $or: [
+                { questionText: { $regex: search, $options: "i" } },
+                { context: { $regex: search, $options: "i" } },
+                { tags: { $regex: search, $options: "i" } },
+              ],
             },
-          ]
+          },
+        ]
         : []),
       ...(sortBy === "unanswered"
         ? [
-            {
-              $match: {
-                $or: [
-                  { answers: { $size: 0 } },
-                  { answers: { $exists: false } },
-                ],
-              },
+          {
+            $match: {
+              $or: [
+                { answers: { $size: 0 } },
+                { answers: { $exists: false } },
+              ],
             },
-          ]
+          },
+        ]
         : []),
     ]).count("total");
 
@@ -857,18 +857,69 @@ export const getAllCommentsByAnswerId = async (req, res) => {
       },
     },
     {
+      $unwind: {
+        path: "$repliesData",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "repliesData.replyTo",
+        foreignField: "_id",
+        as: "replyToUserDetails",
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        answerId: { $first: "$answerId" },
+        content: { $first: "$content" },
+        createdBy: { $first: "$createdBy" },
+        username: { $first: { $arrayElemAt: ["$userDetails.name", 0] } },
+        userAvatar: { $first: { $arrayElemAt: ["$userDetails.avatar", 0] } },
+        likes: { $first: "$likes" },
+        replies: { $first: "$replies" },
+        createdAt: { $first: "$createdAt" },
+        updatedAt: { $first: "$updatedAt" },
+        deleted: { $first: "$deleted" },
+        repliesLength: { $first: { $size: { $ifNull: ["$replies", []] } } },
+        totalLikes: { $first: { $size: { $ifNull: ["$likes", []] } } },
+        totalReplies: { $first: { $size: { $ifNull: ["$replies", []] } } },
+        repliesData: {
+          $push: {
+            _id: "$repliesData._id",
+            content: "$repliesData.content",
+            createdBy: "$repliesData.createdBy",
+            replyTo: "$repliesData.replyTo",
+            isAnonymous: "$repliesData.isAnonymous",
+            realCreator: "$repliesData.realCreator",
+            likes: "$repliesData.likes",
+            createdAt: "$repliesData.createdAt",
+            updatedAt: "$repliesData.updatedAt",
+            replyToUser: {
+              _id: { $arrayElemAt: ["$replyToUserDetails._id", 0] },
+              name: { $arrayElemAt: ["$replyToUserDetails.name", 0] },
+              avatar: { $arrayElemAt: ["$replyToUserDetails.avatar", 0] },
+            },
+          },
+        },
+      },
+    },
+    {
       $addFields: {
-        username: { $arrayElemAt: ["$userDetails.name", 0] },
-        userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
-        repliesLength: { $size: { $ifNull: ["$replies", []] } },
-        totalLikes: { $size: { $ifNull: ["$likes", []] } },
-        totalReplies: { $size: { $ifNull: ["$replies", []] } },
+        repliesData: {
+          $filter: {
+            input: "$repliesData",
+            as: "reply",
+            cond: { $ne: ["$$reply._id", null] },
+          },
+        },
       },
     },
     {
       $project: {
         userDetails: 0,
-        repliesData: 0,
       },
     },
     {
@@ -978,6 +1029,7 @@ export const getAllAnswerRepliesByCommentId = async (req, res) => {
         as: "authorDetails",
       },
     },
+
     {
       $lookup: {
         from: "users",
@@ -992,7 +1044,7 @@ export const getAllAnswerRepliesByCommentId = async (req, res) => {
         userAvatar: { $arrayElemAt: ["$authorDetails.avatar", 0] },
         commentUsername: { $arrayElemAt: ["$replyToDetails.name", 0] },
         commentUserAvatar: { $arrayElemAt: ["$replyToDetails.avatar", 0] },
-        commentUserId: "$replyTo",
+        commentUserId: { $arrayElemAt: ["$replyToDetails._id", 0] },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
       },
     },

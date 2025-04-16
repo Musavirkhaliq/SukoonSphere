@@ -166,6 +166,19 @@ const ArticleCommentCard = ({ comment, articleId, onCommentUpdate }) => {
             <FaReply />
             Reply
           </button>
+          {comment.replies?.length > 0 && (
+            <div className="">
+              <button
+                onClick={() => setShowReplies(!showReplies)}
+                className="text-primary text-sm"
+              >
+                {showReplies
+                  ? "Hide Replies"
+                  : `Show ${comment.replies.length} ${comment.replies.length === 1 ? "Reply" : "Replies"
+                  }`}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Reply Form */}
@@ -196,30 +209,17 @@ const ArticleCommentCard = ({ comment, articleId, onCommentUpdate }) => {
         )}
 
         {/* Replies */}
-        {comment.replies?.length > 0 && (
-          <div className="mt-4">
-            <button
-              onClick={() => setShowReplies(!showReplies)}
-              className="text-primary text-sm"
-            >
-              {showReplies
-                ? "Hide Replies"
-                : `Show ${comment.replies.length} ${
-                    comment.replies.length === 1 ? "Reply" : "Replies"
-                  }`}
-            </button>
-            {showReplies && (
-              <div className="ml-4 mt-2 space-y-3">
-                {comment.replies.map((reply) => (
-                  <ArticleCommentReply
-                    key={reply._id}
-                    reply={reply}
-                    commentId={comment._id}
-                    onReplyUpdate={onCommentUpdate}
-                  />
-                ))}
-              </div>
-            )}
+
+        {showReplies && (
+          <div className="ml-4 mt-2 space-y-3">
+            {comment.replies.map((reply) => (
+              <ArticleCommentReply
+                key={reply._id}
+                reply={reply}
+                commentId={comment._id}
+                onReplyUpdate={onCommentUpdate}
+              />
+            ))}
           </div>
         )}
       </div>
