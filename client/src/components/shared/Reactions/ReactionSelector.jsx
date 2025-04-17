@@ -332,7 +332,7 @@ const ReactionSelector = ({
   };
 
   return (
-    <div className="relative w-[350px]">
+    <div className="relative ">
       {/* Main reaction button */}
       <div className="flex items-center gap-2">
         <button
