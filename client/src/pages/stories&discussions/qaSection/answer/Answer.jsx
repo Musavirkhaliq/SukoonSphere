@@ -15,6 +15,7 @@ export const answerAction = async ({ request }) => {
   const formData = await request.formData();
   const context = formData.get("context");
   const questionId = formData.get("questionId");
+  const isAnonymous = formData.get("isAnonymous") === "true";
 
   if (!context?.trim()) {
     return { error: "Answer cannot be empty" };
@@ -23,7 +24,7 @@ export const answerAction = async ({ request }) => {
   try {
     const { data } = await customFetch.post(
       `/qa-section/question/${questionId}/add-answer`,
-      { context }
+      { context, isAnonymous }
     );
     return { success: data.msg };
   } catch (error) {
@@ -36,6 +37,7 @@ const Answer = () => {
   const { user } = useUser();
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [newAnswer, setNewAnswer] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const actionData = useActionData();
   const { ref, inView } = useInView();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -134,6 +136,45 @@ const Answer = () => {
     }
     setSelectedQuestionId((prev) => (prev === questionId ? null : questionId));
     setNewAnswer("");
+    setIsAnonymous(false);
+  };
+
+  const handleSubmitAnswer = async (e) => {
+    e.preventDefault();
+
+    if (!user) {
+      toast.error("Please login to submit an answer");
+      return;
+    }
+
+    if (!newAnswer.trim()) {
+      toast.error("Answer cannot be empty");
+      return;
+    }
+
+    if (!selectedQuestionId) {
+      console.error("Question ID is missing");
+      toast.error("Failed to submit answer. Please try again.");
+      return;
+    }
+
+    try {
+      const response = await customFetch.post(
+        `/qa-section/question/${selectedQuestionId}/add-answer`,
+        {
+          context: newAnswer,
+          isAnonymous: isAnonymous ? true : false // Ensure boolean value is sent
+        }
+      );
+
+      toast.success("Answer submitted successfully");
+      setNewAnswer("");
+      setSelectedQuestionId(null);
+      refetch();
+    } catch (error) {
+      console.error("Error submitting answer:", error);
+      toast.error(error.response?.data?.msg || "Failed to submit answer");
+    }
   };
 
   if (status === "loading") {
@@ -289,7 +330,7 @@ const Answer = () => {
                   >
                     <UserAvatar
                       createdBy={question?.author.userId}
-                      username={question?.author.username}
+                      username={question?.author.username || question?.authorName}
                       userAvatar={question?.author.userAvatar}
                       createdAt={question?.createdAt}
                     />
@@ -361,12 +402,26 @@ const Answer = () => {
                     </div>
 
                     {selectedQuestionId === question._id && (
-                      <Form method="post" className="mt-4">
+                      <Form onSubmit={handleSubmitAnswer} className="mt-4">
                         <input
                           type="hidden"
                           name="questionId"
                           value={question._id}
                         />
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id="anonymous"
+                              checked={isAnonymous}
+                              onChange={(e) => setIsAnonymous(e.target.checked)}
+                              className="w-4 h-4 text-[var(--primary)] rounded"
+                            />
+                            <label htmlFor="anonymous" className="text-sm text-gray-600">
+                              Post anonymously
+                            </label>
+                          </div>
+                        </div>
                         <div className="mb-4">
                           <textarea
                             name="context"

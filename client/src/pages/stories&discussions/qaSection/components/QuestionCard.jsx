@@ -1,7 +1,6 @@
 import { useState } from "react";
 import UserAvatar from "@/components/shared/UserAvatar";
 import PostActions from "@/components/shared/PostActions";
-import { FaUserMinus, FaUserPlus } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi";
 import { IoCloseOutline } from "react-icons/io5";
 import { useUser } from "@/context/UserContext";
@@ -26,24 +25,24 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
     authorName,
   } = question;
 
-  // Get a few answers to display (up to 3)
   const previewAnswers = answers?.slice(0, 2) || [];
   const hasMoreAnswers = totalAnswers > previewAnswers.length;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAnswerForm, setShowAnswerForm] = useState(false);
   const [answerText, setAnswerText] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAnswerPreviews, setShowAnswerPreviews] = useState(false);
 
   const handleDeleteQuestion = async () => {
     try {
       await customFetch.delete(`/qa-section/question/${_id}`);
+      toast.success("Question deleted successfully");
       setShowDeleteModal(false);
       window.location.reload();
     } catch (error) {
-      console.log(error);
-      toast.error("Failed to delete question");
+      toast.error(error?.response?.data?.msg || "Failed to delete question");
     }
   };
 
@@ -52,39 +51,34 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       toast.error("Please login to answer questions");
       return;
     }
-    setShowAnswerForm((prev) => !prev);
+    setShowAnswerForm(!showAnswerForm);
     setAnswerText("");
+    setIsAnonymous(false);
   };
 
   const handleSubmitAnswer = async (e) => {
     e.preventDefault();
-
     if (!answerText.trim()) {
       toast.error("Answer cannot be empty");
       return;
     }
-
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-      const response = await customFetch.post(
-        `/qa-section/question/${_id}/add-answer`,
-        { context: answerText }
-      );
-
+      await customFetch.post(`/qa-section/question/${_id}/add-answer`, {
+        context: answerText,
+        isAnonymous,
+      });
       toast.success("Answer submitted successfully");
       setShowAnswerForm(false);
       setAnswerText("");
-
-      // Refresh the question data if callback provided
+      setIsAnonymous(false);
       if (typeof onAnswerSubmitted === "function") {
         onAnswerSubmitted();
       } else {
-        // Fallback to reload if no callback
         window.location.reload();
       }
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.msg || "Failed to submit answer");
+      toast.error(error?.response?.data?.msg || "Failed to submit answer");
     } finally {
       setIsSubmitting(false);
     }
@@ -103,19 +97,16 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           <span className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium">
             {totalAnswers} {totalAnswers === 1 ? "Answer" : "Answers"}
           </span>
-          {/* {user && question?.author?.userId === user?._id && (
+          {user && author?.userId === user?._id && (
             <PostActions handleDelete={() => setShowDeleteModal(true)} />
-          )} */}
+          )}
         </div>
       </div>
-
       <div className="mb-4">
         <h3 className="text-lg md:text-2xl mb-2 font-bold text-[var(--grey--900)] hover:text-[var(--ternery)] transition-colors duration-200">
           {questionText}
         </h3>
-        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">
-          {context}
-        </p>
+        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">{context}</p>
         <div className="flex flex-wrap gap-2 mb-4">
           {tags?.map((tag, index) => (
             <span
@@ -127,7 +118,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           ))}
         </div>
       </div>
-
       <div className="flex flex-wrap gap-2 mt-4">
         <button
           onClick={handleAnswerButtonClick}
@@ -149,7 +139,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
             </>
           )}
         </button>
-
         <Link
           to={`/QA-section/question/${_id}`}
           className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 transition-all duration-300"
@@ -157,9 +146,23 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           See more answers →
         </Link>
       </div>
-
       {showAnswerForm && (
         <form onSubmit={handleSubmitAnswer} className="mt-4">
+          <input type="hidden" name="isAnonymous" value={isAnonymous.toString()} />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="anonymous"
+                checked={isAnonymous}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+                className="w-4 h-4 text-[var(--primary)] rounded focus:ring-[var(--primary)]"
+              />
+              <label htmlFor="anonymous" className="text-sm text-gray-600">
+                Post anonymously
+              </label>
+            </div>
+          </div>
           <div className="mb-4">
             <textarea
               value={answerText}
@@ -180,8 +183,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           </div>
         </form>
       )}
-
-      {/* Answer Previews Section */}
       {totalAnswers > 0 && (
         <div className="mt-4">
           <div className="">
@@ -201,8 +202,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
               </div>
             )}
           </div>
-
-          {/* Show only top answer when not expanded */}
           {!showAnswerPreviews && mostLikedAnswer && (
             <Answer
               answer={mostLikedAnswer}
@@ -211,8 +210,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
               preview={true}
             />
           )}
-
-          {/* Show preview answers when expanded */}
           {showAnswerPreviews && previewAnswers.length > 0 && (
             <div className="space-y-3">
               {previewAnswers.map((answer) => (
@@ -223,7 +220,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
                   preview={true}
                 />
               ))}
-
               {hasMoreAnswers && (
                 <Link
                   to={`/QA-section/question/${_id}`}
@@ -236,7 +232,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           )}
         </div>
       )}
-
       <DeleteModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}

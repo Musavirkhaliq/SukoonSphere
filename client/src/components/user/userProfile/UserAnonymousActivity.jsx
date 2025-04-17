@@ -7,6 +7,7 @@ import PostCard from "@/components/posts/PostCard";
 import PersonalStoryCard from "@/components/personalStories/PersonalStoryCard";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
 import QuestionCard from "@/pages/stories&discussions/qaSection/components/QuestionCard";
+import Answer from "@/pages/stories&discussions/qaSection/components/Answer";
 
 const UserAnonymousActivity = () => {
   const user = useOutletContext();
@@ -16,6 +17,7 @@ const UserAnonymousActivity = () => {
     posts: [],
     stories: [],
     questions: [],
+    answers: [],
     // Add other content types as needed
   });
 
@@ -40,13 +42,19 @@ const UserAnonymousActivity = () => {
 
         // Fetch anonymous questions
         const questionsResponse = await customFetch.get("/user/anonymous-content/question");
-        console.log({quesRes:questionsResponse.data})
+        
+        // Fetch anonymous answers
+        const answersResponse = await customFetch.get("/user/anonymous-content/answer");
+        console.log({ansRes:answersResponse.data})
+        
+        
 
         // Set the anonymous content
         setAnonymousContent({
           posts: postsResponse.data.posts || [],
           stories: storiesResponse.data.stories || [],
           questions: questionsResponse.data.questions || [],
+          answers: answersResponse.data.answers || [],
           // Add other content types as needed
         });
 
@@ -83,7 +91,9 @@ const UserAnonymousActivity = () => {
 
   const hasAnonymousContent =
     anonymousContent.posts.length > 0 ||
-    anonymousContent.stories.length > 0;
+    anonymousContent.stories.length > 0 ||
+    anonymousContent.questions.length > 0 ||
+    anonymousContent.answers.length > 0;
 
   if (!hasAnonymousContent) {
     return (
@@ -128,14 +138,29 @@ const UserAnonymousActivity = () => {
         </div>
       )}
 
-{anonymousContent.questions.length > 0 && (
+      {/* Anonymous Questions Section */}
+      {anonymousContent.questions.length > 0 && (
         <div>
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Anonymous Stories
+            Anonymous Questions
           </h2>
           <div className="space-y-4">
             {anonymousContent.questions.map((question) => (
               <QuestionCard key={question._id} question={question} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Anonymous Answers Section */}
+      {anonymousContent.answers.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Anonymous Answers
+          </h2>
+          <div className="space-y-4">
+            {anonymousContent.answers.map((answer) => (
+              <Answer key={answer._id} answer={answer} preview={true} />
             ))}
           </div>
         </div>

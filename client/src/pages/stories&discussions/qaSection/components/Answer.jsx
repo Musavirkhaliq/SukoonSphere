@@ -85,7 +85,7 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
       <div className="flex items-center justify-between mb-2">
         <UserAvatar
           createdBy={answer?.author?.userId}
-          username={answer?.author?.username}
+          username={answer?.author?.username || answer?.authorName}
           userAvatar={answer?.author?.userAvatar}
           createdAt={answer?.createdAt}
         // compact={preview}

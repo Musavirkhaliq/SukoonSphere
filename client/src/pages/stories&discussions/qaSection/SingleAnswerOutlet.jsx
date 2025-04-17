@@ -42,7 +42,7 @@ const SingleAnswerOutlet = () => {
       {/* question  */}
       <div className="flex items-center justify-between mb-5">
         <UserAvatar
-          username={question?.author?.username}
+          username={question?.author?.username || authorName}
           userAvatar={question?.author?.userAvatar}
           createdAt={question?.createdAt}
         />
