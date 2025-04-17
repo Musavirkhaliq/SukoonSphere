@@ -15,6 +15,10 @@ const questionSchema = new mongoose.Schema(
       ref: "User",
       required: true
     },
+    realCreator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
     tags: {
       type: [String],
       default: [],
@@ -26,6 +30,10 @@ const questionSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    isAnonymous: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );

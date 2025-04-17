@@ -13,33 +13,60 @@ import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import { io } from "../server.js";
 import { updateUserPoints, awardBadges } from "../utils/gamification.js";
+import { getAnonymousUserId } from '../utils/anonymousUser.js';
 
 // question controllers
 export const addQuestion = async (req, res) => {
-  const { questionText, context, tags } = req.body;
+  const { questionText, context, tags, isAnonymous } = req.body;
   const { userId } = req.user;
+  if (typeof isAnonymous === 'string') {
+    isAnonymous = isAnonymous === 'true';
+  }
 
-  const newQuestion = await Question.create(
-    [
-      {
-        questionText,
-        context,
-        createdBy: userId, // Only store user ID
-        tags,
-      },
-    ]
-  );
+  try {
+    let createdBy = userId;
+    if (isAnonymous) {
+      const anonymousUserId = await getAnonymousUserId();
+      if (!anonymousUserId) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          msg: 'Failed to create anonymous question'
+        });
+      }
+      createdBy = anonymousUserId;
+    }
 
-  await User.findByIdAndUpdate(
-    userId,
-    { $push: { questions: newQuestion[0]._id } },
-  );
-  await updateUserPoints(userId, "question");
-  const earnedBadges = await awardBadges(userId, "question");
+    const newQuestion = await Question.create(
+      [
+        {
+          questionText,
+          context,
+          createdBy,
+          tags,
+          isAnonymous: isAnonymous || false,
+          realCreator: isAnonymous ? userId : null // Store the real creator's ID for anonymous posts
+        },
+      ]
+    );
 
-  res.status(StatusCodes.CREATED).json({
-    msg: "Question added successfully",
-  });
+    if (!isAnonymous) {
+      await User.findByIdAndUpdate(
+        userId,
+        { $push: { questions: newQuestion[0]._id } },
+      );
+    }
+    await updateUserPoints(userId, "question");
+    const earnedBadges = await awardBadges(userId, "question");
+
+    res.status(StatusCodes.CREATED).json({
+      msg: "Question added successfully",
+    });
+  } catch (error) {
+    console.error('Error in addQuestion:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: 'Error adding question',
+      error: error.message
+    });
+  }
 };
 
 export const getAllQuestions = async (req, res) => {
@@ -72,8 +99,20 @@ export const getAllQuestions = async (req, res) => {
         $addFields: {
           author: {
             userId: "$createdBy",
-            username: { $arrayElemAt: ["$userDetails.name", 0] },
-            userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+            username: {
+              $cond: [
+                "$isAnonymous",
+                "Anonymous",
+                { $arrayElemAt: ["$userDetails.name", 0] }
+              ]
+            },
+            userAvatar: {
+              $cond: [
+                "$isAnonymous",
+                null, // Will use default avatar for anonymous posts
+                { $arrayElemAt: ["$userDetails.avatar", 0] }
+              ]
+            },
           },
           totalAnswers: { $size: "$answers" },
         },
@@ -281,8 +320,20 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
       $addFields: {
         author: {
           userId: "$createdBy",
-          username: { $arrayElemAt: ["$userDetails.name", 0] },
-          userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+          username: {
+            $cond: [
+              "$isAnonymous",
+              "Anonymous",
+              { $arrayElemAt: ["$userDetails.name", 0] }
+            ]
+          },
+          userAvatar: {
+            $cond: [
+              "$isAnonymous",
+              null, // Will use default avatar for anonymous posts
+              { $arrayElemAt: ["$userDetails.avatar", 0] }
+            ]
+          },
         },
         totalAnswers: { $size: "$answers" },
         answers: {
@@ -809,6 +860,7 @@ export const createAnswerComment = async (req, res) => {
     },
   ]);
   if (answer.createdBy.toString() !== req.user.userId) {
+    console.log("notified");
     const notification = new Notification({
       userId: answer.createdBy, // The user who created the post
       createdBy: req.user.userId,
@@ -1659,8 +1711,20 @@ export const getMostAnsweredQuestions = async (req, res) => {
         $addFields: {
           author: {
             userId: "$createdBy",
-            username: "$userDetails.name",
-            userAvatar: "$userDetails.avatar",
+            username: {
+              $cond: [
+                "$isAnonymous",
+                "Anonymous",
+                "$userDetails.name",
+              ]
+            },
+            userAvatar: {
+              $cond: [
+                "$isAnonymous",
+                null, // Will use default avatar for anonymous posts
+                "$userDetails.avatar",
+              ]
+            },
           },
         },
       },

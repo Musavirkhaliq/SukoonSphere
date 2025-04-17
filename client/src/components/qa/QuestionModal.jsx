@@ -3,13 +3,16 @@ import { toast } from "react-toastify";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import customFetch from "@/utils/customFetch";
 import { useNavigate } from "react-router-dom";
+
 const QuestionModal = ({ isOpen, onClose, refetchQuestions }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
   const [questionText, setQuestionText] = useState("");
   const [context, setContext] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const navigate = useNavigate();
+
   if (!isOpen) return null;
 
   const handleCancel = (e) => {
@@ -18,6 +21,7 @@ const QuestionModal = ({ isOpen, onClose, refetchQuestions }) => {
     setTagInput("");
     setQuestionText("");
     setContext("");
+    setIsAnonymous(false);
     onClose();
   };
 
@@ -54,6 +58,7 @@ const QuestionModal = ({ isOpen, onClose, refetchQuestions }) => {
         questionText,
         context,
         tags,
+        isAnonymous,
       });
 
       toast.success("Question posted successfully!");
@@ -96,6 +101,21 @@ const QuestionModal = ({ isOpen, onClose, refetchQuestions }) => {
               rows="3"
               className="textarea w-full p-3 rounded-lg bg-gray-50 text-gray-800 border border-gray-200  focus:ring-2 focus:ring-[var(--primary)] transition-all duration-200"
             />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="anonymous"
+                checked={isAnonymous}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+                className="w-4 h-4 text-[var(--primary)] rounded"
+              />
+              <label htmlFor="anonymous" className="text-sm text-gray-600">
+                Post anonymously
+              </label>
+            </div>
           </div>
 
           <div className="space-y-2">
