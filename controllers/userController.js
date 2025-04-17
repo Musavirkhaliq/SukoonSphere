@@ -951,3 +951,42 @@ export const getAnonymousQuestions = async (req, res) => {
     });
   }
 };
+
+// Get anonymous answers created by the logged-in user
+export const getAnonymousAnswers = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    // Find answers where the real creator is the logged-in user and isAnonymous is true
+    const anonymousAnswers = await Answer.aggregate([
+      {
+        $match: {
+          realCreator: new mongoose.Types.ObjectId(userId),
+          isAnonymous: true,
+          deleted: { $ne: true }
+        }
+      },
+      {
+        $addFields: {
+          authorName: "Anonymous",
+          authorAvatar: null,
+          totalLikes: { $size: { $ifNull: ["$likes", []] } },
+          totalComments: { $size: { $ifNull: ["$comments", []] } },
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      answers: anonymousAnswers
+    });
+  } catch (error) {
+    console.error('Error fetching anonymous answers:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: "Error fetching anonymous answers"
+    });
+  }
+};

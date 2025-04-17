@@ -23,7 +23,8 @@ import {
   getUserAchievementsById,
   getAnonymousPosts,
   getAnonymousStories,
-  getAnonymousQuestions
+  getAnonymousQuestions,
+  getAnonymousAnswers
 } from "../controllers/userController.js";
 import { searchUsers, checkFollowing } from "../controllers/userSearchController.js";
 import upload from "../middleware/multer.js";
@@ -72,6 +73,6 @@ router.get('/check-following/:userId', authenticateUser, checkFollowing);
 router.get('/anonymous-content/posts', authenticateUser, getAnonymousPosts);
 router.get('/anonymous-content/stories', authenticateUser, getAnonymousStories);
 router.get('/anonymous-content/question', authenticateUser, getAnonymousQuestions);
-
+router.get('/anonymous-content/answer', authenticateUser, getAnonymousAnswers);
 
 export default router;

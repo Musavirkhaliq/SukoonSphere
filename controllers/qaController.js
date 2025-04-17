@@ -461,59 +461,93 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
 
 // answer controllers
 export const createAnswer = async (req, res) => {
+  const { context, isAnonymous } = req.body;
   const { userId } = req.user;
-  const { id: questionId } = req.params;
-  const { context } = req.body;
+  const questionId = req.params.id; // Get question ID from URL params
+
+  if (typeof isAnonymous === 'string') {
+    isAnonymous = isAnonymous === 'true';
+  }
+
   try {
-    // First verify the question exists
+    // Validate required fields
+    if (!context?.trim()) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        msg: "Answer content is required"
+      });
+    }
+
+    if (!questionId) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        msg: "Question ID is required"
+      });
+    }
+
+    // Verify question exists
     const question = await Question.findById(questionId);
     if (!question) {
-      throw new NotFoundError("Question not found");
+      return res.status(StatusCodes.NOT_FOUND).json({
+        msg: "Question not found"
+      });
     }
 
-    const newAnswer = await Answer.create(
-      [
-        {
-          context,
-          createdBy: userId,
-          answeredTo: questionId,
-        },
-      ]
-    );
+    let createdBy = userId;
+    if (isAnonymous) {
+      const anonymousUserId = await getAnonymousUserId();
+      if (!anonymousUserId) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          msg: "Failed to create anonymous answer"
+        });
+      }
+      createdBy = anonymousUserId;
+    }
 
+    // Create the answer
+    const newAnswer = await Answer.create({
+      context,
+      createdBy,
+      answeredTo: questionId,
+      isAnonymous: isAnonymous || false,
+      realCreator: isAnonymous ? userId : null
+    });
+
+    // Update question's answers array
     await Question.findByIdAndUpdate(
       questionId,
-      { $push: { answers: newAnswer[0]._id } },
+      { $push: { answers: newAnswer._id } },
+      { new: true }
     );
 
-    await User.findByIdAndUpdate(
-      userId,
-      { $push: { answers: newAnswer[0]._id } },
-    );
-
-    // Send notification to user who asked the question
-    if (question.createdBy.toString() !== req.user.userId) {
-      const notification = await Notification.create({
-        userId: question.createdBy,
+    // Add notification for the question creator
+    if (question.createdBy.toString() !== userId) {
+      const notification = new Notification({
+        userId: question.createdBy, // The user who created the question
         createdBy: userId,
-        type: "answered",
-        message: `${req.user.username} Answered your question`,
-        answerId: newAnswer[0]._id,
-        questionId: question._id,
+        type: 'answered',
+        message: `${req.user.username} answered your question`,
+        questionId,
+        answerId: newAnswer._id
       });
-      // Emit to socket
-      io.to(question.createdBy.toString()).emit(
-        "newNotification",
-        notification
-      );
+      await notification.save();
     }
+
     await updateUserPoints(userId, "answer");
     const earnedBadges = await awardBadges(userId, "answer");
+
     res.status(StatusCodes.CREATED).json({
       msg: "Answer created successfully",
+      answer: {
+        ...newAnswer.toObject(),
+        authorName: isAnonymous ? "Anonymous" : null,
+        authorAvatar: isAnonymous ? null : null
+      }
     });
   } catch (error) {
-    throw error;
+    console.error('Error in createAnswer:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      msg: 'Error creating answer',
+      error: error.message
+    });
   }
 };
 
@@ -1323,7 +1357,7 @@ export const editAnswer = async (req, res) => {
   }
 
   // Check if the user is authorized to edit this answer
-  if (answer.createdBy.toString() !== userId) {
+  if (answer.createdBy.toString() !== userId && !answer.realCreator) {
     throw new UnauthorizedError("Not authorized to edit this answer");
   }
 
@@ -1469,7 +1503,8 @@ export const deleteQuestion = async (req, res) => {
     user: req.user,
   });
   if (
-    question.createdBy.toString() !== req.user.userId &&
+    !(question.createdBy.toString() === req.user.userId ||
+      question.realCreator.toString() === req.user.userId) &&
     req.user.role !== "admin"
   ) {
     throw new UnauthorizedError(

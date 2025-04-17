@@ -16,25 +16,18 @@ import { IoCloseOutline } from "react-icons/io5";
 const AllQuestionAnswers = () => {
   const { user } = useUser();
   const navigate = useNavigate();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("newest");
   const { id } = useParams();
   const { ref, inView } = useInView();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("newest");
   const [showAnswerForm, setShowAnswerForm] = useState(false);
   const [answerText, setAnswerText] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAllAnswers, setShowAllAnswers] = useState(false);
-  const INITIAL_ANSWERS_TO_SHOW = 2; // Number of answers to show initially
+  const INITIAL_ANSWERS_TO_SHOW = 2;
 
-  // Set up infinite query for answers
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage: queryHasNextPage,
-    isFetchingNextPage,
-    status,
-    refetch,
-  } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status, refetch } = useInfiniteQuery({
     queryKey: ["answers", id, activeFilter],
     queryFn: async ({ pageParam = 1 }) => {
       const response = await customFetch.get(
@@ -42,23 +35,18 @@ const AllQuestionAnswers = () => {
       );
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.pagination) return undefined;
-      return lastPage.pagination.hasNextPage
-        ? lastPage.pagination.currentPage + 1
-        : undefined;
-    },
+    getNextPageParam: (lastPage) =>
+      lastPage.pagination?.hasNextPage ? lastPage.pagination.currentPage + 1 : undefined,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    cacheTime: 5 * 60 * 1000, // Cache for 5 minutes
+    cacheTime: 5 * 60 * 1000,
   });
 
-  // Fetch next page when last element is in view
   useEffect(() => {
-    if (inView && queryHasNextPage && !isFetchingNextPage) {
+    if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, fetchNextPage, queryHasNextPage, isFetchingNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
@@ -72,8 +60,7 @@ const AllQuestionAnswers = () => {
       setShowDeleteModal(false);
       navigate("/qa-section");
     } catch (error) {
-      console.log(error);
-      toast.error("Failed to delete question");
+      toast.error(error?.response?.data?.msg || "Failed to delete question");
     }
   };
 
@@ -82,32 +69,30 @@ const AllQuestionAnswers = () => {
       toast.error("Please login to answer questions");
       return;
     }
-    setShowAnswerForm(prev => !prev);
+    setShowAnswerForm(!showAnswerForm);
     setAnswerText("");
+    setIsAnonymous(false);
   };
 
   const handleSubmitAnswer = async (e) => {
     e.preventDefault();
-
     if (!answerText.trim()) {
       toast.error("Answer cannot be empty");
       return;
     }
-
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-      const response = await customFetch.post(
-        `/qa-section/question/${id}/add-answer`,
-        { context: answerText }
-      );
-
+      await customFetch.post(`/qa-section/question/${id}/add-answer`, {
+        context: answerText,
+        isAnonymous,
+      });
       toast.success("Answer submitted successfully");
       setShowAnswerForm(false);
       setAnswerText("");
+      setIsAnonymous(false);
       refetch();
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.msg || "Failed to submit answer");
+      toast.error(error?.response?.data?.msg || "Failed to submit answer");
     } finally {
       setIsSubmitting(false);
     }
@@ -118,9 +103,7 @@ const AllQuestionAnswers = () => {
   }
 
   if (status === "error") {
-    return (
-      <div className="text-center text-red-500 py-4">Error loading answers</div>
-    );
+    return <div className="text-center text-red-500 py-4">Error loading answers</div>;
   }
 
   const question = data?.pages[0]?.question || {};
@@ -129,7 +112,6 @@ const AllQuestionAnswers = () => {
 
   return (
     <div className="bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 mb-3 border border-gray-100">
-      {/* question  */}
       <div className="flex items-center justify-between mb-3">
         <UserAvatar
           createdBy={question?.author?.userId}
@@ -139,8 +121,7 @@ const AllQuestionAnswers = () => {
         />
         <div className="flex items-center gap-4">
           <span className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium">
-            {pagination?.totalAnswers || 0}{" "}
-            {pagination?.totalAnswers === 1 ? "Answer" : "Answers"}
+            {pagination?.totalAnswers || 0} {pagination?.totalAnswers === 1 ? "Answer" : "Answers"}
           </span>
           {user && question?.author?.userId === user?._id && (
             <PostActions handleDelete={() => setShowDeleteModal(true)} />
@@ -151,9 +132,7 @@ const AllQuestionAnswers = () => {
         <h3 className="text-lg md:text-2xl mb-2 font-bold text-[var(--grey--900)] hover:text-[var(--ternery)] transition-colors duration-200">
           {question?.questionText}
         </h3>
-        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">
-          {question?.context}
-        </p>
+        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">{question?.context}</p>
         <div className="flex flex-wrap gap-2 mb-2">
           {question?.tags?.map((tag, index) => (
             <span
@@ -164,14 +143,14 @@ const AllQuestionAnswers = () => {
             </span>
           ))}
         </div>
-
         <div className="flex flex-wrap gap-2 mt-4 mb-2">
           <button
             onClick={handleAnswerButtonClick}
-            className={`inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${showAnswerForm
-              ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
-              : "btn-2 shadow-sm hover:shadow-md"
-              }`}
+            className={`inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+              showAnswerForm
+                ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                : "btn-2 shadow-sm hover:shadow-md"
+            }`}
           >
             {showAnswerForm ? (
               <>
@@ -186,9 +165,23 @@ const AllQuestionAnswers = () => {
             )}
           </button>
         </div>
-
         {showAnswerForm && (
           <form onSubmit={handleSubmitAnswer} className="mt-4 mb-4">
+            <input type="hidden" name="isAnonymous" value={isAnonymous.toString()} />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="anonymous"
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                  className="w-4 h-4 text-[var(--primary)] rounded focus:ring-[var(--primary)]"
+                />
+                <label htmlFor="anonymous" className="text-sm text-gray-600">
+                  Post anonymously
+                </label>
+              </div>
+            </div>
             <div className="mb-4">
               <textarea
                 value={answerText}
@@ -210,60 +203,32 @@ const AllQuestionAnswers = () => {
           </form>
         )}
       </div>
-
       {allAnswers.length > 0 && (
-        <AnswerFilter
-          activeFilter={activeFilter}
-          onFilterChange={handleFilterChange}
-        />
-
+        <AnswerFilter activeFilter={activeFilter} onFilterChange={handleFilterChange} />
       )}
-
-      {/* Answers List */}
       <div className="space-y-4">
-        {/* Show limited answers initially or all answers when expanded */}
         {(showAllAnswers ? allAnswers : allAnswers.slice(0, INITIAL_ANSWERS_TO_SHOW)).map((answer) => (
-          <Answer
-            key={answer._id}
-            answer={answer}
-            user={user}
-            answerCount={pagination?.totalAnswers || 0}
-          />
+          <Answer key={answer._id} answer={answer} user={user} answerCount={pagination?.totalAnswers || 0} />
         ))}
-
-        {/* Show/Hide answers button */}
         {allAnswers.length > INITIAL_ANSWERS_TO_SHOW && (
           <div className="text-center py-3">
             <button
               onClick={() => setShowAllAnswers(!showAllAnswers)}
               className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-all duration-300"
             >
-              {showAllAnswers ? (
-                <>Show less answers ({INITIAL_ANSWERS_TO_SHOW} of {allAnswers.length})</>
-              ) : (
-                <>Show all answers ({allAnswers.length - INITIAL_ANSWERS_TO_SHOW} more)</>
-              )}
+              {showAllAnswers
+                ? `Show less answers (${INITIAL_ANSWERS_TO_SHOW} of ${allAnswers.length})`
+                : `Show all answers (${allAnswers.length - INITIAL_ANSWERS_TO_SHOW} more)`}
             </button>
           </div>
         )}
-
-        {/* Loading indicator */}
         <div ref={ref} className="py-4 text-center">
-          {isFetchingNextPage && (
-            <div className="text-gray-500">Loading more answers...</div>
-          )}
-          {!isFetchingNextPage && queryHasNextPage && (
-            <div className="text-gray-400">Scroll for more answers</div>
-          )}
-          {!queryHasNextPage && allAnswers.length > 0 && (
-            <div className="text-gray-400">No more answers to load</div>
-          )}
-          {!queryHasNextPage && allAnswers.length === 0 && (
-            <div className="text-gray-400">No answers yet</div>
-          )}
+          {isFetchingNextPage && <div className="text-gray-500">Loading more answers...</div>}
+          {!isFetchingNextPage && hasNextPage && <div className="text-gray-400">Scroll for more answers</div>}
+          {!hasNextPage && allAnswers.length > 0 && <div className="text-gray-400">No more answers to load</div>}
+          {!hasNextPage && allAnswers.length === 0 && <div className="text-gray-400">No answers yet</div>}
         </div>
       </div>
-
       <DeleteModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}

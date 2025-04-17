@@ -45,7 +45,7 @@ const PostCard = ({ post, user, onPostUpdate }) => {
     }
   };
 
-  console.log("Post data:", { post, currentPost });
+  console.log("Post data:", { user,post, currentPost });
 
   return (
     <>

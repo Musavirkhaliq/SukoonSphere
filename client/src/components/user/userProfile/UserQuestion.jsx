@@ -161,7 +161,7 @@ const UserQuestions = () => {
                         }}
                         className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                       >
-                        <BsThreeDotsVertical className="text-gray-500" />
+                        <BsThreeDotsVertical className="text-gray-500" size={20} />
                       </button>
                       {showActionModal &&
                         selectedQuestionId === question._id && (

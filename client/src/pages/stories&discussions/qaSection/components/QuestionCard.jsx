@@ -1,9 +1,8 @@
 import { useState } from "react";
 import UserAvatar from "@/components/shared/UserAvatar";
-import PostActions from "@/components/shared/PostActions";
-import { FaUserMinus, FaUserPlus } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi";
 import { IoCloseOutline } from "react-icons/io5";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import { useUser } from "@/context/UserContext";
 import DeleteModal from "@/components/shared/DeleteModal";
 import customFetch from "@/utils/customFetch";
@@ -26,24 +25,32 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
     authorName,
   } = question;
 
-  // Get a few answers to display (up to 3)
   const previewAnswers = answers?.slice(0, 2) || [];
   const hasMoreAnswers = totalAnswers > previewAnswers.length;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showActionModal, setShowActionModal] = useState(false);
   const [showAnswerForm, setShowAnswerForm] = useState(false);
   const [answerText, setAnswerText] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showAnswerPreviews, setShowAnswerPreviews] = useState(false);
 
   const handleDeleteQuestion = async () => {
+    setIsDeleting(true);
     try {
       await customFetch.delete(`/qa-section/question/${_id}`);
       setShowDeleteModal(false);
-      window.location.reload();
+      if (typeof onAnswerSubmitted === "function") {
+        onAnswerSubmitted();
+      } else {
+        window.location.reload();
+      }
     } catch (error) {
-      console.log(error);
-      toast.error("Failed to delete question");
+      toast.error(error?.response?.data?.msg || "Failed to delete question");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -52,44 +59,40 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       toast.error("Please login to answer questions");
       return;
     }
-    setShowAnswerForm((prev) => !prev);
+    setShowAnswerForm(!showAnswerForm);
     setAnswerText("");
+    setIsAnonymous(false);
   };
 
   const handleSubmitAnswer = async (e) => {
     e.preventDefault();
-
     if (!answerText.trim()) {
       toast.error("Answer cannot be empty");
       return;
     }
-
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-      const response = await customFetch.post(
-        `/qa-section/question/${_id}/add-answer`,
-        { context: answerText }
-      );
-
+      await customFetch.post(`/qa-section/question/${_id}/add-answer`, {
+        context: answerText,
+        isAnonymous,
+      });
       toast.success("Answer submitted successfully");
       setShowAnswerForm(false);
       setAnswerText("");
-
-      // Refresh the question data if callback provided
+      setIsAnonymous(false);
       if (typeof onAnswerSubmitted === "function") {
         onAnswerSubmitted();
       } else {
-        // Fallback to reload if no callback
         window.location.reload();
       }
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.msg || "Failed to submit answer");
+      toast.error(error?.response?.data?.msg || "Failed to submit answer");
     } finally {
       setIsSubmitting(false);
     }
   };
-
+  
+  const isQuestionOwner = user && (author?.userId === user?._id || question?.realCreator === user?._id);
   return (
     <div className="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
       <div className="flex items-center justify-between mb-5">
@@ -103,19 +106,33 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           <span className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium">
             {totalAnswers} {totalAnswers === 1 ? "Answer" : "Answers"}
           </span>
-          {/* {user && question?.author?.userId === user?._id && (
-            <PostActions handleDelete={() => setShowDeleteModal(true)} />
-          )} */}
+          {isQuestionOwner && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowActionModal(!showActionModal)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                <BsThreeDotsVertical className="text-gray-500" size={20} />
+              </button>
+              {showActionModal && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-10">
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    Delete Question
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
-
       <div className="mb-4">
         <h3 className="text-lg md:text-2xl mb-2 font-bold text-[var(--grey--900)] hover:text-[var(--ternery)] transition-colors duration-200">
           {questionText}
         </h3>
-        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">
-          {context}
-        </p>
+        <p className="text-base mb-2 leading-relaxed text-[var(--grey--800)]">{context}</p>
         <div className="flex flex-wrap gap-2 mb-4">
           {tags?.map((tag, index) => (
             <span
@@ -127,7 +144,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           ))}
         </div>
       </div>
-
       <div className="flex flex-wrap gap-2 mt-4">
         <button
           onClick={handleAnswerButtonClick}
@@ -149,7 +165,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
             </>
           )}
         </button>
-
         <Link
           to={`/QA-section/question/${_id}`}
           className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 transition-all duration-300"
@@ -157,9 +172,23 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           See more answers →
         </Link>
       </div>
-
       {showAnswerForm && (
         <form onSubmit={handleSubmitAnswer} className="mt-4">
+          <input type="hidden" name="isAnonymous" value={isAnonymous.toString()} />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="anonymous"
+                checked={isAnonymous}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+                className="w-4 h-4 text-[var(--primary)] rounded focus:ring-[var(--primary)]"
+              />
+              <label htmlFor="anonymous" className="text-sm text-gray-600">
+                Post anonymously
+              </label>
+            </div>
+          </div>
           <div className="mb-4">
             <textarea
               value={answerText}
@@ -180,29 +209,23 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           </div>
         </form>
       )}
-
-      {/* Answer Previews Section */}
       {totalAnswers > 0 && (
         <div className="mt-4">
-          <div className="">
-            {totalAnswers > 1 && (
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="text-sm font-medium text-gray-500">
-                  {showAnswerPreviews ? "Answers:" : "Top Answer:"}
-                </h4>
-                <button
-                  onClick={() => setShowAnswerPreviews(!showAnswerPreviews)}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
-                >
-                  {showAnswerPreviews
-                    ? "Show less"
-                    : `Show ${Math.min(previewAnswers.length, 2)} answers`}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Show only top answer when not expanded */}
+          {totalAnswers > 1 && (
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="text-sm font-medium text-gray-500">
+                {showAnswerPreviews ? "Answers:" : "Top Answer:"}
+              </h4>
+              <button
+                onClick={() => setShowAnswerPreviews(!showAnswerPreviews)}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+              >
+                {showAnswerPreviews
+                  ? "Show less"
+                  : `Show ${Math.min(previewAnswers.length, 2)} answers`}
+              </button>
+            </div>
+          )}
           {!showAnswerPreviews && mostLikedAnswer && (
             <Answer
               answer={mostLikedAnswer}
@@ -211,8 +234,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
               preview={true}
             />
           )}
-
-          {/* Show preview answers when expanded */}
           {showAnswerPreviews && previewAnswers.length > 0 && (
             <div className="space-y-3">
               {previewAnswers.map((answer) => (
@@ -223,7 +244,6 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
                   preview={true}
                 />
               ))}
-
               {hasMoreAnswers && (
                 <Link
                   to={`/QA-section/question/${_id}`}
@@ -236,13 +256,12 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           )}
         </div>
       )}
-
       <DeleteModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleDeleteQuestion}
         title="Delete Question"
-        message="Are you sure you want to delete this question?"
+        message="Are you sure you want to delete this question? This action cannot be undone."
         itemType="question"
       />
     </div>

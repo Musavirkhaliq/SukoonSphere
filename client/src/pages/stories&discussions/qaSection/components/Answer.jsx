@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, preview }) => {
+  console.log({ initialAnswer });
   const navigate = useNavigate();
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [showAnswerDeleteModal, setShowAnswerDeleteModal] = useState(false);
@@ -73,9 +74,17 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
   const handleLikeUpdate = (newIsLiked, newLikesCount) => {
     // Don't update local state here as ReactionSelector already updates the UI optimistically
     // This prevents the double-counting issue
-    console.log('Answer reaction updated:', { newIsLiked, newLikesCount });
+    // console.log('Answer reaction updated:', { newIsLiked, newLikesCount });
   };
-  console.log({ answer });
+  // console.log({ answer });
+
+  console.log({
+    user,
+    initialAnswer,
+    answer,
+    mostLikedAnswer
+
+  })
 
   return (
     <div
@@ -85,12 +94,12 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
       <div className="flex items-center justify-between mb-2">
         <UserAvatar
           createdBy={answer?.author?.userId}
-          username={answer?.author?.username}
+          username={answer?.author?.username || answer?.authorName}
           userAvatar={answer?.author?.userAvatar}
           createdAt={answer?.createdAt}
         // compact={preview}
         />
-        {user?.id && String(user.id) === String(answer?.author?.userId) && (
+        {user && (user?._id === initialAnswer?.author?.userId || initialAnswer?.realCreator === user?._id) && (
           <AnswerActions
             answerId={answer._id}
             handleEdit={handleEdit}

@@ -11,6 +11,10 @@ const Answer = new mongoose.Schema(
       ref: "User",
       required: true
     },
+    realCreator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [
       {
@@ -27,6 +31,10 @@ const Answer = new mongoose.Schema(
       type: Date,
       default: null
     },
+    isAnonymous: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );
