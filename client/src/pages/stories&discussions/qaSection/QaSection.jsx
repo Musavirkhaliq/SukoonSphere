@@ -75,7 +75,7 @@ const QaSection = () => {
                   className="btn-2 w-full sm:w-auto text-center"
                 >
                   <AiOutlineComment className="mr-2" />
-                  Answer
+                  All Questions
                 </Link>
               </div>
             </div>

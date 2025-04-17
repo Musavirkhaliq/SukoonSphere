@@ -17,13 +17,7 @@ import "@/assets/styles/EnhancedMentalHealthTopics.css";
 const TodaysQuote = lazy(
   () => import("../components/homeComponents/TodaysQuote")
 );
-const TodaysQuiz = lazy(
-  () => import("../components/homeComponents/TodaysQuiz")
-);
-// Replaced with enhanced MentalHealthStats component
-// const Infography = lazy(
-//   () => import("../components/homeComponents/Infography")
-// );
+
 const EnhancedMentalHealthTopics = lazy(
   () => import("../components/homeComponents/EnhancedMentalHealthTopics")
 );

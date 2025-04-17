@@ -246,7 +246,7 @@ const PostCommentCard = ({ comment, postId, onCommentUpdate }) => {
           <div className="">
             <button
               onClick={() => setShowReplies(!showReplies)}
-              className="text-[var(--secondary)] text-sm mt-2 hover:text-[var(--secondary-hover)] transition-colors duration-200"
+              className="text-primary text-sm"
             >
               {showReplies
                 ? "Hide Replies"

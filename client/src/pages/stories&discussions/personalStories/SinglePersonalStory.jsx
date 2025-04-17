@@ -29,6 +29,7 @@ import DeleteModal from "@/components/shared/DeleteModal";
 
 import PersonalStoryCommentPopup from "@/components/personalStories/PersonalStoryCommentPopup";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
+import { BiUpvote } from "react-icons/bi";
 
 const SinglePersonalStory = () => {
   const { id } = useParams();
@@ -240,8 +241,8 @@ const SinglePersonalStory = () => {
     const totalCount = reactionCounts.total !== undefined
       ? reactionCounts.total
       : Object.entries(reactionCounts)
-          .filter(([key]) => key !== 'total')
-          .reduce((sum, [_, count]) => sum + count, 0);
+        .filter(([key]) => key !== 'total')
+        .reduce((sum, [_, count]) => sum + count, 0);
 
     setLikesCount(totalCount);
   };

@@ -15,6 +15,10 @@ export const createOptimizedComponent = (importFn) => {
 export { default as Header } from "./shared/Header";
 export { default as Footer } from "./shared/Footer";
 
+export const HeroSection = createOptimizedComponent(
+  () => import("./homeComponents/HeroSection")
+);
+
 export const Like = createOptimizedComponent(() => import("./shared/Like"));
 export const Follow = createOptimizedComponent(() => import("./shared/Follow"));
 
@@ -55,9 +59,7 @@ export const QuizWithPopup = createOptimizedComponent(
   () => import("./homeComponents/QuizWithPopup")
 );
 // -----------------------------------------------//
-export const HeroSection = createOptimizedComponent(
-  () => import("./homeComponents/HeroSection")
-);
+
 export const UserPostsHome = createOptimizedComponent(
   () => import("./homeComponents/UserPosts")
 );
