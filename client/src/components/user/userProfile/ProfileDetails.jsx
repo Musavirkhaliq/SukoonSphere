@@ -23,10 +23,10 @@ const ProfileDetails = ({ user }) => {
           )
         }
 
+        <RenderProfileLinks name="Achievements" link="achievements" />
         <RenderProfileLinks name="Posts" link="." />
         <RenderProfileLinks name="Questions" link="questions" />
         <RenderProfileLinks name="Answers" link="answers" />
-        <RenderProfileLinks name="Achievements" link="achievements" />
         <RenderProfileLinks name="Followers" link="followers" />
         <RenderProfileLinks name="Following" link="following" />
         {logedInUser?._id === user._id && (

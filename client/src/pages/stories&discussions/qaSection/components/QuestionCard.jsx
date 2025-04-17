@@ -23,6 +23,7 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
     mostLikedAnswer,
     answers,
     author,
+    authorName,
   } = question;
 
   // Get a few answers to display (up to 3)
@@ -51,7 +52,7 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       toast.error("Please login to answer questions");
       return;
     }
-    setShowAnswerForm(prev => !prev);
+    setShowAnswerForm((prev) => !prev);
     setAnswerText("");
   };
 
@@ -75,7 +76,7 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       setAnswerText("");
 
       // Refresh the question data if callback provided
-      if (typeof onAnswerSubmitted === 'function') {
+      if (typeof onAnswerSubmitted === "function") {
         onAnswerSubmitted();
       } else {
         // Fallback to reload if no callback
@@ -94,7 +95,7 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       <div className="flex items-center justify-between mb-5">
         <UserAvatar
           createdBy={author?.userId}
-          username={author?.username}
+          username={author?.username || authorName}
           userAvatar={author?.userAvatar}
           createdAt={createdAt}
         />
@@ -130,10 +131,11 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       <div className="flex flex-wrap gap-2 mt-4">
         <button
           onClick={handleAnswerButtonClick}
-          className={`inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${showAnswerForm
-            ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
-            : "btn-2 shadow-sm hover:shadow-md"
-            }`}
+          className={`inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+            showAnswerForm
+              ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+              : "btn-2 shadow-sm hover:shadow-md"
+          }`}
         >
           {showAnswerForm ? (
             <>
@@ -182,30 +184,44 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       {/* Answer Previews Section */}
       {totalAnswers > 0 && (
         <div className="mt-4">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="text-sm font-medium text-gray-500">
-              {showAnswerPreviews ? "Answers:" : "Top Answer:"}
-            </h4>
+          <div className="">
             {totalAnswers > 1 && (
-              <button
-                onClick={() => setShowAnswerPreviews(!showAnswerPreviews)}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
-              >
-                {showAnswerPreviews ? "Show less" : `Show ${Math.min(previewAnswers.length, 2)} answers`}
-              </button>
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-sm font-medium text-gray-500">
+                  {showAnswerPreviews ? "Answers:" : "Top Answer:"}
+                </h4>
+                <button
+                  onClick={() => setShowAnswerPreviews(!showAnswerPreviews)}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                >
+                  {showAnswerPreviews
+                    ? "Show less"
+                    : `Show ${Math.min(previewAnswers.length, 2)} answers`}
+                </button>
+              </div>
             )}
           </div>
 
           {/* Show only top answer when not expanded */}
           {!showAnswerPreviews && mostLikedAnswer && (
-            <Answer answer={mostLikedAnswer} user={user} mostLikedAnswer={true} preview={true} />
+            <Answer
+              answer={mostLikedAnswer}
+              user={user}
+              mostLikedAnswer={true}
+              preview={true}
+            />
           )}
 
           {/* Show preview answers when expanded */}
           {showAnswerPreviews && previewAnswers.length > 0 && (
             <div className="space-y-3">
               {previewAnswers.map((answer) => (
-                <Answer key={answer._id} answer={answer} user={user} preview={true} />
+                <Answer
+                  key={answer._id}
+                  answer={answer}
+                  user={user}
+                  preview={true}
+                />
               ))}
 
               {hasMoreAnswers && (

@@ -12,17 +12,26 @@ export const getAnonymousUserId = async () => {
     }
     
     // Query the database for the anonymous user
-    const anonymousUser = await User.findOne({ email: 'anonymous@sukoon.com' });
+    let anonymousUser = await User.findOne({ email: 'anonymous@sukoon.com' });
+    
+    // If user doesn't exist, create it
     if (!anonymousUser) {
-      console.error('Anonymous user not found in the database');
-      return null;
+      anonymousUser = await User.create({
+        name: 'Anonymous',
+        email: 'anonymous@sukoon.com',
+        password: 'anonymous', // This won't be used for login
+        isAnonymous: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      console.log('Created anonymous user');
     }
     
     // Cache the ID for future use
     anonymousUserId = anonymousUser._id;
     return anonymousUserId;
   } catch (error) {
-    console.error('Error fetching anonymous user:', error);
-    return null;
+    console.error('Error fetching/creating anonymous user:', error);
+    throw error;
   }
 };

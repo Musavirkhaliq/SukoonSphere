@@ -22,7 +22,8 @@ import {
   getUserGamification,
   getUserAchievementsById,
   getAnonymousPosts,
-  getAnonymousStories
+  getAnonymousStories,
+  getAnonymousQuestions
 } from "../controllers/userController.js";
 import { searchUsers, checkFollowing } from "../controllers/userSearchController.js";
 import upload from "../middleware/multer.js";
@@ -70,5 +71,7 @@ router.get('/check-following/:userId', authenticateUser, checkFollowing);
 // Anonymous content routes
 router.get('/anonymous-content/posts', authenticateUser, getAnonymousPosts);
 router.get('/anonymous-content/stories', authenticateUser, getAnonymousStories);
+router.get('/anonymous-content/question', authenticateUser, getAnonymousQuestions);
+
 
 export default router;

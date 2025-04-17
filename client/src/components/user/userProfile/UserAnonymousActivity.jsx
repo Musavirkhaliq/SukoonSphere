@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import PostCard from "@/components/posts/PostCard";
 import PersonalStoryCard from "@/components/personalStories/PersonalStoryCard";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
+import QuestionCard from "@/pages/stories&discussions/qaSection/components/QuestionCard";
 
 const UserAnonymousActivity = () => {
   const user = useOutletContext();
@@ -14,6 +15,7 @@ const UserAnonymousActivity = () => {
   const [anonymousContent, setAnonymousContent] = useState({
     posts: [],
     stories: [],
+    questions: [],
     // Add other content types as needed
   });
 
@@ -36,12 +38,19 @@ const UserAnonymousActivity = () => {
         // Fetch anonymous stories
         const storiesResponse = await customFetch.get("/user/anonymous-content/stories");
 
+        // Fetch anonymous questions
+        const questionsResponse = await customFetch.get("/user/anonymous-content/question");
+        console.log({quesRes:questionsResponse.data})
+
         // Set the anonymous content
         setAnonymousContent({
           posts: postsResponse.data.posts || [],
           stories: storiesResponse.data.stories || [],
+          questions: questionsResponse.data.questions || [],
           // Add other content types as needed
         });
+
+       
       } catch (error) {
         console.error("Error fetching anonymous content:", error);
         toast.error("Failed to load anonymous content");
@@ -114,6 +123,19 @@ const UserAnonymousActivity = () => {
           <div className="space-y-4">
             {anonymousContent.stories.map((story) => (
               <PersonalStoryCard key={story._id} story={story} />
+            ))}
+          </div>
+        </div>
+      )}
+
+{anonymousContent.questions.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Anonymous Stories
+          </h2>
+          <div className="space-y-4">
+            {anonymousContent.questions.map((question) => (
+              <QuestionCard key={question._id} question={question} />
             ))}
           </div>
         </div>
