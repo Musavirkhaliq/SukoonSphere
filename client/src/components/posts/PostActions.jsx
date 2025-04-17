@@ -96,7 +96,7 @@ const PostActions = ({
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                     aria-label="More options"
                 >
-                    <FaEllipsisH className="text-gray-500" />
+                    <FaEllipsisH className="text-gray-500 rotate-90" />
                 </button>
 
                 {showMoreOptions && (

@@ -1357,7 +1357,7 @@ export const editAnswer = async (req, res) => {
   }
 
   // Check if the user is authorized to edit this answer
-  if (answer.createdBy.toString() !== userId) {
+  if (answer.createdBy.toString() !== userId && !answer.realCreator) {
     throw new UnauthorizedError("Not authorized to edit this answer");
   }
 
@@ -1503,7 +1503,8 @@ export const deleteQuestion = async (req, res) => {
     user: req.user,
   });
   if (
-    question.createdBy.toString() !== req.user.userId &&
+    !(question.createdBy.toString() === req.user.userId ||
+      question.realCreator.toString() === req.user.userId) &&
     req.user.role !== "admin"
   ) {
     throw new UnauthorizedError(

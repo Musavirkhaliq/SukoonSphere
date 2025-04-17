@@ -102,6 +102,7 @@ const UserAnswers = () => {
       ) : (
         <div className="space-y-6">
           {allAnswers.map((answer, index) => (
+            console.log({ answer }),
             <Answer
               key={`${answer._id}-${index}`}
               answer={{

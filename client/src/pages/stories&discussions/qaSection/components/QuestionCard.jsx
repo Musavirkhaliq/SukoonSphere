@@ -1,8 +1,8 @@
 import { useState } from "react";
 import UserAvatar from "@/components/shared/UserAvatar";
-import PostActions from "@/components/shared/PostActions";
 import { FiEdit } from "react-icons/fi";
 import { IoCloseOutline } from "react-icons/io5";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import { useUser } from "@/context/UserContext";
 import DeleteModal from "@/components/shared/DeleteModal";
 import customFetch from "@/utils/customFetch";
@@ -29,20 +29,28 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
   const hasMoreAnswers = totalAnswers > previewAnswers.length;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showActionModal, setShowActionModal] = useState(false);
   const [showAnswerForm, setShowAnswerForm] = useState(false);
   const [answerText, setAnswerText] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showAnswerPreviews, setShowAnswerPreviews] = useState(false);
 
   const handleDeleteQuestion = async () => {
+    setIsDeleting(true);
     try {
       await customFetch.delete(`/qa-section/question/${_id}`);
-      toast.success("Question deleted successfully");
       setShowDeleteModal(false);
-      window.location.reload();
+      if (typeof onAnswerSubmitted === "function") {
+        onAnswerSubmitted();
+      } else {
+        window.location.reload();
+      }
     } catch (error) {
       toast.error(error?.response?.data?.msg || "Failed to delete question");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -83,7 +91,8 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       setIsSubmitting(false);
     }
   };
-
+  
+  const isQuestionOwner = user && (author?.userId === user?._id || question?.realCreator === user?._id);
   return (
     <div className="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
       <div className="flex items-center justify-between mb-5">
@@ -97,8 +106,25 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           <span className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium">
             {totalAnswers} {totalAnswers === 1 ? "Answer" : "Answers"}
           </span>
-          {user && author?.userId === user?._id && (
-            <PostActions handleDelete={() => setShowDeleteModal(true)} />
+          {isQuestionOwner && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowActionModal(!showActionModal)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                <BsThreeDotsVertical className="text-gray-500" size={20} />
+              </button>
+              {showActionModal && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-10">
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    Delete Question
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -185,23 +211,21 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
       )}
       {totalAnswers > 0 && (
         <div className="mt-4">
-          <div className="">
-            {totalAnswers > 1 && (
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="text-sm font-medium text-gray-500">
-                  {showAnswerPreviews ? "Answers:" : "Top Answer:"}
-                </h4>
-                <button
-                  onClick={() => setShowAnswerPreviews(!showAnswerPreviews)}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
-                >
-                  {showAnswerPreviews
-                    ? "Show less"
-                    : `Show ${Math.min(previewAnswers.length, 2)} answers`}
-                </button>
-              </div>
-            )}
-          </div>
+          {totalAnswers > 1 && (
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="text-sm font-medium text-gray-500">
+                {showAnswerPreviews ? "Answers:" : "Top Answer:"}
+              </h4>
+              <button
+                onClick={() => setShowAnswerPreviews(!showAnswerPreviews)}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+              >
+                {showAnswerPreviews
+                  ? "Show less"
+                  : `Show ${Math.min(previewAnswers.length, 2)} answers`}
+              </button>
+            </div>
+          )}
           {!showAnswerPreviews && mostLikedAnswer && (
             <Answer
               answer={mostLikedAnswer}
@@ -237,7 +261,7 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleDeleteQuestion}
         title="Delete Question"
-        message="Are you sure you want to delete this question?"
+        message="Are you sure you want to delete this question? This action cannot be undone."
         itemType="question"
       />
     </div>
