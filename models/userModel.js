@@ -94,6 +94,16 @@ const userSchema = mongoose.Schema({
   streakCount: { type: Number, default: 0 },
   longestStreak: { type: Number, default: 0 },
   lastVisitDate: { type: Date, default: null },
+  // Add these fields to your User schema
+  avatarFrame: {
+      type: String,
+      enum: ['default', 'bronze', 'silver', 'gold', 'diamond', 'elite'],
+      default: 'default'
+  },
+  avatarAccessories: [{
+      type: String,
+      enum: ['star', 'verified', 'crown', 'gem']
+  }]
 });
 
 export default mongoose.model("User", userSchema);
