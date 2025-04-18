@@ -63,6 +63,7 @@ const PersonalStoryCard = ({ story, index }) => {
     e.stopPropagation();
     // The actual reaction handling is done by the ReactionButton component
   };
+  console.log({story});
 
   return (
     <motion.div
@@ -121,20 +122,16 @@ const PersonalStoryCard = ({ story, index }) => {
           {/* Story stats and actions */}
           <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
             <div className="flex items-center">
-              {story.authorAvatar ? (
-                <img
-                  src={story.authorAvatar}
-                  alt={story.authorName}
-                  className="w-8 h-8 mr-2 object-cover rounded-full border-2 border-white shadow-sm"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-2 shadow-sm">
-                  <FaUser className="w-4 h-4 text-purple-600" />
-                </div>
-              )}
-              <span className="text-sm font-medium text-gray-800 line-clamp-1">
-                {story.authorName || "Anonymous"}
-              </span>
+        
+            <UserAvatar
+              username={story?.authorName}
+              userAvatar={story?.authorAvatar}
+              createdBy={story?.authorId}
+              createdAt={story?.createdAt}
+              userAvatarFrame={story?.avatarFrame}
+              userAvatarAccessories={story?.avatarAccessories}
+              size="medium"
+            />
             </div>
 
             <div className="flex items-center gap-3">

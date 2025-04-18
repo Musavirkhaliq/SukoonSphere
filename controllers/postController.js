@@ -93,6 +93,12 @@ export const getAllPosts = async (req, res) => {
               { $arrayElemAt: ["$userDetails.avatar", 0] }
             ]
           },
+          avatarFrame: {
+            $arrayElemAt: ["$userDetails.avatarFrame", 0]
+          },
+          avatarAccessories: {
+            $arrayElemAt: ["$userDetails.avatarAccessories", 0]
+          },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
           totalComments: { $size: { $ifNull: ["$comments", []] } },
         },
@@ -238,6 +244,12 @@ export const getAllPostsByUserId = async (req, res) => {
             null, // Will use default avatar for anonymous posts
             { $arrayElemAt: ["$userDetails.avatar", 0] }
           ]
+        },
+        avatarFrame: {
+          $arrayElemAt: ["$userDetails.avatarFrame", 0]
+        },
+        avatarAccessories: {
+          $arrayElemAt: ["$userDetails.avatarAccessories", 0]
         },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
         totalComments: { $size: { $ifNull: ["$comments", []] } },
@@ -1115,14 +1127,33 @@ export const updatePostCommentReply = async (req, res) => {
 };
 
 export const mostLikedPosts = async (req, res) => {
-  const posts = await Post.find({ deleted: false })
-    .populate("createdBy", "name avatar")
-    .populate("comments", "content likes createdAt updatedAt")
-    .sort({ likes: -1 })
-    .limit(7);
+  try {
+    const posts = await Post.find({ deleted: false })
+      .populate("createdBy", "name avatar avatarFrame avatarAccessories")
+      .populate("comments", "content likes createdAt updatedAt")
+      .sort({ likes: -1 })
+      .limit(7);
 
-  res.status(StatusCodes.OK).json({
-    message: "Most liked posts",
-    posts,
-  });
+    // Transform the posts to include avatarFrame and avatarAccessories
+    const transformedPosts = posts.map(post => ({
+      ...post.toObject(),
+      author: {
+        userId: post.createdBy._id,
+        username: post.createdBy.name,
+        userAvatar: post.createdBy.avatar,
+        avatarFrame: post.createdBy.avatarFrame,
+        avatarAccessories: post.createdBy.avatarAccessories,
+      }
+    }));
+
+    res.status(StatusCodes.OK).json({
+      message: "Most liked posts",
+      posts: transformedPosts,
+    });
+  } catch (error) {
+    console.error("Error fetching most liked posts:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Failed to fetch most liked posts",
+    });
+  }
 };

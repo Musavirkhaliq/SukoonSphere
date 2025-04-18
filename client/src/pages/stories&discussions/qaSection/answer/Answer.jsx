@@ -333,6 +333,9 @@ const Answer = () => {
                       username={question?.author.username || question?.authorName}
                       userAvatar={question?.author.userAvatar}
                       createdAt={question?.createdAt}
+                      userAvatarFrame={question?.author.avatarFrame}
+                      userAvatarAccessories={question?.author.avatarAccessories}
+                      size="large"
                     />
 
                     <h3 className="text-base md:text-xl mb-2 font-bold text-[var(--grey--900)] hover:text-[var(--ternery)] transition-colors duration-200s">

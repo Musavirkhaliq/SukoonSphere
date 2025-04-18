@@ -37,6 +37,8 @@ const QaOutlet = () => {
 
   const allQuestions = data?.pages.flatMap((page) => page.questions) || [];
 
+  // console.log({allQuestions});
+
   if (status === "loading") {
     return <LoadingSpinner />;
   }

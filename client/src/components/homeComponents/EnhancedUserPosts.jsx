@@ -52,6 +52,7 @@ const CallToActionCard = () => {
 const PostCard = ({ post }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+
   return (
     <motion.div
       className="community-card post-card"
@@ -66,6 +67,8 @@ const PostCard = ({ post }) => {
           userAvatar={post?.createdBy?.avatar}
           createdBy={post?.createdBy?.name}
           createdAt={post?.createdAt}
+          userAvatarFrame={post?.author?.avatarFrame}
+          userAvatarAccessories={post?.author?.avatarAccessories}
           size="medium"
         />
 

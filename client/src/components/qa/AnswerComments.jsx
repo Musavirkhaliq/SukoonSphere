@@ -8,7 +8,7 @@ import { FaSpinner } from "react-icons/fa";
 import AnswerCommentCard from "./AnswerCommentCard";
 
 const AnswerComments = ({ answerId }) => {
-  console.log({ answerId });
+  // console.log({ answerId });
   const { user } = useUser();
   const [commentContent, setCommentContent] = useState("");
   const { ref, inView } = useInView();

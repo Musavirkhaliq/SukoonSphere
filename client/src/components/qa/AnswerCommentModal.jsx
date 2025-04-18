@@ -140,6 +140,8 @@ const AnswerCommentModal = ({ isOpen, onClose, answerId }) => {
                                             userAvatar={answer.author.userAvatar}
                                             createdBy={answer.createdBy}
                                             createdAt={answer.createdAt}
+                                            userAvatarFrame={answer.author.avatarFrame}
+                                            userAvatarAccessories={answer.author.avatarAccessories}
                                             size="medium"
                                         />
                                         {user?.id && String(user.id) === String(answer.createdBy) && (

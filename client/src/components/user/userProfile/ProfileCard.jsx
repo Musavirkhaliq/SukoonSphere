@@ -18,7 +18,7 @@ import { data } from "autoprefixer";
 const avatarFrames = [
   { id: 'default', name: 'Default', minPoints: 0, color: 'ring-gray-200', icon: <FaUserCircle /> },
   { id: 'bronze', name: 'Bronze', minPoints: 50, color: 'ring-amber-700', icon: <FaMedal className="text-amber-700" /> },
-  { id: 'silver', name: 'Silver', minPoints: 300, color: 'ring-gray-400', icon: <FaMedal className="text-gray-400" /> },
+  { id: 'silver', name: 'Silver', minPoints: 300, color: 'ring-gray-600', icon: <FaMedal className="text-gray-400" /> },
   { id: 'gold', name: 'Gold', minPoints: 1200, color: 'ring-yellow-400', icon: <FaTrophy className="text-yellow-500" /> },
   { id: 'diamond', name: 'Diamond', minPoints: 2000, color: 'ring-blue-400', icon: <FaGem className="text-blue-400" /> },
   { id: 'elite', name: 'Elite', minPoints: 5000, color: 'ring-purple-500', icon: <FaCrown className="text-purple-500" /> },

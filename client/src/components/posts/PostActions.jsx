@@ -27,7 +27,7 @@ const PostActions = ({
 
     // Handle reaction change
     const handleReactionChange = (newReactionCounts, newUserReaction) => {
-        console.log('Reaction updated:', { newReactionCounts, newUserReaction });
+        // console.log('Reaction updated:', { newReactionCounts, newUserReaction });
 
         // Update local state
         setReactionCounts(newReactionCounts);

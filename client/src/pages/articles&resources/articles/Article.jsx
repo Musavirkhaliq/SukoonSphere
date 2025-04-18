@@ -24,6 +24,7 @@ import { toast } from "react-toastify";
 
 import ReactionButton from "@/components/shared/Reactions/ReactionButton";
 import LoadingSpinner from "@/components/loaders/LoadingSpinner";
+import UserAvatar from "@/components/shared/UserAvatar";
 
 const Article = () => {
   const [article, setArticle] = useState(null);
@@ -469,12 +470,16 @@ const Article = () => {
                 <div className="flex gap-3">
                   {/* Author Section */}
                   <div className="flex gap-3">
-                    <img
-                      src={article?.authorAvatar}
-                      alt={article?.authorName}
-                      className="w-10 h-10 rounded-full object-cover"
+                    <UserAvatar
+                      username={article?.authorName}
+                      userAvatar={article?.authorAvatar}
+                      createdBy={article?.authorId}
+                      createdAt={article?.createdAt}
+                      userAvatarFrame={article?.authorAvatarFrame}
+                      userAvatarAccessories={article?.authorAvatarAccessories}
+                      size="medium"
                     />
-                    <div className="flex flex-col">
+                    {/* <div className="flex flex-col">
                       <div className="flex items-center gap-2">
                         <span className="font-medium md:font-semibold text-sm md:text-base text-[var(--primary)]">
                           {article?.author?.name ||
@@ -496,7 +501,7 @@ const Article = () => {
                           )}
                         </span>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
