@@ -40,7 +40,15 @@ export const userRoutes = [
     ),
     children: [
       {
-        index: true,
+        index:true,
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <UserAchievements />
+          </Suspense>
+        ),
+      },
+      {
+        path: "posts",
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <UserPosts />
@@ -72,14 +80,7 @@ export const userRoutes = [
         ),
         loader: userFollowersLoader,
       },
-      {
-        path: "achievements",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <UserAchievements />
-          </Suspense>
-        ),
-      },
+ 
       {
         path: "following",
         element: (

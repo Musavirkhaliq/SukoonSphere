@@ -990,3 +990,63 @@ export const getAnonymousAnswers = async (req, res) => {
     });
   }
 };
+
+export const updateAvatarCustomization = async (req, res) => {
+    try {
+        const { avatarFrame, avatarAccessories } = req.body;
+        const userId = req.user._id;
+
+        // Get user's current points
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Validate frame selection
+        const availableFrames = [
+            { id: 'default', minPoints: 0 },
+            { id: 'bronze', minPoints: 50 },
+            { id: 'silver', minPoints: 300 },
+            { id: 'gold', minPoints: 1200 },
+            { id: 'diamond', minPoints: 2000 },
+            { id: 'elite', minPoints: 5000 }
+        ];
+
+        const selectedFrame = availableFrames.find(f => f.id === avatarFrame);
+        if (!selectedFrame || user.currentPoints < selectedFrame.minPoints) {
+            return res.status(400).json({ message: "Insufficient points for selected frame" });
+        }
+
+        // Validate accessory selection
+        const availableAccessories = [
+            { id: 'star', minPoints: 100 },
+            { id: 'verified', minPoints: 500 },
+            { id: 'crown', minPoints: 1500 },
+            { id: 'gem', minPoints: 2500 }
+        ];
+
+        const selectedAccessories = avatarAccessories || [];
+        const invalidAccessories = selectedAccessories.filter(accessory => {
+            const accessoryData = availableAccessories.find(a => a.id === accessory);
+            return !accessoryData || user.currentPoints < accessoryData.minPoints;
+        });
+
+        if (invalidAccessories.length > 0) {
+            return res.status(400).json({ 
+                message: "Insufficient points for some accessories",
+                invalidAccessories
+            });
+        }
+
+        // Update user's avatar customization
+        await User.findByIdAndUpdate(userId, {
+            avatarFrame,
+            avatarAccessories
+        });
+
+        res.json({ message: "Avatar customization updated successfully" });
+    } catch (error) {
+        console.error("Error updating avatar customization:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};

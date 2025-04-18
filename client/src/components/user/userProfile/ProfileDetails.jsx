@@ -1,10 +1,20 @@
-import React from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import React, { useEffect } from "react";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import RenderProfileLinks from "./RenderProfileLinks";
 import { useUser } from "@/context/UserContext";
 
 const ProfileDetails = ({ user }) => {
   const { user: logedInUser } = useUser();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect to achievements if on the base profile route
+  useEffect(() => {
+    if (location.pathname === `/profile/${user._id}`) {
+      navigate(`achievements`, { replace: true });
+    }
+  }, [location.pathname, navigate, user._id]);
+
   return (
     <>
       <div className="flex gap-2 sm:gap-4 items-center justify-start flex-wrap p-1 sm:p-2">
@@ -13,18 +23,14 @@ const ProfileDetails = ({ user }) => {
             <RenderProfileLinks name="Articles" link="articles" />
           </>
         )}
-        {
-          // logedInUser?.role === "contributor" &&
-          user?.role === "contributor" && logedInUser?._id === user._id && (
-            <>
-              <RenderProfileLinks name="Videos" link="videos" />
-              <RenderProfileLinks name="Podcast" link="podcasts" />
-            </>
-          )
-        }
-
-        <RenderProfileLinks name="Achievements" link="achievements" />
-        <RenderProfileLinks name="Posts" link="." />
+        {user?.role === "contributor" && logedInUser?._id === user._id && (
+          <>
+            <RenderProfileLinks name="Videos" link="videos" />
+            <RenderProfileLinks name="Podcast" link="podcasts" />
+          </>
+        )}
+        <RenderProfileLinks name="Achievements" link="." />
+        <RenderProfileLinks name="Posts" link="posts" />
         <RenderProfileLinks name="Questions" link="questions" />
         <RenderProfileLinks name="Answers" link="answers" />
         <RenderProfileLinks name="Followers" link="followers" />

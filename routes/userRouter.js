@@ -24,7 +24,8 @@ import {
   getAnonymousPosts,
   getAnonymousStories,
   getAnonymousQuestions,
-  getAnonymousAnswers
+  getAnonymousAnswers,
+  updateAvatarCustomization,
 } from "../controllers/userController.js";
 import { searchUsers, checkFollowing } from "../controllers/userSearchController.js";
 import upload from "../middleware/multer.js";
@@ -74,5 +75,7 @@ router.get('/anonymous-content/posts', authenticateUser, getAnonymousPosts);
 router.get('/anonymous-content/stories', authenticateUser, getAnonymousStories);
 router.get('/anonymous-content/question', authenticateUser, getAnonymousQuestions);
 router.get('/anonymous-content/answer', authenticateUser, getAnonymousAnswers);
+// Add this route to your user routes
+router.patch('/avatar-customization', authenticateUser, updateAvatarCustomization);
 
 export default router;

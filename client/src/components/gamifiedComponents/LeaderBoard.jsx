@@ -15,9 +15,10 @@ const LeaderBoard = ({data}) => {
               <div className="absolute -bottom-2 -right-2 bg-purple-200 text-purple-800 rounded-full px-2 py-1 text-xs font-bold">
                 #{data?.user?.rank}
               </div>
+           
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">{data?.user?.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{data?.user?.name} <sub className="text-gray-600">(you)</sub></h2>
               <div className="flex items-center gap-3 text-sm text-gray-600 mt-1">
                 <span className="flex items-center gap-1">
                   <FaFireAlt className="text-orange-500" />
@@ -40,7 +41,7 @@ const LeaderBoard = ({data}) => {
           </div>
         </div>
       </div>
-      {data.topUsers.slice(0, Math.ceil(data.topUsers.length / 2)).map((user, index) => (
+      {data.topUsers.slice(0, 5).map((user, index) => (
         <div
           key={user._id}
           className={`p-4 rounded-xl transition-all ${
@@ -113,7 +114,7 @@ const LeaderBoard = ({data}) => {
     </div>
     
     <div className="space-y-4">
-      {data.topUsers.slice(Math.ceil(data.topUsers.length / 2)).map((user, index) => (
+      {data.topUsers.slice(5,10).map((user, index) => (
         <div
           key={user._id}
           className={`p-4 rounded-xl transition-all bg-white border-2 border-gray-100`}
@@ -149,11 +150,7 @@ const LeaderBoard = ({data}) => {
               <span className="text-lg font-bold text-purple-600">
                 {user?.totalPoints || 0} XP
               </span>
-              {index === 0 && (
-                <div className="text-xs text-yellow-600 font-medium mt-1">
-                  Current Leader! 🏆
-                </div>
-              )}
+         
             </div>
           </div>
         </div>
