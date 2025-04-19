@@ -48,6 +48,8 @@ export const getAllArticles = async (req, res) => {
           authorName: { $arrayElemAt: ["$authorDetails.name", 0] },
           authorAvatar: { $arrayElemAt: ["$authorDetails.avatar", 0] },
           authorId: { $arrayElemAt: ["$authorDetails._id", 0] },
+          authorAvatarFrame: { $arrayElemAt: ["$authorDetails.avatarFrame", 0] },
+          authorAvatarAccessories: { $arrayElemAt: ["$authorDetails.avatarAccessories", 0] },
         },
       },
       // Project out unnecessary fields
@@ -162,6 +164,8 @@ export const getSingleArticle = async (req, res) => {
           totalComments: {
             $ifNull: [{ $arrayElemAt: ["$commentCount.total", 0] }, 0],
           },
+          authorAvatarFrame: { $arrayElemAt: ["$authorDetails.avatarFrame", 0] },
+          authorAvatarAccessories: { $arrayElemAt: ["$authorDetails.avatarAccessories", 0] },
         },
       },
       {

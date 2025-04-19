@@ -10,6 +10,7 @@ import {
 import { BiUpvote } from "react-icons/bi";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import UserAvatar from "../shared/UserAvatar";
 
 const ArticleCard = ({ article, index }) => {
   // Format date in a more readable way
@@ -67,7 +68,7 @@ const ArticleCard = ({ article, index }) => {
               </div>
             )}
             {/* Gradient overlay for better text visibility */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-80"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent opacity-90"></div>
           </motion.div>
 
           {/* Article metadata on the image */}
@@ -127,7 +128,7 @@ const ArticleCard = ({ article, index }) => {
           {/* Author info */}
           <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
             <div className="flex items-center">
-              {article?.authorAvatar ? (
+              {/* {article?.authorAvatar ? (
                 <img
                   src={article?.authorAvatar}
                   alt={article?.authorName}
@@ -140,8 +141,17 @@ const ArticleCard = ({ article, index }) => {
               )}
               <span className="text-sm font-medium text-gray-800 line-clamp-1">
                 {article?.authorName || "Anonymous"}
-              </span>
-            </div>
+              </span> */}
+            <UserAvatar
+              username={article?.authorName}
+              userAvatar={article?.authorAvatar}
+              createdBy={article?.authorId}
+              createdAt={article?.createdAt}
+              userAvatarFrame={article?.authorAvatarFrame}
+              userAvatarAccessories={article?.authorAvatarAccessories}
+              size="medium"
+              />
+              </div>
 
             {/* Read more indicator */}
             <span className="text-sm font-medium text-blue-600 group-hover:underline">Read more</span>

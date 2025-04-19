@@ -73,6 +73,20 @@ export const getAllPersonalStories = async (req, res) => {
               { $arrayElemAt: ["$authorDetails.avatar", 0] }
             ]
           },
+          avatarFrame: {
+            $cond: [
+              "$isAnonymous",
+              null,
+              { $arrayElemAt: ["$authorDetails.avatarFrame", 0] }
+            ]
+          },
+          avatarAccessories: {
+            $cond: [
+              "$isAnonymous",
+              [],
+              { $arrayElemAt: ["$authorDetails.avatarAccessories", 0] }
+            ]
+          },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
           // Only count non-deleted comments
           totalComments: { $size: { $ifNull: ["$comments", []] } },
@@ -152,6 +166,20 @@ export const getPersonalStoriesByUserId = async (req, res) => {
               { $arrayElemAt: ["$authorDetails.avatar", 0] }
             ]
           },
+          avatarFrame: {
+            $cond: [
+              "$isAnonymous",
+              null,
+              { $arrayElemAt: ["$authorDetails.avatarFrame", 0] }
+            ]
+          },
+          avatarAccessories: {
+            $cond: [
+              "$isAnonymous",
+              [],
+              { $arrayElemAt: ["$authorDetails.avatarAccessories", 0] }
+            ]
+          },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
           // Only count non-deleted comments
           totalComments: { $size: { $ifNull: ["$comments", []] } },
@@ -218,6 +246,20 @@ export const getSinglePersonalStory = async (req, res) => {
               "$isAnonymous",
               null,
               { $arrayElemAt: ["$authorDetails.avatar", 0] }
+            ]
+          },
+          avatarFrame: {
+            $cond: [
+              "$isAnonymous",
+              null,
+              { $arrayElemAt: ["$authorDetails.avatarFrame", 0] }
+            ]
+          },
+          avatarAccessories: {
+            $cond: [
+              "$isAnonymous",
+              [],
+              { $arrayElemAt: ["$authorDetails.avatarAccessories", 0] }
             ]
           },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },

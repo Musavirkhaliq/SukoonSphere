@@ -117,6 +117,8 @@ const AllQuestionAnswers = () => {
           createdBy={question?.author?.userId}
           username={question?.author?.username}
           userAvatar={question?.author?.userAvatar}
+          userAvatarFrame={question?.author?.avatarFrame}
+          userAvatarAccessories={question?.author?.avatarAccessories}
           createdAt={question?.createdAt}
         />
         <div className="flex items-center gap-4">

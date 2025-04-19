@@ -113,13 +113,146 @@ export const getAllQuestions = async (req, res) => {
                 { $arrayElemAt: ["$userDetails.avatar", 0] }
               ]
             },
+            avatarFrame: {
+              $arrayElemAt: ["$userDetails.avatarFrame", 0]
+            },
+            avatarAccessories: {
+              $arrayElemAt: ["$userDetails.avatarAccessories", 0]
+            },
           },
           totalAnswers: { $size: "$answers" },
+          answers: {
+            $map: {
+              input: "$answers",
+              as: "answer",
+              in: {
+                _id: "$$answer._id",
+                context: "$$answer.context",
+                createdBy: "$$answer.createdBy",
+                likes: "$$answer.likes",
+                comments: "$$answer.comments",
+                createdAt: "$$answer.createdAt",
+                updatedAt: "$$answer.updatedAt",
+                author: {
+                  userId: "$$answer.createdBy",
+                  username: {
+                    $let: {
+                      vars: {
+                        user: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$userDetails",
+                                cond: {
+                                  $eq: ["$$this._id", "$$answer.createdBy"],
+                                },
+                              },
+                            },
+                            0,
+                          ],
+                        },
+                      },
+                      in: "$$user.name",
+                    },
+                  },
+                  userAvatar: {
+                    $let: {
+                      vars: {
+                        user: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$userDetails",
+                                cond: {
+                                  $eq: ["$$this._id", "$$answer.createdBy"],
+                                },
+                              },
+                            },
+                            0,
+                          ],
+                        },
+                      },
+                      in: "$$user.avatar",
+                    },
+                  },
+                  avatarFrame: {
+                    $let: {
+                      vars: {
+                        user: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$userDetails",
+                                cond: {
+                                  $eq: ["$$this._id", "$$answer.createdBy"],
+                                },
+                              },
+                            },
+                            0,
+                          ],
+                        },
+                      },
+                      in: "$$user.avatarFrame",
+                    },
+                  },
+                  avatarAccessories: {
+                    $let: {
+                      vars: {
+                        user: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$userDetails",
+                                cond: {
+                                  $eq: ["$$this._id", "$$answer.createdBy"],
+                                },
+                              },
+                            },
+                            0,
+                          ],
+                        },
+                      },
+                      in: "$$user.avatarAccessories",
+                    },
+                  },
+                },
+                totalLikes: { $size: { $ifNull: ["$$answer.likes", []] } },
+                totalComments: { $size: { $ifNull: ["$$answer.comments", []] } },
+              },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          mostLikedAnswer: {
+            $reduce: {
+              input: "$answers",
+              initialValue: { totalLikes: -1 },
+              in: {
+                $cond: [
+                  { $gt: ["$$this.totalLikes", "$$value.totalLikes"] },
+                  "$$this",
+                  "$$value",
+                ],
+              },
+            },
+          },
+          totalAnswerLikes: {
+            $sum: {
+              $map: {
+                input: "$answers",
+                as: "answer",
+                in: { $size: { $ifNull: ["$$answer.likes", []] } },
+              },
+            },
+          },
         },
       },
       {
         $project: {
           userDetails: 0,
+          __v: 0,
         },
       },
     ];
@@ -334,6 +467,12 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
               { $arrayElemAt: ["$userDetails.avatar", 0] }
             ]
           },
+          avatarFrame: {
+            $arrayElemAt: ["$userDetails.avatarFrame", 0]
+          },
+          avatarAccessories: {
+            $arrayElemAt: ["$userDetails.avatarAccessories", 0]
+          },
         },
         totalAnswers: { $size: "$answers" },
         answers: {
@@ -388,6 +527,46 @@ export const getAllQuestionsWithAnswer = async (req, res) => {
                       },
                     },
                     in: "$$user.avatar",
+                  },
+                },
+                avatarFrame: {
+                  $let: {
+                    vars: {
+                      user: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$answerUserDetails",
+                              cond: {
+                                $eq: ["$$this._id", "$$answer.createdBy"],
+                              },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: "$$user.avatarFrame",
+                  },
+                },
+                avatarAccessories: {
+                  $let: {
+                    vars: {
+                      user: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$answerUserDetails",
+                              cond: {
+                                $eq: ["$$this._id", "$$answer.createdBy"],
+                              },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: "$$user.avatarAccessories",
                   },
                 },
               },
@@ -581,6 +760,8 @@ export const getAnswerById = async (req, res) => {
           userId: "$createdBy",
           username: { $arrayElemAt: ["$userDetails.name", 0] },
           userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+          avatarFrame: { $arrayElemAt: ["$userDetails.avatarFrame", 0] },
+          avatarAccessories: { $arrayElemAt: ["$userDetails.avatarAccessories", 0] },
         },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
         totalComments: { $size: "$commentDetails" },
@@ -625,6 +806,8 @@ export const getAnswerById = async (req, res) => {
           userId: "$createdBy",
           username: { $arrayElemAt: ["$userDetails.name", 0] },
           userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+          avatarFrame: { $arrayElemAt: ["$userDetails.avatarFrame", 0] },
+          avatarAccessories: { $arrayElemAt: ["$userDetails.avatarAccessories", 0] },
         },
         totalLikes: { $size: { $ifNull: ["$likes", []] } },
         totalComments: { $size: { $ifNull: ["$comments", []] } },
@@ -679,6 +862,8 @@ export const getAnswersByQuestionId = async (req, res) => {
             userId: "$createdBy",
             username: { $arrayElemAt: ["$userDetails.name", 0] },
             userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+            avatarFrame: { $arrayElemAt: ["$userDetails.avatarFrame", 0] },
+            avatarAccessories: { $arrayElemAt: ["$userDetails.avatarAccessories", 0] },
           },
           totalAnswers: { $size: "$answers" },
         },
@@ -728,6 +913,8 @@ export const getAnswersByQuestionId = async (req, res) => {
             userId: "$createdBy",
             username: { $arrayElemAt: ["$userDetails.name", 0] },
             userAvatar: { $arrayElemAt: ["$userDetails.avatar", 0] },
+            avatarFrame: { $arrayElemAt: ["$userDetails.avatarFrame", 0] },
+            avatarAccessories: { $arrayElemAt: ["$userDetails.avatarAccessories", 0] },
           },
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
           totalComments: { $size: { $ifNull: ["$comments", []] } },
@@ -816,6 +1003,8 @@ export const getUserAnswers = async (req, res) => {
           totalLikes: { $size: { $ifNull: ["$likes", []] } },
           totalComments: { $size: { $ifNull: ["$comments", []] } },
           question: { $arrayElemAt: ["$question", 0] },
+          avatarFrame: { $arrayElemAt: ["$userDetails.avatarFrame", 0] },
+          avatarAccessories: { $arrayElemAt: ["$userDetails.avatarAccessories", 0] },
         },
       },
       {
@@ -1760,6 +1949,8 @@ export const getMostAnsweredQuestions = async (req, res) => {
                 "$userDetails.avatar",
               ]
             },
+            avatarFrame: "$userDetails.avatarFrame",
+            avatarAccessories: "$userDetails.avatarAccessories",
           },
         },
       },

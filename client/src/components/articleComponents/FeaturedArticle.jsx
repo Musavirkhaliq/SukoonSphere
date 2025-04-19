@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FaCalendarAlt, FaRegCommentAlt, FaUser, FaClock } from 'react-icons/fa';
 import { BiUpvote } from 'react-icons/bi';
 import { format } from 'date-fns';
+import UserAvatar from '../shared/UserAvatar';
 
 const FeaturedArticle = ({ article }) => {
   if (!article) return null;
@@ -46,19 +47,19 @@ const FeaturedArticle = ({ article }) => {
       <div className="relative -mt-24 mx-4 sm:mx-8 p-6 bg-white rounded-lg shadow-lg">
         <div className="flex flex-wrap items-center text-sm text-gray-500 mb-3 gap-4">
           <div className="flex items-center">
-            <FaClock className="mr-2 text-blue-500" />
+            <FaClock className="mr-2 text-[var(--primary)]" />
             <span>{calculateReadingTime(article.content)}</span>
           </div>
           <div className="flex items-center">
-            <FaCalendarAlt className="mr-2 text-blue-500" />
+            <FaCalendarAlt className="mr-2 text-[var(--primary)]" />
             <span>{formattedDate}</span>
           </div>
           <div className="flex items-center">
-            <BiUpvote className="mr-2 text-blue-500" />
+            <BiUpvote className="mr-2 text-[var(--primary)]" />
             <span>{article.likes?.length || 0} likes</span>
           </div>
           <div className="flex items-center">
-            <FaRegCommentAlt className="mr-2 text-blue-500" />
+            <FaRegCommentAlt className="mr-2 text-[var(--primary)]" />
             <span>{article.comments?.length || 0} comments</span>
           </div>
         </div>
@@ -75,7 +76,7 @@ const FeaturedArticle = ({ article }) => {
         
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            {article.authorAvatar ? (
+            {/* {article.authorAvatar ? (
               <img 
                 src={article.authorAvatar} 
                 alt={article.authorName} 
@@ -89,12 +90,21 @@ const FeaturedArticle = ({ article }) => {
             <div>
               <span className="block font-medium text-gray-900">{article.authorName || 'Anonymous'}</span>
               <span className="text-xs text-gray-500">Author</span>
-            </div>
+            </div> */}
+            <UserAvatar
+              username={article?.authorName}
+              userAvatar={article?.authorAvatar}
+              createdBy={article?.authorId}
+              createdAt={article?.createdAt}
+              userAvatarFrame={article?.authorAvatarFrame}
+              userAvatarAccessories={article?.authorAvatarAccessories}
+              size="medium"
+            />
           </div>
           
           <Link 
             to={`/articles/article/${article._id}`}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            className="btn-2 transition-colors duration-200"
           >
             Read Article
             <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

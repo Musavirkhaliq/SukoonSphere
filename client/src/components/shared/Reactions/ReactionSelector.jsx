@@ -104,11 +104,11 @@ const ReactionSelector = ({
     try {
       // Get the appropriate API endpoint
       const endpoint = getApiEndpoint(contentType, contentId);
-      console.log(`Fetching reactions from ${endpoint}`);
+      // console.log(`Fetching reactions from ${endpoint}`);
 
       // Use the new reaction system
       const { data } = await customFetch.get(endpoint);
-      console.log('Reaction data:', data);
+      // console.log('Reaction data:', data);
 
       // Update local state with fetched data
       setReactionCounts(data.reactionCounts || {});

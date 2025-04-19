@@ -93,6 +93,7 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
   };
   
   const isQuestionOwner = user && (author?.userId === user?._id || question?.realCreator === user?._id);
+  // console.log({questionnnnnn:question})
   return (
     <div className="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
       <div className="flex items-center justify-between mb-5">
@@ -101,6 +102,9 @@ const QuestionCard = ({ question, onAnswerSubmitted }) => {
           username={author?.username || authorName}
           userAvatar={author?.userAvatar}
           createdAt={createdAt}
+          userAvatarFrame={author?.avatarFrame || 'default'}
+          userAvatarAccessories={author?.avatarAccessories || []}
+          size="large"
         />
         <div className="flex items-center gap-4">
           <span className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium">

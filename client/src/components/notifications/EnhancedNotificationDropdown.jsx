@@ -105,7 +105,7 @@ const EnhancedNotificationDropdown = () => {
     closeDropdown
   } = useNotifications();
 
-  console.log({ notifications });
+
 
   const [filter, setFilter] = useState('all');
   const [isExpanded, setIsExpanded] = useState(false);

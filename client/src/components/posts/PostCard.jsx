@@ -45,7 +45,7 @@ const PostCard = ({ post, user, onPostUpdate }) => {
     }
   };
 
-  console.log("Post data:", { user,post, currentPost });
+  // console.log("Post data:", { user,post, currentPost });
 
   return (
     <>
@@ -57,7 +57,9 @@ const PostCard = ({ post, user, onPostUpdate }) => {
               userAvatar={currentPost?.userAvatar}
               createdBy={currentPost?.createdBy}
               createdAt={currentPost?.createdAt}
-              size="medium"
+              userAvatarFrame={currentPost?.avatarFrame}
+              userAvatarAccessories={currentPost?.avatarAccessories}
+              size="large"
             />
           </div>
 

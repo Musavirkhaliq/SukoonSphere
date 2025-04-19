@@ -97,6 +97,9 @@ const Answer = ({ answer: initialAnswer, user, answerCount, mostLikedAnswer, pre
           username={answer?.author?.username || answer?.authorName}
           userAvatar={answer?.author?.userAvatar}
           createdAt={answer?.createdAt}
+          userAvatarFrame={answer?.author?.avatarFrame}
+          userAvatarAccessories={answer?.author?.avatarAccessories}
+          
         // compact={preview}
         />
         {user && (user?._id === initialAnswer?.author?.userId || initialAnswer?.realCreator === user?._id) && (
