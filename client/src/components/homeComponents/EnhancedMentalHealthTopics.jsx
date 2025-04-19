@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FaInfoCircle, FaArrowRight, FaExternalLinkAlt, FaBookOpen } from 'react-icons/fa';
+import { FaInfoCircle, FaArrowRight, FaExternalLinkAlt, FaBookOpen, FaFilePdf } from 'react-icons/fa';
 import '../../assets/styles/EnhancedMentalHealthTopics.css';
 
 const EnhancedMentalHealthTopics = () => {
@@ -28,6 +28,12 @@ const EnhancedMentalHealthTopics = () => {
         'Difficulty concentrating',
         'Sleep problems',
         'Muscle tension'
+      ],
+      symptomLinks: [
+        {
+          name: 'Anxiety Disorders_Symptoms',
+          url: 'https://drive.google.com/file/d/1rOliMl1pMyqM1sxTf2BQi3j1twislGQS/view?usp=drive_link'
+        }
       ],
       resources: [
         {
@@ -61,6 +67,16 @@ const EnhancedMentalHealthTopics = () => {
         'Fatigue',
         'Feelings of worthlessness'
       ],
+      symptomLinks: [
+        {
+          name: 'Bipolar Disorder_Symptoms',
+          url: 'https://drive.google.com/file/d/1hUcbEiZh5-prR3_a1UxdgF65LxGpcfWG/view?usp=drive_link'
+        },
+        {
+          name: 'Major Depressive Disorder_Symptoms',
+          url: 'https://drive.google.com/file/d/10WvsdVkwLRyFtWovUMjbaEBZJ0OkKl3Y/view?usp=drive_link'
+        }
+      ],
       resources: [
         {
           name: 'Depression and Bipolar Support Alliance',
@@ -91,6 +107,12 @@ const EnhancedMentalHealthTopics = () => {
         'Impulse control issues',
         'Interpersonal difficulties',
         'Identity disturbances'
+      ],
+      symptomLinks: [
+        {
+          name: 'Borderline Personality Disorder_Symptoms',
+          url: 'https://drive.google.com/file/d/1dJGvDv_foRgjh5GrwryKUmkVE9I9XYG-/view?usp=drive_link'
+        }
       ],
       resources: [
         {
@@ -123,6 +145,12 @@ const EnhancedMentalHealthTopics = () => {
         'Uncontrollable thoughts',
         'Avoidance behaviors',
         'Hypervigilance'
+      ],
+      symptomLinks: [
+        {
+          name: 'Post-Traumatic Stress Disorder_Symptoms',
+          url: 'https://drive.google.com/file/d/1aUZszjNll3MMYhGsDBWxZzbwd-juohJ0/view?usp=drive_link'
+        }
       ],
       resources: [
         {
@@ -167,6 +195,44 @@ const EnhancedMentalHealthTopics = () => {
         }
       ],
       image: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+    },
+    {
+      id: 'psychotic',
+      name: 'Psychotic Disorders',
+      color: '#9c27b0',
+      description: 'Mental disorders characterized by abnormal thinking and perceptions that cause individuals to lose touch with reality, affecting their thoughts, emotions, and behaviors.',
+      disorders: [
+        'Schizophrenia',
+        'Schizoaffective Disorder',
+        'Brief Psychotic Disorder',
+        'Delusional Disorder',
+        'Schizophreniform Disorder'
+      ],
+      symptoms: [
+        'Hallucinations',
+        'Delusions',
+        'Disorganized thinking',
+        'Abnormal motor behavior',
+        'Negative symptoms (reduced emotional expression)',
+        'Social withdrawal'
+      ],
+      symptomLinks: [
+        {
+          name: 'Schizophrenia_Symptoms',
+          url: 'https://drive.google.com/file/d/1ObkFlJnAX33vtc7zpWZVnUg-knBtP6ZX/view?usp=drive_link'
+        }
+      ],
+      resources: [
+        {
+          name: 'National Alliance on Mental Illness - Schizophrenia',
+          url: 'https://www.nami.org/About-Mental-Illness/Mental-Health-Conditions/Schizophrenia'
+        },
+        {
+          name: 'Schizophrenia and Related Disorders Alliance of America',
+          url: 'https://sardaa.org/'
+        }
+      ],
+      image: 'https://images.unsplash.com/photo-1518331483807-f6adb0e1ad23?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
     }
   ];
 
@@ -252,6 +318,27 @@ const EnhancedMentalHealthTopics = () => {
                           </li>
                         ))}
                       </ul>
+                      {category.symptomLinks && category.symptomLinks.length > 0 && (
+                        <div className="symptom-links">
+                          <h5 className="mt-3 mb-2 font-medium">Detailed Symptoms:</h5>
+                          <ul className="flex flex-col gap-2">
+                            {category.symptomLinks.map((link, index) => (
+                              <li key={index}>
+                                <a
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="symptom-pdf-link"
+                                  style={{ color: category.color }}
+                                >
+                                  <FaFilePdf className="mr-2" />
+                                  {link.name}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
                     <div className="details-resources">
