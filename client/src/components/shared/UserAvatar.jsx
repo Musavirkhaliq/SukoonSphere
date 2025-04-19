@@ -81,7 +81,7 @@ const UserAvatar = ({
         <img
           src={userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}`}
           alt={`${username}'s profile`}
-          className={`w-full h-full object-cover rounded-full transition-opacity duration-300 ${sizeClasses[effectiveSize].image}`}
+          className={`object-cover rounded-full transition-opacity duration-300 ${sizeClasses[effectiveSize].image}`}
         />
         {eligibleAccessories.length > 0 && (
           <>
