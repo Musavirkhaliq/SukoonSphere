@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { BadRequestError, UnauthenticatedError } from "../errors/customErors.js";
 import Video from "../models/videos/videoModel.js";
 import { deleteFile } from '../utils/fileUtils.js';
+import { downloadImage } from '../utils/imageUtils.js';
 import Notification from "../models/notifications/postNotificationModel.js";
 import { io } from "../server.js";
 
@@ -17,11 +18,25 @@ export const createVideo = async (req, res) => {
     }
 
     try {
-      if (!req.file) {
-        throw new BadRequestError("Please provide a cover image");
-      }
+      let coverImagePath;
+      let downloadedFilename;
 
-      const coverImagePath = `${process.env.BACKEND_URL}/public/uploads/${req.file.filename}`;
+      // Handle cover image - either from file upload or YouTube thumbnail URL
+      if (req.file) {
+        // Use uploaded file
+        coverImagePath = `${process.env.BACKEND_URL}/public/uploads/${req.file.filename}`;
+      } else if (req.body.thumbnailUrl) {
+        // Download image from URL
+        try {
+          downloadedFilename = await downloadImage(req.body.thumbnailUrl);
+          coverImagePath = `${process.env.BACKEND_URL}/public/uploads/${downloadedFilename}`;
+        } catch (downloadError) {
+          console.error('Error downloading thumbnail:', downloadError);
+          throw new BadRequestError("Failed to download thumbnail. Please upload a cover image.");
+        }
+      } else {
+        throw new BadRequestError("Please provide a cover image or YouTube URL with thumbnail");
+      }
 
       const videoData = { ...req.body };
 
@@ -75,6 +90,7 @@ export const updateVideo = async (req, res) => {
         updateData.tags = [];
       }
 
+      // Handle cover image - either from file upload or YouTube thumbnail URL
       if (req.file) {
         // Delete old cover image if it exists
         if (video.coverImage) {
@@ -82,6 +98,21 @@ export const updateVideo = async (req, res) => {
           await deleteFile(oldImagePath);
         }
         updateData.coverImage = `${process.env.BACKEND_URL}/public/uploads/${req.file.filename}`;
+      } else if (req.body.thumbnailUrl) {
+        // Download image from URL
+        try {
+          // Delete old cover image if it exists
+          if (video.coverImage) {
+            const oldImagePath = video.coverImage.replace(`${process.env.BACKEND_URL}/public/uploads/`, '');
+            await deleteFile(oldImagePath);
+          }
+
+          const downloadedFilename = await downloadImage(req.body.thumbnailUrl);
+          updateData.coverImage = `${process.env.BACKEND_URL}/public/uploads/${downloadedFilename}`;
+        } catch (downloadError) {
+          console.error('Error downloading thumbnail:', downloadError);
+          throw new BadRequestError("Failed to download thumbnail.");
+        }
       }
 
       const updatedVideo = await Video.findOneAndUpdate(

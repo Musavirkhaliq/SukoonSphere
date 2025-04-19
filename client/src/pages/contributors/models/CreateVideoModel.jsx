@@ -1,16 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { FaVideo, FaTimes, FaPlus, FaTimesCircle } from "react-icons/fa";
+import { FaVideo, FaTimes, FaPlus, FaTimesCircle, FaMagic } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import customFetch from "../../../utils/customFetch";
+import { getYoutubeId, getCompleteYoutubeMetadata } from "../../../utils/youtubeApi";
 
 const CreateVideoModel = ({ setShowModal }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [videoUrl, setVideoUrl] = useState("");
     const [coverImage, setCoverImage] = useState("");
+    const [thumbnailUrl, setThumbnailUrl] = useState("");
     const [type, setType] = useState("single");
+
+    // Fetch YouTube metadata when URL changes
+    useEffect(() => {
+        const fetchYoutubeMetadata = async () => {
+            // Only proceed if the URL looks like a YouTube URL
+            const videoId = getYoutubeId(videoUrl);
+            if (!videoId) return;
+
+            try {
+                setIsLoadingMetadata(true);
+                const metadata = await getCompleteYoutubeMetadata(videoUrl);
+
+                if (metadata) {
+                    // Only update fields if they're empty or if user confirms
+                    const shouldUpdate =
+                        (!title && !description) ||
+                        window.confirm("Do you want to replace the current title and description with the YouTube video details?");
+
+                    if (shouldUpdate) {
+                        setTitle(metadata.title || "");
+                        setDescription(metadata.description || "");
+                        setThumbnailUrl(metadata.thumbnailUrl || "");
+                        toast.success("YouTube video details loaded successfully!");
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching YouTube metadata:", error);
+                toast.error("Failed to load YouTube video details");
+            } finally {
+                setIsLoadingMetadata(false);
+            }
+        };
+
+        // Debounce the API call to avoid too many requests
+        const timeoutId = setTimeout(() => {
+            if (videoUrl) {
+                fetchYoutubeMetadata();
+            }
+        }, 800);
+
+        return () => clearTimeout(timeoutId);
+    }, [videoUrl]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,7 +67,14 @@ const CreateVideoModel = ({ setShowModal }) => {
             formData.append('description', description.trim());
             formData.append('videoUrl', videoUrl.trim());
             formData.append('type', type);
-            formData.append('coverImage', coverImage);
+
+            // If we have a file upload, use that; otherwise try to use the YouTube thumbnail
+            if (coverImage) {
+                formData.append('coverImage', coverImage);
+            } else if (thumbnailUrl) {
+                // If we have a thumbnail URL but no file, we need to tell the backend to fetch it
+                formData.append('thumbnailUrl', thumbnailUrl);
+            }
 
             const response = await customFetch.post("/videos/create-video", formData, {
                 headers: {
@@ -54,6 +106,45 @@ const CreateVideoModel = ({ setShowModal }) => {
             }
 
             setCoverImage(file);
+            // Clear thumbnail URL if user uploads a file
+            setThumbnailUrl("");
+        }
+    };
+
+    const handleVideoUrlChange = (e) => {
+        const url = e.target.value;
+        setVideoUrl(url);
+    };
+
+    const handleFetchMetadata = async () => {
+        if (!videoUrl) {
+            toast.error("Please enter a YouTube URL first");
+            return;
+        }
+
+        const videoId = getYoutubeId(videoUrl);
+        if (!videoId) {
+            toast.error("Invalid YouTube URL");
+            return;
+        }
+
+        try {
+            setIsLoadingMetadata(true);
+            const metadata = await getCompleteYoutubeMetadata(videoUrl);
+
+            if (metadata) {
+                setTitle(metadata.title || "");
+                setDescription(metadata.description || "");
+                setThumbnailUrl(metadata.thumbnailUrl || "");
+                toast.success("YouTube video details loaded successfully!");
+            } else {
+                toast.error("Could not fetch video details");
+            }
+        } catch (error) {
+            console.error("Error fetching YouTube metadata:", error);
+            toast.error("Failed to load YouTube video details");
+        } finally {
+            setIsLoadingMetadata(false);
         }
     };
 
@@ -106,27 +197,49 @@ const CreateVideoModel = ({ setShowModal }) => {
                     </div>
 
                     <div>
-                        <input
-                            type="text"
-                            value={videoUrl}
-                            onChange={(e) => setVideoUrl(e.target.value)}
-                            placeholder="Enter video embedded URL..."
-                            className="w-full px-4 py-3 bg-[var(--pure)] rounded-lg border focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all duration-300 placeholder-ternary"
-
-                        />
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={videoUrl}
+                                onChange={handleVideoUrlChange}
+                                placeholder="Enter YouTube URL..."
+                                className="w-full px-4 py-3 bg-[var(--pure)] rounded-lg border focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all duration-300 placeholder-ternary"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleFetchMetadata}
+                                disabled={isLoadingMetadata || !videoUrl}
+                                className="px-4 py-3 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-dark)] transition-colors duration-300 disabled:opacity-50"
+                                title="Fetch video details from YouTube"
+                            >
+                                <FaMagic />
+                            </button>
+                        </div>
+                        {isLoadingMetadata && (
+                            <p className="text-sm text-gray-500 mt-1">Loading video details...</p>
+                        )}
                     </div>
 
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2 ">
-                            Cover Image*
+                            Cover Image{thumbnailUrl ? ' (YouTube thumbnail available)' : '*'}
                         </label>
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handleFileChange}
                             className="shadow appearance-none border  w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline rounded-lg"
-
                         />
+                        {thumbnailUrl && (
+                            <div className="mt-2">
+                                <p className="text-sm text-gray-500 mb-1">YouTube thumbnail:</p>
+                                <img
+                                    src={thumbnailUrl}
+                                    alt="YouTube thumbnail"
+                                    className="w-full max-h-40 object-cover rounded-lg"
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex justify-start gap-3 pt-3 border-t">
@@ -147,7 +260,7 @@ const CreateVideoModel = ({ setShowModal }) => {
                             {isSubmitting ? "Creating..." : "Create Video"}
                         </button>
                     </div>
-                  
+
                 </form>
             </div>
         </div>
